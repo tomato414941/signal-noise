@@ -18,9 +18,12 @@ def main(argv: list[str] | None = None) -> None:
     p_eval = sub.add_parser("evaluate", help="Run signal evaluation pipeline")
     p_eval.add_argument("--target", "-t", default="btc_ohlcv", help="Target source")
     p_eval.add_argument("--period", "-p", help="Specific return period (e.g. 1d)")
+    p_eval.add_argument("--no-transforms", action="store_true", help="Raw signals only")
+    p_eval.add_argument("--top", type=int, help="Show only top N signals")
 
     sub.add_parser("report", help="Show latest evaluation report")
     sub.add_parser("list", help="List available sources with status")
+    sub.add_parser("count", help="Show total signal count")
 
     args = parser.parse_args(argv)
     logging.basicConfig(
@@ -36,6 +39,8 @@ def main(argv: list[str] | None = None) -> None:
         _cmd_report()
     elif args.command == "list":
         _cmd_list()
+    elif args.command == "count":
+        _cmd_count()
     else:
         parser.print_help()
 
@@ -63,8 +68,13 @@ def _cmd_evaluate(args: argparse.Namespace) -> None:
     config = EvaluationConfig()
     if args.period:
         config.return_periods = [args.period]
-    metrics = run_evaluation(config, target_source=args.target)
-    print(generate_report(metrics))
+    metrics = run_evaluation(
+        config,
+        target_source=args.target,
+        use_transforms=not args.no_transforms,
+    )
+    top_n = args.top if hasattr(args, "top") and args.top else None
+    print(generate_report(metrics, top_n=top_n))
 
 
 def _cmd_report() -> None:
@@ -80,14 +90,35 @@ def _cmd_report() -> None:
 def _cmd_list() -> None:
     from signal_noise.collector import COLLECTORS
 
-    print(f"{'Source':<25} {'Type':<15} {'Freq':<10} {'Key?':<5} {'Data?':<6} {'Rows':>8}")
+    cols = ("Source", "Type", "Freq", "Key?", "Data?", "Rows")
+    print(f"Total raw sources: {len(COLLECTORS)}")
+    print()
+    print(f"{cols[0]:<25} {cols[1]:<15} {cols[2]:<10} {cols[3]:<5} {cols[4]:<6} {cols[5]:>8}")
     print("-" * 75)
     for name, cls in COLLECTORS.items():
         c = cls()
         s = c.status()
-        print(
-            f"{s['display_name']:<25} {c.meta.data_type:<15} "
-            f"{c.meta.update_frequency:<10} {'yes' if s['requires_key'] else 'no':<5} "
-            f"{'yes' if s['has_data'] else 'no':<6} "
-            f"{s['rows'] if s['has_data'] else '-':>8}"
-        )
+        ks = "yes" if s["requires_key"] else "no"
+        ds = "yes" if s["has_data"] else "no"
+        rs = str(s["rows"]) if s["has_data"] else "-"
+        dn = s["display_name"]
+        dt = c.meta.data_type
+        uf = c.meta.update_frequency
+        print(f"{dn:<25} {dt:<15} {uf:<10} {ks:<5} {ds:<6} {rs:>8}")
+
+
+def _cmd_count() -> None:
+    from signal_noise.collector import COLLECTORS
+    from signal_noise.transforms import TRANSFORMS
+
+    n_sources = len(COLLECTORS) - 1  # exclude target
+    n_transforms = len(TRANSFORMS)
+    raw_signals = n_sources
+    derived_signals = n_sources * n_transforms
+    total = raw_signals + derived_signals
+
+    print(f"Raw sources:       {n_sources + 1}")
+    print(f"Transforms:        {n_transforms}")
+    print(f"Raw signals:       {raw_signals}")
+    print(f"Derived signals:   {derived_signals}")
+    print(f"Total signals:     {total}")

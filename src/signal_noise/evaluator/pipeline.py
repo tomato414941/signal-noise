@@ -9,6 +9,7 @@ from signal_noise.config import DEFAULT_EVALUATION, EvaluationConfig, RAW_DIR
 from signal_noise.evaluator.corrections import bonferroni, fdr_bh
 from signal_noise.evaluator.metrics import SignalMetrics, evaluate_signal
 from signal_noise.evaluator.returns import compute_forward_returns
+from signal_noise.transforms import TRANSFORMS
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +48,7 @@ def _align_signal_to_target(
 def run_evaluation(
     config: EvaluationConfig | None = None,
     target_source: str = "btc_ohlcv",
+    use_transforms: bool = True,
 ) -> list[SignalMetrics]:
     config = config or DEFAULT_EVALUATION
 
@@ -72,8 +74,9 @@ def run_evaluation(
             continue
 
         signal_df = pd.read_parquet(parquet)
-        aligned = _align_signal_to_target(signal_df, target_df)
 
+        # Raw signal
+        aligned = _align_signal_to_target(signal_df, target_df)
         for period in config.return_periods:
             ret_col = f"ret_{period}"
             if ret_col not in returns_df.columns:
@@ -86,6 +89,33 @@ def run_evaluation(
                 max_lag=config.max_lag_periods,
             )
             all_metrics.append(metrics)
+
+        # Transformed signals
+        if use_transforms:
+            for transform in TRANSFORMS:
+                try:
+                    transformed_df = signal_df.copy()
+                    transformed_df["value"] = transform.fn(transformed_df["value"])
+                    t_aligned = _align_signal_to_target(transformed_df, target_df)
+                    signal_name = f"{source_name}__{transform.name}"
+
+                    for period in config.return_periods:
+                        ret_col = f"ret_{period}"
+                        if ret_col not in returns_df.columns:
+                            continue
+                        metrics = evaluate_signal(
+                            signal=t_aligned,
+                            returns=returns_df[ret_col],
+                            source_name=signal_name,
+                            period=period,
+                            max_lag=config.max_lag_periods,
+                        )
+                        all_metrics.append(metrics)
+                except Exception as e:
+                    log.debug(
+                        "Transform %s failed on %s: %s",
+                        transform.name, source_name, e,
+                    )
 
     pvalues = [m.ic_pvalue for m in all_metrics]
     if config.correction_method == "bonferroni":

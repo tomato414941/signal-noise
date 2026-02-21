@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.btc_dominance import BtcDominanceCollector
     from signal_noise.collector.btc_ohlcv import BtcOhlcvCollector
+    from signal_noise.collector.ccxt_generic import get_ccxt_collectors
     from signal_noise.collector.electricity import ElectricityCollector
     from signal_noise.collector.eth_btc import EthBtcCollector
     from signal_noise.collector.fear_greed import FearGreedCollector
@@ -24,8 +25,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.weather import NYWeatherCollector
     from signal_noise.collector.wikipedia import WikipediaBtcCollector
     from signal_noise.collector.yahoo_finance import DXYCollector, GoldCollector, SP500Collector
+    from signal_noise.collector.yahoo_generic import get_yahoo_collectors
 
-    return {
+    collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
         "hour_of_day": HourOfDayCollector,
         "btc_ohlcv": BtcOhlcvCollector,
@@ -42,6 +44,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "ny_weather": NYWeatherCollector,
         "electricity": ElectricityCollector,
     }
+    collectors.update(get_yahoo_collectors())
+    collectors.update(get_ccxt_collectors())
+    return collectors
 
 
 COLLECTORS = _get_collectors()
