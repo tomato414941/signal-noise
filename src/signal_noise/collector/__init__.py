@@ -15,12 +15,21 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.btc_dominance import BtcDominanceCollector
     from signal_noise.collector.btc_ohlcv import BtcOhlcvCollector
     from signal_noise.collector.ccxt_generic import get_ccxt_collectors
+    from signal_noise.collector.climate_indices import (
+        ArcticOscillationCollector,
+        EnsoCollector,
+        NaoCollector,
+    )
+    from signal_noise.collector.earthquake import EarthquakeCountCollector
     from signal_noise.collector.electricity import ElectricityCollector
     from signal_noise.collector.eth_btc import EthBtcCollector
     from signal_noise.collector.fear_greed import FearGreedCollector
     from signal_noise.collector.geomagnetic import GeomagneticCollector
     from signal_noise.collector.google_trends import GoogleTrendsCollector
     from signal_noise.collector.hashrate import HashrateCollector
+    from signal_noise.collector.moon import MoonPhaseCollector
+    from signal_noise.collector.solar import SolarXrayCollector
+    from signal_noise.collector.sunspot import SunspotCollector
     from signal_noise.collector.temporal import DayOfWeekCollector, HourOfDayCollector
     from signal_noise.collector.weather import NYWeatherCollector
     from signal_noise.collector.wikipedia import WikipediaBtcCollector
@@ -43,6 +52,14 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "google_trends": GoogleTrendsCollector,
         "ny_weather": NYWeatherCollector,
         "electricity": ElectricityCollector,
+        # Nature / physical phenomena
+        "moon_phase": MoonPhaseCollector,
+        "earthquake_count": EarthquakeCountCollector,
+        "solar_xray": SolarXrayCollector,
+        "sunspot": SunspotCollector,
+        "enso": EnsoCollector,
+        "arctic_oscillation": ArcticOscillationCollector,
+        "nao": NaoCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())
