@@ -53,10 +53,26 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.weather import NYWeatherCollector
     from signal_noise.collector.wikipedia import WikipediaBtcCollector
     from signal_noise.collector.wikipedia_generic import get_wiki_collectors
+    from signal_noise.collector.blockchain_charts import get_blockchain_collectors
+    from signal_noise.collector.coingecko_global import (
+        CG_ActiveCryptosCollector,
+        CG_BtcDominanceCollector,
+        CG_EthDominanceCollector,
+        CG_MarketCapChangePct24hCollector,
+        CG_MarketsCollector,
+        CG_OngoingICOsCollector,
+        CG_TotalMarketCapCollector,
+        CG_TotalVolumeCollector,
+    )
     from signal_noise.collector.ecb_generic import get_ecb_collectors
     from signal_noise.collector.fred_generic import get_fred_collectors
+    from signal_noise.collector.github_events import get_gh_events_collectors
+    from signal_noise.collector.hackernews import HNBestCollector, HNNewCollector, HNTopCollector
     from signal_noise.collector.imf_generic import get_imf_collectors
+    from signal_noise.collector.npm_downloads import get_npm_collectors
+    from signal_noise.collector.stackoverflow import get_so_collectors
     from signal_noise.collector.treasury_generic import get_treasury_collectors
+    from signal_noise.collector.wayback import get_wayback_collectors
     from signal_noise.collector.worldbank_generic import get_wb_collectors
     from signal_noise.collector.yahoo_finance import DXYCollector, GoldCollector, SP500Collector
     from signal_noise.collector.yahoo_generic import get_yahoo_collectors
@@ -103,6 +119,19 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "reddit_crypto": RedditCryptoCollector,
         "reddit_wsb": RedditWsbCollector,
         "reddit_bitcoin": RedditBitcoinCollector,
+        # Hacker News
+        "hn_top": HNTopCollector,
+        "hn_best": HNBestCollector,
+        "hn_new": HNNewCollector,
+        # CoinGecko global
+        "cg_total_mcap": CG_TotalMarketCapCollector,
+        "cg_total_volume": CG_TotalVolumeCollector,
+        "cg_btc_dominance": CG_BtcDominanceCollector,
+        "cg_eth_dominance": CG_EthDominanceCollector,
+        "cg_active_cryptos": CG_ActiveCryptosCollector,
+        "cg_ongoing_icos": CG_OngoingICOsCollector,
+        "cg_markets": CG_MarketsCollector,
+        "cg_mcap_change_24h": CG_MarketCapChangePct24hCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())
@@ -112,6 +141,11 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_ecb_collectors())
     collectors.update(get_treasury_collectors())
     collectors.update(get_imf_collectors())
+    collectors.update(get_blockchain_collectors())
+    collectors.update(get_gh_events_collectors())
+    collectors.update(get_so_collectors())
+    collectors.update(get_npm_collectors())
+    collectors.update(get_wayback_collectors())
     return collectors
 
 
