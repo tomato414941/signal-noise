@@ -88,6 +88,14 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         CO2DailyCollector,
         NASAGlobalTempCollector,
     )
+    from signal_noise.collector.nasa_eonet import (
+        EONETWildfireCollector,
+        EONETStormCollector,
+        EONETVolcanoCollector,
+        EONETTotalCollector,
+    )
+    from signal_noise.collector.nasa_power import get_power_collectors
+    from signal_noise.collector.usgs_water import get_water_collectors
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -153,6 +161,11 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "noaa_land_temp": LandTempAnomalyCollector,
         "noaa_co2_daily": CO2DailyCollector,
         "nasa_giss_temp": NASAGlobalTempCollector,
+        # Natural disasters (NASA EONET)
+        "eonet_wildfires": EONETWildfireCollector,
+        "eonet_storms": EONETStormCollector,
+        "eonet_volcanoes": EONETVolcanoCollector,
+        "eonet_total": EONETTotalCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())
@@ -172,6 +185,8 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_weather_collectors())
     collectors.update(get_marine_collectors())
     collectors.update(get_air_collectors())
+    collectors.update(get_power_collectors())
+    collectors.update(get_water_collectors())
     return collectors
 
 

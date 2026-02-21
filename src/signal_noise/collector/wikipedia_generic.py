@@ -64,6 +64,15 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str]] = [
     ("Federal_Reserve", "wiki_fed", "Wikipedia: Federal Reserve", "central_bank"),
     ("Interest_rate", "wiki_interest_rate", "Wikipedia: Interest Rate", "central_bank"),
     ("Central_bank", "wiki_central_bank", "Wikipedia: Central Bank", "central_bank"),
+    # ── Remote sensing / natural disasters ──
+    ("Satellite_imagery", "wiki_sat_imagery", "Wikipedia: Satellite Imagery", "remote_sensing"),
+    ("Remote_sensing", "wiki_remote_sensing", "Wikipedia: Remote Sensing", "remote_sensing"),
+    ("Wildfire", "wiki_wildfire", "Wikipedia: Wildfire", "natural_disaster"),
+    ("Volcanic_eruption", "wiki_volcanic", "Wikipedia: Volcanic Eruption", "natural_disaster"),
+    ("Tsunami", "wiki_tsunami", "Wikipedia: Tsunami", "natural_disaster"),
+    ("Hurricane", "wiki_hurricane", "Wikipedia: Hurricane", "natural_disaster"),
+    ("Tornado", "wiki_tornado", "Wikipedia: Tornado", "natural_disaster"),
+    ("Landslide", "wiki_landslide", "Wikipedia: Landslide", "natural_disaster"),
     # ── Climate / environment ──
     ("Climate_change", "wiki_climate_change", "Wikipedia: Climate Change", "climate"),
     ("Global_warming", "wiki_global_warming", "Wikipedia: Global Warming", "climate"),
