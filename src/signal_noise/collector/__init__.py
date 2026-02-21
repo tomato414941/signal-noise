@@ -24,6 +24,11 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.earthquake import EarthquakeCountCollector
     from signal_noise.collector.electricity import ElectricityCollector
     from signal_noise.collector.eth_btc import EthBtcCollector
+    from signal_noise.collector.events import (
+        MajorSportsEventCollector,
+        OlympicsCollector,
+        SuperBowlCollector,
+    )
     from signal_noise.collector.fear_greed import FearGreedCollector
     from signal_noise.collector.geomagnetic import GeomagneticCollector
     from signal_noise.collector.github_activity import (
@@ -35,6 +40,11 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.lightning import LightningCapacityCollector
     from signal_noise.collector.mempool import MempoolFeeCollector, MempoolSizeCollector
     from signal_noise.collector.moon import MoonPhaseCollector
+    from signal_noise.collector.reddit import (
+        RedditBitcoinCollector,
+        RedditCryptoCollector,
+        RedditWsbCollector,
+    )
     from signal_noise.collector.solar import SolarXrayCollector
     from signal_noise.collector.steam import SteamPlayersCollector
     from signal_noise.collector.sunspot import SunspotCollector
@@ -80,6 +90,14 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "github_ethereum": EthereumCommitsCollector,
         "tor_users": TorUsersCollector,
         "steam_players": SteamPlayersCollector,
+        # Entertainment / events
+        "major_sports_event": MajorSportsEventCollector,
+        "super_bowl": SuperBowlCollector,
+        "olympics": OlympicsCollector,
+        # Social media
+        "reddit_crypto": RedditCryptoCollector,
+        "reddit_wsb": RedditWsbCollector,
+        "reddit_bitcoin": RedditBitcoinCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())

@@ -40,6 +40,17 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str]] = [
     ("Initial_public_offering", "wiki_ipo", "Wikipedia: IPO", "greed"),
     ("Speculation", "wiki_speculation", "Wikipedia: Speculation", "greed"),
     ("Bubble_(economics)", "wiki_bubble", "Wikipedia: Economic Bubble", "greed"),
+    # ── Entertainment / attention diversion ──
+    ("Super_Bowl", "wiki_super_bowl", "Wikipedia: Super Bowl", "entertainment"),
+    ("FIFA_World_Cup", "wiki_world_cup", "Wikipedia: FIFA World Cup", "entertainment"),
+    ("Olympic_Games", "wiki_olympics", "Wikipedia: Olympic Games", "entertainment"),
+    ("UEFA_Champions_League", "wiki_ucl", "Wikipedia: Champions League", "entertainment"),
+    ("Netflix", "wiki_netflix", "Wikipedia: Netflix", "entertainment"),
+    ("Taylor_Swift", "wiki_taylor_swift", "Wikipedia: Taylor Swift", "entertainment"),
+    ("Elon_Musk", "wiki_elon_musk", "Wikipedia: Elon Musk", "attention"),
+    ("Donald_Trump", "wiki_trump", "Wikipedia: Donald Trump", "attention"),
+    ("Artificial_intelligence", "wiki_ai", "Wikipedia: AI", "tech_attention"),
+    ("ChatGPT", "wiki_chatgpt", "Wikipedia: ChatGPT", "tech_attention"),
 ]
 
 
