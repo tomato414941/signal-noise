@@ -12,13 +12,35 @@ log = logging.getLogger(__name__)
 
 
 def _get_collectors() -> dict[str, type[BaseCollector]]:
+    from signal_noise.collector.btc_dominance import BtcDominanceCollector
     from signal_noise.collector.btc_ohlcv import BtcOhlcvCollector
+    from signal_noise.collector.electricity import ElectricityCollector
+    from signal_noise.collector.eth_btc import EthBtcCollector
+    from signal_noise.collector.fear_greed import FearGreedCollector
+    from signal_noise.collector.geomagnetic import GeomagneticCollector
+    from signal_noise.collector.google_trends import GoogleTrendsCollector
+    from signal_noise.collector.hashrate import HashrateCollector
     from signal_noise.collector.temporal import DayOfWeekCollector, HourOfDayCollector
+    from signal_noise.collector.weather import NYWeatherCollector
+    from signal_noise.collector.wikipedia import WikipediaBtcCollector
+    from signal_noise.collector.yahoo_finance import DXYCollector, GoldCollector, SP500Collector
 
     return {
-        "btc_ohlcv": BtcOhlcvCollector,
         "day_of_week": DayOfWeekCollector,
         "hour_of_day": HourOfDayCollector,
+        "btc_ohlcv": BtcOhlcvCollector,
+        "fear_greed": FearGreedCollector,
+        "geomagnetic": GeomagneticCollector,
+        "hashrate": HashrateCollector,
+        "dxy": DXYCollector,
+        "gold": GoldCollector,
+        "sp500": SP500Collector,
+        "eth_btc": EthBtcCollector,
+        "btc_dominance": BtcDominanceCollector,
+        "wikipedia_btc": WikipediaBtcCollector,
+        "google_trends": GoogleTrendsCollector,
+        "ny_weather": NYWeatherCollector,
+        "electricity": ElectricityCollector,
     }
 
 
@@ -37,5 +59,5 @@ def collect_all(sources: list[str] | None = None) -> dict[str, pd.DataFrame]:
             collector = cls()
             results[name] = collector.collect()
         except Exception as e:
-            log.error("Failed to collect %s: %s", name, e)
+            log.warning("Failed to collect %s: %s", name, e)
     return results
