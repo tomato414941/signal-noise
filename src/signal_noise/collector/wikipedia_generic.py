@@ -64,6 +64,15 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str]] = [
     ("Federal_Reserve", "wiki_fed", "Wikipedia: Federal Reserve", "central_bank"),
     ("Interest_rate", "wiki_interest_rate", "Wikipedia: Interest Rate", "central_bank"),
     ("Central_bank", "wiki_central_bank", "Wikipedia: Central Bank", "central_bank"),
+    # ── Logistics / transportation ──
+    ("Supply_chain", "wiki_supply_chain", "Wikipedia: Supply Chain", "logistics"),
+    ("Containerization", "wiki_containerization", "Wikipedia: Containerization", "logistics"),
+    ("Suez_Canal", "wiki_suez_canal", "Wikipedia: Suez Canal", "logistics"),
+    ("Panama_Canal", "wiki_panama_canal", "Wikipedia: Panama Canal", "logistics"),
+    ("Baltic_Exchange", "wiki_baltic_exchange", "Wikipedia: Baltic Exchange", "logistics"),
+    ("Aviation", "wiki_aviation", "Wikipedia: Aviation", "logistics"),
+    ("Freight_transport", "wiki_freight", "Wikipedia: Freight Transport", "logistics"),
+    ("Shipping_container", "wiki_shipping_container", "Wikipedia: Shipping Container", "logistics"),
 ]
 
 

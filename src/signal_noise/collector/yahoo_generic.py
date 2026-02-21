@@ -113,6 +113,21 @@ YAHOO_TICKERS: list[tuple[str, str, str, str]] = [
     ("QCOM", "qcom", "Qualcomm", "mega_cap"),
     ("INTC", "intc", "Intel", "mega_cap"),
     ("AMGN", "amgn", "Amgen", "mega_cap"),
+    # ── Shipping / maritime ──
+    ("BDRY", "bdry", "Breakwave Dry Bulk Shipping", "shipping"),
+    ("BOAT", "boat", "SonicShares Global Shipping", "shipping"),
+    ("SBLK", "sblk", "Star Bulk Carriers", "shipping"),
+    ("ZIM", "zim", "ZIM Integrated Shipping", "shipping"),
+    ("DAC", "dac", "Danaos Corporation", "shipping"),
+    ("MATX", "matx", "Matson Inc", "shipping"),
+    # ── Aviation ──
+    ("JETS", "jets", "US Global Jets ETF", "aviation"),
+    ("DAL", "dal", "Delta Air Lines", "aviation"),
+    ("UAL", "ual", "United Airlines", "aviation"),
+    ("LUV", "luv", "Southwest Airlines", "aviation"),
+    ("AAL", "aal", "American Airlines", "aviation"),
+    ("BA", "ba", "Boeing", "aviation"),
+    ("AIR.PA", "airbus", "Airbus", "aviation"),
 ]
 
 

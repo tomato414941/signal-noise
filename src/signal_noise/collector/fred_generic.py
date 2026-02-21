@@ -70,6 +70,8 @@ FRED_SERIES: list[tuple[str, str, str, str, str]] = [
     # ── Commodities (via FRED) ──
     ("DCOILWTICO", "fred_wti_daily", "WTI Crude Oil (FRED daily)", "commodity", "daily"),
     ("GOLDAMGBD228NLBM", "fred_gold_daily", "Gold Price London Fix", "commodity", "daily"),
+    # ── Transportation / logistics ──
+    ("TSIFRGHT", "fred_freight_index", "Transportation Services Index: Freight", "logistics", "monthly"),
 ]
 
 

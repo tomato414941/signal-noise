@@ -53,6 +53,7 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.weather import NYWeatherCollector
     from signal_noise.collector.wikipedia import WikipediaBtcCollector
     from signal_noise.collector.wikipedia_generic import get_wiki_collectors
+    from signal_noise.collector.aviation import FR24TotalCollector, OpenSkyTotalCollector, OpenSkyUSCollector
     from signal_noise.collector.blockchain_charts import get_blockchain_collectors
     from signal_noise.collector.coingecko_global import (
         CG_ActiveCryptosCollector,
@@ -132,6 +133,10 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "cg_ongoing_icos": CG_OngoingICOsCollector,
         "cg_markets": CG_MarketsCollector,
         "cg_mcap_change_24h": CG_MarketCapChangePct24hCollector,
+        # Aviation
+        "opensky_total": OpenSkyTotalCollector,
+        "opensky_us": OpenSkyUSCollector,
+        "fr24_total": FR24TotalCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())

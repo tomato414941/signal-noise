@@ -50,7 +50,7 @@ class TestFredGenericFactory:
         valid_types = {
             "labor", "inflation", "monetary", "economic",
             "sentiment", "housing", "stress", "forex",
-            "trade", "commodity",
+            "trade", "commodity", "logistics",
         }
         for series_id, name, display, dtype, freq in FRED_SERIES:
             assert dtype in valid_types, f"{name} has invalid type: {dtype}"
