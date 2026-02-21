@@ -51,6 +51,10 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str]] = [
     ("Donald_Trump", "wiki_trump", "Wikipedia: Donald Trump", "attention"),
     ("Artificial_intelligence", "wiki_ai", "Wikipedia: AI", "tech_attention"),
     ("ChatGPT", "wiki_chatgpt", "Wikipedia: ChatGPT", "tech_attention"),
+    # ── Consumer behavior (Whopper inspiration) ──
+    ("Whopper", "wiki_whopper", "Wikipedia: Whopper", "consumer"),
+    ("Big_Mac_Index", "wiki_big_mac_index", "Wikipedia: Big Mac Index", "consumer"),
+    ("Comfort_food", "wiki_comfort_food", "Wikipedia: Comfort Food", "consumer"),
 ]
 
 

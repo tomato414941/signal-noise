@@ -62,6 +62,10 @@ YAHOO_TICKERS: list[tuple[str, str, str, str]] = [
     ("COIN", "coinbase", "Coinbase Global", "crypto_equity"),
     ("MARA", "mara", "Marathon Digital", "crypto_equity"),
     ("RIOT", "riot", "Riot Platforms", "crypto_equity"),
+    # Consumer / fast food (Whopper inspiration)
+    ("QSR", "qsr", "Restaurant Brands International", "consumer"),
+    ("MCD", "mcd", "McDonald's", "consumer"),
+    ("SBUX", "sbux", "Starbucks", "consumer"),
 ]
 
 
