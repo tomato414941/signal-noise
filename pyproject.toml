@@ -1,0 +1,33 @@
+[project]
+name = "signal-noise"
+version = "0.1.0"
+description = "Collect worldwide signals and evaluate predictive power against any target time series"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0",
+    "pyarrow>=14.0",
+    "requests>=2.28",
+    "ccxt>=4.0",
+    "yfinance>=0.2",
+    "scipy>=1.11",
+    "numpy>=1.24",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
+trends = [
+    "pytrends>=4.9",
+]
