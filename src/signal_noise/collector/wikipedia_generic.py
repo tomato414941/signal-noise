@@ -55,6 +55,15 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str]] = [
     ("Whopper", "wiki_whopper", "Wikipedia: Whopper", "consumer"),
     ("Big_Mac_Index", "wiki_big_mac_index", "Wikipedia: Big Mac Index", "consumer"),
     ("Comfort_food", "wiki_comfort_food", "Wikipedia: Comfort Food", "consumer"),
+    # ── Labor / regulation / central bank ──
+    ("Strike_action", "wiki_strike", "Wikipedia: Strike Action", "labor"),
+    ("Trade_union", "wiki_trade_union", "Wikipedia: Trade Union", "labor"),
+    ("Minimum_wage", "wiki_minimum_wage", "Wikipedia: Minimum Wage", "labor"),
+    ("Lawsuit", "wiki_lawsuit", "Wikipedia: Lawsuit", "regulation"),
+    ("Financial_regulation", "wiki_fin_regulation", "Wikipedia: Financial Regulation", "regulation"),
+    ("Federal_Reserve", "wiki_fed", "Wikipedia: Federal Reserve", "central_bank"),
+    ("Interest_rate", "wiki_interest_rate", "Wikipedia: Interest Rate", "central_bank"),
+    ("Central_bank", "wiki_central_bank", "Wikipedia: Central Bank", "central_bank"),
 ]
 
 
