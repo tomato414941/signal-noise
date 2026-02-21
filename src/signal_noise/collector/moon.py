@@ -19,7 +19,7 @@ class MoonPhaseCollector(BaseCollector):
     meta = SourceMeta(
         name="moon_phase",
         display_name="Moon Phase (0=New, 0.5=Full)",
-        update_frequency="computed",
+        update_frequency="daily",
         data_type="celestial",
         api_docs_url="N/A",
     )

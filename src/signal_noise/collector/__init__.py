@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -9,6 +10,75 @@ if TYPE_CHECKING:
     from signal_noise.collector.base import BaseCollector
 
 log = logging.getLogger(__name__)
+
+# Map legacy data_type -> (domain, category)
+_TAXONOMY: dict[str, tuple[str, str]] = {
+    # ── financial ──
+    "equity": ("financial", "equity"),
+    "mega_cap": ("financial", "equity"),
+    "sector": ("financial", "equity"),
+    "crypto_equity": ("financial", "equity"),
+    "crypto": ("financial", "crypto"),
+    "crypto_market": ("financial", "crypto"),
+    "onchain": ("financial", "crypto"),
+    "forex": ("financial", "forex"),
+    "bond": ("financial", "rates"),
+    "monetary": ("financial", "rates"),
+    "commodity": ("financial", "commodity"),
+    "price": ("financial", "crypto"),
+    "volatility": ("financial", "equity"),
+    "stress": ("financial", "rates"),
+    # ── macro ──
+    "economic": ("macro", "economic"),
+    "labor": ("macro", "labor"),
+    "inflation": ("macro", "inflation"),
+    "trade": ("macro", "trade"),
+    "fiscal": ("macro", "fiscal"),
+    "macro": ("macro", "economic"),
+    # ── sentiment ──
+    "sentiment": ("sentiment", "sentiment"),
+    "fear": ("sentiment", "sentiment"),
+    "greed": ("sentiment", "sentiment"),
+    "attention": ("sentiment", "attention"),
+    "tech_attention": ("sentiment", "attention"),
+    "crypto_attention": ("sentiment", "attention"),
+    "entertainment": ("sentiment", "attention"),
+    "consumer": ("sentiment", "attention"),
+    "social": ("sentiment", "attention"),
+    "safe_haven": ("sentiment", "sentiment"),
+    "geopolitical": ("sentiment", "sentiment"),
+    "regulation": ("sentiment", "sentiment"),
+    "central_bank": ("sentiment", "sentiment"),
+    "remote_sensing": ("sentiment", "attention"),
+    # ── earth ──
+    "weather": ("earth", "weather"),
+    "climate": ("earth", "climate"),
+    "marine": ("earth", "marine"),
+    "air_quality": ("earth", "air_quality"),
+    "hydrology": ("earth", "hydrology"),
+    "satellite": ("earth", "satellite"),
+    "energy": ("earth", "weather"),
+    # ── geophysical ──
+    "space_weather": ("geophysical", "space_weather"),
+    "seismic": ("geophysical", "seismic"),
+    "celestial": ("geophysical", "celestial"),
+    "natural_disaster": ("geophysical", "seismic"),
+    # ── infrastructure ──
+    "logistics": ("infrastructure", "logistics"),
+    "shipping": ("infrastructure", "logistics"),
+    "aviation": ("infrastructure", "aviation"),
+    "internet": ("infrastructure", "logistics"),
+    "web_attention": ("infrastructure", "logistics"),
+    # ── real_estate ──
+    "real_estate": ("real_estate", "real_estate"),
+    "housing": ("real_estate", "real_estate"),
+    # ── developer ──
+    "developer": ("developer", "developer"),
+    "dev_activity": ("developer", "developer"),
+    "dev_attention": ("developer", "developer"),
+    # ── misc ──
+    "temporal": ("financial", "temporal"),
+}
 
 
 def _get_collectors() -> dict[str, type[BaseCollector]]:
@@ -187,6 +257,17 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_air_collectors())
     collectors.update(get_power_collectors())
     collectors.update(get_water_collectors())
+
+    # Auto-patch: populate domain/category from legacy data_type
+    for cls in collectors.values():
+        meta = cls.meta
+        if not meta.domain or not meta.category:
+            mapping = _TAXONOMY.get(meta.data_type)
+            if mapping:
+                cls.meta = replace(meta, domain=mapping[0], category=mapping[1])
+            else:
+                log.warning("Unmapped data_type: %s (collector: %s)", meta.data_type, meta.name)
+
     return collectors
 
 

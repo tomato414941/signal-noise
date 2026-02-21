@@ -9,7 +9,7 @@ class DayOfWeekCollector(BaseCollector):
     meta = SourceMeta(
         name="day_of_week",
         display_name="Day of Week (0=Mon)",
-        update_frequency="computed",
+        update_frequency="daily",
         data_type="temporal",
         api_docs_url="N/A",
     )
@@ -23,7 +23,7 @@ class HourOfDayCollector(BaseCollector):
     meta = SourceMeta(
         name="hour_of_day",
         display_name="Hour of Day (UTC)",
-        update_frequency="computed",
+        update_frequency="daily",
         data_type="temporal",
         api_docs_url="N/A",
     )

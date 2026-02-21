@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, SourceMeta, DOMAINS, CATEGORIES, FREQUENCIES
 from signal_noise.config import CollectorConfig
 
 
@@ -98,6 +98,11 @@ class TestBaseCollector:
             assert len(result) == 5  # 3 + 3 - 1 overlap
             assert result.iloc[2]["value"] == 30.0  # newer wins
 
+    def test_taxonomy_constants_non_empty(self):
+        assert len(DOMAINS) >= 8
+        assert len(CATEGORIES) >= 20
+        assert len(FREQUENCIES) >= 5
+
     def test_status_no_data(self, tmp_path):
         with patch("signal_noise.collector.base.RAW_DIR", tmp_path / "raw"), \
              patch("signal_noise.collector.base.CACHE_DIR", tmp_path / "cache"):
@@ -106,3 +111,28 @@ class TestBaseCollector:
             assert s["name"] == "dummy"
             assert s["has_data"] is False
             assert s["cache_age_hours"] is None
+
+
+class TestTaxonomy:
+    def test_all_collectors_have_domain_and_category(self):
+        from signal_noise.collector import COLLECTORS
+        for name, cls in COLLECTORS.items():
+            assert cls.meta.domain, f"{name} missing domain"
+            assert cls.meta.category, f"{name} missing category"
+
+    def test_all_domains_valid(self):
+        from signal_noise.collector import COLLECTORS
+        for name, cls in COLLECTORS.items():
+            assert cls.meta.domain in DOMAINS, f"{name} has invalid domain: {cls.meta.domain}"
+
+    def test_all_categories_valid(self):
+        from signal_noise.collector import COLLECTORS
+        for name, cls in COLLECTORS.items():
+            assert cls.meta.category in CATEGORIES, f"{name} has invalid category: {cls.meta.category}"
+
+    def test_all_frequencies_valid(self):
+        from signal_noise.collector import COLLECTORS
+        for name, cls in COLLECTORS.items():
+            assert cls.meta.update_frequency in FREQUENCIES, (
+                f"{name} has invalid frequency: {cls.meta.update_frequency}"
+            )

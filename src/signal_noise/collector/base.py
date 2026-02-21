@@ -14,14 +14,55 @@ from signal_noise.config import CACHE_DIR, RAW_DIR, DEFAULT_COLLECTOR, Collector
 log = logging.getLogger(__name__)
 
 
+# ── Taxonomy ──
+# domain: stable top-level grouping (rarely changes)
+DOMAINS = {
+    "financial",     # equities, FX, bonds, commodities, crypto
+    "macro",         # GDP, employment, inflation, trade, fiscal
+    "sentiment",     # fear/greed, social media, attention
+    "earth",         # weather, climate, ocean, air quality, hydrology
+    "geophysical",   # solar, geomagnetic, seismic, lunar, volcanic
+    "infrastructure",# logistics, aviation, shipping, internet
+    "real_estate",   # housing, property prices, REITs
+    "developer",     # GitHub, npm, StackOverflow, tech trends
+}
+
+# category: concrete data classification
+CATEGORIES = {
+    # financial
+    "equity", "crypto", "forex", "rates", "commodity",
+    # macro
+    "economic", "labor", "inflation", "trade", "fiscal",
+    # sentiment
+    "sentiment", "attention",
+    # earth
+    "weather", "climate", "marine", "air_quality", "hydrology", "satellite",
+    # geophysical
+    "space_weather", "seismic", "celestial",
+    # infrastructure
+    "logistics", "aviation",
+    # real_estate
+    "real_estate",
+    # developer
+    "developer",
+    # misc
+    "temporal",
+}
+
+# update_frequency: allowed values
+FREQUENCIES = {"hourly", "daily", "weekly", "monthly", "quarterly", "yearly"}
+
+
 @dataclass
 class SourceMeta:
     name: str
     display_name: str
-    update_frequency: str  # "hourly", "daily", "3h", "computed"
-    data_type: str  # "sentiment", "macro", "space_weather", etc.
+    update_frequency: str
+    data_type: str         # category (kept for backward compat)
     api_docs_url: str
     requires_key: bool = False
+    domain: str = ""       # top-level grouping
+    category: str = ""     # concrete classification (== data_type when set)
 
 
 class BaseCollector(ABC):

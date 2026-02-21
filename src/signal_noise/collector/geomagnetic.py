@@ -10,7 +10,7 @@ class GeomagneticCollector(BaseCollector):
     meta = SourceMeta(
         name="geomagnetic",
         display_name="NOAA Planetary K-index",
-        update_frequency="3h",
+        update_frequency="hourly",
         data_type="space_weather",
         api_docs_url="https://www.swpc.noaa.gov/products/planetary-k-index",
     )

@@ -72,7 +72,7 @@ class MajorSportsEventCollector(BaseCollector):
     meta = SourceMeta(
         name="major_sports_event",
         display_name="Major Sports Event (0/1)",
-        update_frequency="computed",
+        update_frequency="daily",
         data_type="entertainment",
         api_docs_url="N/A",
     )
@@ -90,7 +90,7 @@ class SuperBowlCollector(BaseCollector):
     meta = SourceMeta(
         name="super_bowl",
         display_name="Super Bowl Day (0/1)",
-        update_frequency="computed",
+        update_frequency="daily",
         data_type="entertainment",
         api_docs_url="N/A",
     )
@@ -105,7 +105,7 @@ class OlympicsCollector(BaseCollector):
     meta = SourceMeta(
         name="olympics",
         display_name="Olympic Games (0/1)",
-        update_frequency="computed",
+        update_frequency="daily",
         data_type="entertainment",
         api_docs_url="N/A",
     )
