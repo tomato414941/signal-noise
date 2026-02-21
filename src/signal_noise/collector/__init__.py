@@ -77,6 +77,8 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.worldbank_generic import get_wb_collectors
     from signal_noise.collector.yahoo_finance import DXYCollector, GoldCollector, SP500Collector
     from signal_noise.collector.yahoo_generic import get_yahoo_collectors
+    from signal_noise.collector.oecd_house_prices import get_oecd_hp_collectors
+    from signal_noise.collector.bis_property import get_bis_pp_collectors
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -151,6 +153,8 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_so_collectors())
     collectors.update(get_npm_collectors())
     collectors.update(get_wayback_collectors())
+    collectors.update(get_oecd_hp_collectors())
+    collectors.update(get_bis_pp_collectors())
     return collectors
 
 

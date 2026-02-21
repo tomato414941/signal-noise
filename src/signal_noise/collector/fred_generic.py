@@ -72,6 +72,24 @@ FRED_SERIES: list[tuple[str, str, str, str, str]] = [
     ("GOLDAMGBD228NLBM", "fred_gold_daily", "Gold Price London Fix", "commodity", "daily"),
     # ── Transportation / logistics ──
     ("TSIFRGHT", "fred_freight_index", "Transportation Services Index: Freight", "logistics", "monthly"),
+    # ── Housing / real estate (expanded) ──
+    ("HPIPONM226S", "fred_fhfa_hpi", "FHFA Purchase-Only HPI (Monthly SA)", "housing", "monthly"),
+    ("SPCS20RSA", "fred_case_shiller_20", "Case-Shiller 20-City Composite", "housing", "monthly"),
+    ("COMREPUSQ159N", "fred_commercial_re", "Commercial Real Estate Prices US", "housing", "quarterly"),
+    ("MORTGAGE30US", "fred_mortgage_30y", "30-Year Fixed Mortgage Rate", "housing", "weekly"),
+    ("MORTGAGE15US", "fred_mortgage_15y", "15-Year Fixed Mortgage Rate", "housing", "weekly"),
+    ("PERMIT", "fred_building_permits", "New Housing Permits", "housing", "monthly"),
+    ("EXHOSLUSM495S", "fred_existing_home_sales", "Existing Home Sales", "housing", "monthly"),
+    ("HSN1F", "fred_new_home_sales", "New One Family Houses Sold", "housing", "monthly"),
+    ("FIXHAI", "fred_affordability", "Housing Affordability Index", "housing", "monthly"),
+    # BIS property prices via FRED
+    ("QUSR628BIS", "fred_bis_hpi_us", "BIS Real Property Prices: US", "housing", "quarterly"),
+    ("QJPR628BIS", "fred_bis_hpi_jp", "BIS Real Property Prices: Japan", "housing", "quarterly"),
+    ("QGBR628BIS", "fred_bis_hpi_gb", "BIS Real Property Prices: UK", "housing", "quarterly"),
+    ("QDER628BIS", "fred_bis_hpi_de", "BIS Real Property Prices: Germany", "housing", "quarterly"),
+    ("QCNR628BIS", "fred_bis_hpi_cn", "BIS Real Property Prices: China", "housing", "quarterly"),
+    ("QAUR628BIS", "fred_bis_hpi_au", "BIS Real Property Prices: Australia", "housing", "quarterly"),
+    ("QCAR628BIS", "fred_bis_hpi_ca", "BIS Real Property Prices: Canada", "housing", "quarterly"),
 ]
 
 

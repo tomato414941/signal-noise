@@ -113,6 +113,18 @@ YAHOO_TICKERS: list[tuple[str, str, str, str]] = [
     ("QCOM", "qcom", "Qualcomm", "mega_cap"),
     ("INTC", "intc", "Intel", "mega_cap"),
     ("AMGN", "amgn", "Amgen", "mega_cap"),
+    # ── Real estate / REITs ──
+    ("VNQ", "vnq", "Vanguard Real Estate ETF", "real_estate"),
+    ("IYR", "iyr", "iShares US Real Estate ETF", "real_estate"),
+    ("VNQI", "vnqi", "Vanguard Global ex-US Real Estate", "real_estate"),
+    ("REET", "reet", "iShares Global REIT ETF", "real_estate"),
+    ("XHB", "xhb", "SPDR Homebuilders ETF", "real_estate"),
+    ("ITB", "itb", "iShares Home Construction ETF", "real_estate"),
+    ("1343.T", "jreit", "NEXT FUNDS J-REIT ETF", "real_estate"),
+    ("PLD", "pld", "Prologis (Logistics REIT)", "real_estate"),
+    ("AMT", "amt", "American Tower REIT", "real_estate"),
+    ("SPG", "spg", "Simon Property Group", "real_estate"),
+    ("O", "realty_income", "Realty Income", "real_estate"),
     # ── Shipping / maritime ──
     ("BDRY", "bdry", "Breakwave Dry Bulk Shipping", "shipping"),
     ("BOAT", "boat", "SonicShares Global Shipping", "shipping"),

@@ -26,7 +26,7 @@ class TestYahooGeneric:
         assert "nasdaq" in collectors
 
     def test_all_tickers_have_valid_data_type(self):
-        valid_types = {"equity", "volatility", "commodity", "forex", "bond", "sector", "crypto_equity", "consumer", "mega_cap", "shipping", "aviation"}
+        valid_types = {"equity", "volatility", "commodity", "forex", "bond", "sector", "crypto_equity", "consumer", "mega_cap", "shipping", "aviation", "real_estate"}
         for ticker, name, display, dtype in YAHOO_TICKERS:
             assert dtype in valid_types, f"{name} has invalid type: {dtype}"
 
