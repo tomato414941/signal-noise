@@ -53,7 +53,11 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.weather import NYWeatherCollector
     from signal_noise.collector.wikipedia import WikipediaBtcCollector
     from signal_noise.collector.wikipedia_generic import get_wiki_collectors
+    from signal_noise.collector.ecb_generic import get_ecb_collectors
     from signal_noise.collector.fred_generic import get_fred_collectors
+    from signal_noise.collector.imf_generic import get_imf_collectors
+    from signal_noise.collector.treasury_generic import get_treasury_collectors
+    from signal_noise.collector.worldbank_generic import get_wb_collectors
     from signal_noise.collector.yahoo_finance import DXYCollector, GoldCollector, SP500Collector
     from signal_noise.collector.yahoo_generic import get_yahoo_collectors
 
@@ -104,6 +108,10 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_ccxt_collectors())
     collectors.update(get_wiki_collectors())
     collectors.update(get_fred_collectors())
+    collectors.update(get_wb_collectors())
+    collectors.update(get_ecb_collectors())
+    collectors.update(get_treasury_collectors())
+    collectors.update(get_imf_collectors())
     return collectors
 
 
