@@ -19,10 +19,10 @@ def _align_signal_to_target(
     ts_col = "timestamp" if "timestamp" in signal_df.columns else "date"
     sig = signal_df[[ts_col, "value"]].copy()
     sig = sig.rename(columns={ts_col: "timestamp"})
-    sig["timestamp"] = pd.to_datetime(sig["timestamp"], utc=True)
+    sig["timestamp"] = pd.to_datetime(sig["timestamp"], utc=True).astype("datetime64[us, UTC]")
 
     target_ts = target_df[["timestamp"]].copy()
-    target_ts["timestamp"] = pd.to_datetime(target_ts["timestamp"], utc=True)
+    target_ts["timestamp"] = pd.to_datetime(target_ts["timestamp"], utc=True).astype("datetime64[us, UTC]")
 
     if ts_col == "date":
         sig["_date"] = sig["timestamp"].dt.normalize()
