@@ -64,6 +64,17 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str]] = [
     ("Federal_Reserve", "wiki_fed", "Wikipedia: Federal Reserve", "central_bank"),
     ("Interest_rate", "wiki_interest_rate", "Wikipedia: Interest Rate", "central_bank"),
     ("Central_bank", "wiki_central_bank", "Wikipedia: Central Bank", "central_bank"),
+    # ── Climate / environment ──
+    ("Climate_change", "wiki_climate_change", "Wikipedia: Climate Change", "climate"),
+    ("Global_warming", "wiki_global_warming", "Wikipedia: Global Warming", "climate"),
+    ("Carbon_dioxide_in_Earth%27s_atmosphere", "wiki_co2", "Wikipedia: CO2 Atmosphere", "climate"),
+    ("Drought", "wiki_drought", "Wikipedia: Drought", "climate"),
+    ("Flood", "wiki_flood", "Wikipedia: Flood", "climate"),
+    ("Heat_wave", "wiki_heatwave", "Wikipedia: Heat Wave", "climate"),
+    ("Tropical_cyclone", "wiki_cyclone", "Wikipedia: Tropical Cyclone", "climate"),
+    ("El_Ni%C3%B1o%E2%80%93Southern_Oscillation", "wiki_enso_page", "Wikipedia: ENSO", "climate"),
+    ("Renewable_energy", "wiki_renewable", "Wikipedia: Renewable Energy", "climate"),
+    ("Fossil_fuel", "wiki_fossil_fuel", "Wikipedia: Fossil Fuel", "climate"),
     # ── Real estate / housing ──
     ("Real-estate_bubble", "wiki_re_bubble", "Wikipedia: Real Estate Bubble", "real_estate"),
     ("Japanese_asset_price_bubble", "wiki_jp_bubble", "Wikipedia: Japanese Asset Bubble", "real_estate"),

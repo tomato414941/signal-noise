@@ -79,6 +79,15 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.yahoo_generic import get_yahoo_collectors
     from signal_noise.collector.oecd_house_prices import get_oecd_hp_collectors
     from signal_noise.collector.bis_property import get_bis_pp_collectors
+    from signal_noise.collector.open_meteo_weather import get_weather_collectors
+    from signal_noise.collector.open_meteo_marine import get_marine_collectors
+    from signal_noise.collector.open_meteo_air import get_air_collectors
+    from signal_noise.collector.noaa_climate import (
+        GlobalTempAnomalyCollector,
+        LandTempAnomalyCollector,
+        CO2DailyCollector,
+        NASAGlobalTempCollector,
+    )
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -139,6 +148,11 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "opensky_total": OpenSkyTotalCollector,
         "opensky_us": OpenSkyUSCollector,
         "fr24_total": FR24TotalCollector,
+        # Climate / atmosphere
+        "noaa_global_temp": GlobalTempAnomalyCollector,
+        "noaa_land_temp": LandTempAnomalyCollector,
+        "noaa_co2_daily": CO2DailyCollector,
+        "nasa_giss_temp": NASAGlobalTempCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())
@@ -155,6 +169,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_wayback_collectors())
     collectors.update(get_oecd_hp_collectors())
     collectors.update(get_bis_pp_collectors())
+    collectors.update(get_weather_collectors())
+    collectors.update(get_marine_collectors())
+    collectors.update(get_air_collectors())
     return collectors
 
 
