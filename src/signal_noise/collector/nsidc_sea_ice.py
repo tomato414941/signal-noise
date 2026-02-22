@@ -18,7 +18,7 @@ class NSIDCSeaIceCollector(BaseCollector):
         category="climate",
     )
 
-    URL = "https://noaadata.apps.nsidc.org/NOAA/G02135/north/daily/data/N_seaice_extent_daily_v3.0.csv"
+    URL = "https://noaadata.apps.nsidc.org/NOAA/G02135/north/daily/data/N_seaice_extent_daily_v4.0.csv"
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=60)

@@ -20,7 +20,7 @@ class WHOLifeExpectancyCollector(BaseCollector):
 
     URL = (
         "https://ghoapi.azureedge.net/api/WHOSIS_000001"
-        "?$filter=SpatialDim eq 'GLOBAL' and Dim1 eq 'BTSX'"
+        "?$filter=SpatialDim eq 'GLOBAL' and Dim1 eq 'SEX_BTSX'"
     )
 
     def fetch(self) -> pd.DataFrame:
