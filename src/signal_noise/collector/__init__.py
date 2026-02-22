@@ -195,13 +195,13 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
 COLLECTORS = _get_collectors()
 
 
-def collect_all(sources: list[str] | None = None) -> dict[str, pd.DataFrame]:
-    targets = sources or list(COLLECTORS.keys())
+def collect_all(collectors: list[str] | None = None) -> dict[str, pd.DataFrame]:
+    targets = collectors or list(COLLECTORS.keys())
     results: dict[str, pd.DataFrame] = {}
     for name in targets:
         cls = COLLECTORS.get(name)
         if not cls:
-            log.warning("Unknown source: %s", name)
+            log.warning("Unknown collector: %s", name)
             continue
         try:
             collector = cls()

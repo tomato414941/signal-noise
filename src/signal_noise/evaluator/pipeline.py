@@ -47,16 +47,16 @@ def _align_signal_to_target(
 
 def run_evaluation(
     config: EvaluationConfig | None = None,
-    target_source: str = "btc_ohlcv",
+    target_collector: str = "btc_ohlcv",
     use_transforms: bool = True,
 ) -> list[SignalMetrics]:
     config = config or DEFAULT_EVALUATION
 
-    target_path = RAW_DIR / f"{target_source}.parquet"
+    target_path = RAW_DIR / f"{target_collector}.parquet"
     if not target_path.exists():
         raise FileNotFoundError(
             f"Target data not found: {target_path}. "
-            f"Run: python -m signal_noise collect -s {target_source}"
+            f"Run: python -m signal_noise collect -s {target_collector}"
         )
 
     target_df = pd.read_parquet(target_path)
@@ -65,7 +65,7 @@ def run_evaluation(
     all_metrics: list[SignalMetrics] = []
 
     for collector_name in COLLECTORS:
-        if collector_name == target_source:
+        if collector_name == target_collector:
             continue
 
         parquet = RAW_DIR / f"{collector_name}.parquet"
