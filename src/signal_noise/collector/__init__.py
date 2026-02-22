@@ -104,6 +104,80 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.mempool_extended import get_mempool_extended_collectors
     from signal_noise.collector.gdelt import get_gdelt_collectors
     from signal_noise.collector.census_generic import get_census_collectors
+    # ── New providers (batch expansion) ──
+    # Infrastructure / Internet
+    from signal_noise.collector.cloudflare_radar import CloudflareRadarCollector
+    from signal_noise.collector.ripe_stat import RIPEPeerCountCollector
+    from signal_noise.collector.letsencrypt_stats import LetsEncryptCollector
+    from signal_noise.collector.submarine_cable import SubmarineCableCollector
+    from signal_noise.collector.wikimedia_total import WikimediaTotalCollector
+    from signal_noise.collector.github_repo_count import GitHubRepoCountCollector
+    # Geophysical / Space
+    from signal_noise.collector.solar_wind import SolarWindCollector
+    from signal_noise.collector.kp_index import KpIndexCollector
+    from signal_noise.collector.cosmic_ray import CosmicRayCollector
+    from signal_noise.collector.near_earth_objects import NearEarthObjectCollector
+    from signal_noise.collector.iris_seismic import IRISSeismicCollector
+    from signal_noise.collector.gvp_volcano import GVPVolcanoCollector
+    from signal_noise.collector.dst_index import DstIndexCollector
+    from signal_noise.collector.solar_flare import SolarFlareCollector
+    # Earth / Environment
+    from signal_noise.collector.openaq import OpenAQCollector
+    from signal_noise.collector.epa_aqi import EPAAQICollector
+    from signal_noise.collector.nsidc_sea_ice import NSIDCSeaIceCollector
+    from signal_noise.collector.nasa_firms import NASAFIRMSCollector
+    from signal_noise.collector.sea_level import SeaLevelCollector
+    from signal_noise.collector.uv_index import UVIndexCollector
+    from signal_noise.collector.river_discharge import RiverDischargeCollector
+    from signal_noise.collector.co2_global import CO2GlobalCollector
+    from signal_noise.collector.forest_watch import GlobalForestWatchCollector
+    from signal_noise.collector.precipitation import GlobalPrecipitationCollector
+    # Health / Pandemic
+    from signal_noise.collector.who_gho import WHOLifeExpectancyCollector
+    from signal_noise.collector.owid import OWIDCovidCollector
+    from signal_noise.collector.cdc_flu import CDCFluCollector
+    from signal_noise.collector.who_disease_outbreak import WHODiseaseOutbreakCollector
+    from signal_noise.collector.ghe_mortality import GHEMortalityCollector
+    from signal_noise.collector.healthmap import ProMEDAlertCollector
+    # Sentiment / Alternative Data
+    from signal_noise.collector.cboe_vix import CBOEVIXCollector
+    from signal_noise.collector.aaii_sentiment import AAIISentimentCollector
+    from signal_noise.collector.polymarket import PolymarketVolumeCollector
+    from signal_noise.collector.bitfinex_longs_shorts import BitfinexLongShortCollector
+    # Developer / Tech
+    from signal_noise.collector.pypi_stats import PyPIDownloadsCollector
+    from signal_noise.collector.crates_io import CratesIODownloadsCollector
+    from signal_noise.collector.docker_hub import DockerHubPullsCollector
+    from signal_noise.collector.homebrew_stats import HomebrewInstallsCollector
+    from signal_noise.collector.huggingface_stats import HuggingFaceModelsCollector
+    from signal_noise.collector.gitlab_stats import GitLabProjectsCollector
+    from signal_noise.collector.libraries_io import LibrariesIOCollector
+    # Financial / Crypto
+    from signal_noise.collector.binance_oi import BinanceOpenInterestCollector
+    from signal_noise.collector.deribit_skew import DeribitSkewCollector
+    from signal_noise.collector.crypto_compare import CryptoCompareVolumeCollector
+    from signal_noise.collector.etherscan_gas import EtherscanGasCollector
+    from signal_noise.collector.glassnode_free import GlassnodeActiveAddressesCollector
+    from signal_noise.collector.santiment_free import SantimentSocialVolumeCollector
+    from signal_noise.collector.alternative_btc_dominance import CoinMarketCapDominanceCollector
+    from signal_noise.collector.coin_dance import CoinDanceCollector
+    from signal_noise.collector.coinmetrics_free import CoinMetricsCollector
+    from signal_noise.collector.messari_free import MessariCollector
+    # Demographics / Macro
+    from signal_noise.collector.un_population import UNPopulationCollector
+    from signal_noise.collector.ilo_stats import ILOUnemploymentCollector
+    from signal_noise.collector.oecd_cli import OECDCLICollector
+    from signal_noise.collector.numbeo import NumbeoCollector
+    from signal_noise.collector.ecb_rates import ECBDepositRateCollector
+    from signal_noise.collector.ycharts_free import FedBalanceSheetCollector
+    from signal_noise.collector.boj_rates import BOJPolicyRateCollector
+    from signal_noise.collector.pboc_rate import PBOCLPRCollector
+    from signal_noise.collector.rba_rate import RBACashRateCollector
+    # Transport / Logistics
+    from signal_noise.collector.freightos_bdi import FreightosBDICollector
+    from signal_noise.collector.tsa_checkpoint import TSACheckpointCollector
+    from signal_noise.collector.port_la import PortOfLACollector
+    from signal_noise.collector.marine_traffic import MarineTrafficCollector
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -174,6 +248,79 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "eonet_storms": EONETStormCollector,
         "eonet_volcanoes": EONETVolcanoCollector,
         "eonet_total": EONETTotalCollector,
+        # ── Infrastructure / Internet ──
+        "cloudflare_http_human": CloudflareRadarCollector,
+        "ripe_peer_count": RIPEPeerCountCollector,
+        "ssl_cert_issuance": LetsEncryptCollector,
+        "submarine_cable_count": SubmarineCableCollector,
+        "wikimedia_pageview_total": WikimediaTotalCollector,
+        "github_new_repos": GitHubRepoCountCollector,
+        # ── Geophysical / Space ──
+        "solar_wind_speed": SolarWindCollector,
+        "kp_index": KpIndexCollector,
+        "cosmic_ray_flux": CosmicRayCollector,
+        "neo_close_approach": NearEarthObjectCollector,
+        "iris_seismic_count": IRISSeismicCollector,
+        "gvp_active_volcanoes": GVPVolcanoCollector,
+        "dst_index": DstIndexCollector,
+        "solar_flare_count": SolarFlareCollector,
+        # ── Earth / Environment ──
+        "openaq_pm25": OpenAQCollector,
+        "epa_aqi_us": EPAAQICollector,
+        "arctic_sea_ice_extent": NSIDCSeaIceCollector,
+        "nasa_active_fires": NASAFIRMSCollector,
+        "global_sea_level": SeaLevelCollector,
+        "uv_index_nyc": UVIndexCollector,
+        "mississippi_discharge": RiverDischargeCollector,
+        "co2_monthly_global": CO2GlobalCollector,
+        "glad_deforestation": GlobalForestWatchCollector,
+        "global_precip_index": GlobalPrecipitationCollector,
+        # ── Health / Pandemic ──
+        "who_life_expectancy": WHOLifeExpectancyCollector,
+        "owid_covid_cases": OWIDCovidCollector,
+        "cdc_ili_rate": CDCFluCollector,
+        "who_disease_outbreaks": WHODiseaseOutbreakCollector,
+        "who_mortality_rate": GHEMortalityCollector,
+        "health_alerts": ProMEDAlertCollector,
+        # ── Sentiment / Alternative Data ──
+        "vix_close": CBOEVIXCollector,
+        "aaii_bull_ratio": AAIISentimentCollector,
+        "polymarket_volume": PolymarketVolumeCollector,
+        "bitfinex_btc_ls_ratio": BitfinexLongShortCollector,
+        # ── Developer / Tech ──
+        "pypi_numpy_downloads": PyPIDownloadsCollector,
+        "crates_serde_downloads": CratesIODownloadsCollector,
+        "dockerhub_nginx_pulls": DockerHubPullsCollector,
+        "homebrew_wget_installs": HomebrewInstallsCollector,
+        "hf_trending_downloads": HuggingFaceModelsCollector,
+        "gitlab_new_projects": GitLabProjectsCollector,
+        "librariesio_new_packages": LibrariesIOCollector,
+        # ── Financial / Crypto ──
+        "binance_btc_oi": BinanceOpenInterestCollector,
+        "deribit_btc_skew": DeribitSkewCollector,
+        "cryptocompare_volume": CryptoCompareVolumeCollector,
+        "eth_gas_price": EtherscanGasCollector,
+        "btc_active_addresses": GlassnodeActiveAddressesCollector,
+        "santiment_social_btc": SantimentSocialVolumeCollector,
+        "cg_btc_dom_30d": CoinMarketCapDominanceCollector,
+        "btc_node_count": CoinDanceCollector,
+        "coinmetrics_btc_txcount": CoinMetricsCollector,
+        "messari_btc_volume": MessariCollector,
+        # ── Demographics / Macro ──
+        "un_world_population": UNPopulationCollector,
+        "ilo_unemployment_rate": ILOUnemploymentCollector,
+        "oecd_cli": OECDCLICollector,
+        "numbeo_cost_of_living": NumbeoCollector,
+        "ecb_deposit_rate": ECBDepositRateCollector,
+        "fed_balance_sheet": FedBalanceSheetCollector,
+        "boj_policy_rate": BOJPolicyRateCollector,
+        "pboc_lpr_1y": PBOCLPRCollector,
+        "rba_cash_rate": RBACashRateCollector,
+        # ── Transport / Logistics ──
+        "freightos_bdi": FreightosBDICollector,
+        "tsa_traveler_count": TSACheckpointCollector,
+        "port_la_teus": PortOfLACollector,
+        "global_trade_value": MarineTrafficCollector,
     }
     collectors.update(get_yahoo_collectors())
     collectors.update(get_ccxt_collectors())

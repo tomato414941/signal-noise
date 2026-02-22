@@ -4,7 +4,6 @@ No API key required.  Docs: https://mempool.space/docs/api
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 
 import pandas as pd
 import requests

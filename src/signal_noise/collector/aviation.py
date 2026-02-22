@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 
 import requests
 import pandas as pd

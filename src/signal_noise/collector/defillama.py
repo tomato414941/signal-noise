@@ -1,7 +1,6 @@
 """DeFi Llama collectors: TVL by chain, stablecoin market caps, DEX volume."""
 from __future__ import annotations
 
-from datetime import UTC, datetime
 
 import pandas as pd
 import requests

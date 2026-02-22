@@ -13,8 +13,8 @@ Collect worldwide signals and evaluate predictive power against any target time 
 | **CollectorMeta** | Collector metadata (name, domain, category) | `CollectorMeta(name="fear_greed", ...)` |
 | **Signal** | Data entering the evaluation pipeline (raw or transformed) | `fear_greed`, `fear_greed__z_20` |
 | **Transform** | Function applied to a raw signal to derive a new signal | z-score, SMA ratio, RSI |
-| **Domain** | Stable top-level grouping (9 types) | financial, earth, macro |
-| **Category** | Concrete classification (~27 types) | equity, weather, labor |
+| **Domain** | Stable top-level grouping (10 types) | financial, earth, macro |
+| **Category** | Concrete classification (~29 types) | equity, weather, labor |
 
 ### Domain List
 
@@ -27,15 +27,16 @@ Collect worldwide signals and evaluate predictive power against any target time 
 | geophysical | Solar, geomagnetic, seismic, lunar | space_weather, seismic, celestial |
 | infrastructure | Logistics, aviation, internet | logistics, aviation, internet |
 | real_estate | Housing, property prices | real_estate |
-| developer | GitHub, npm, StackOverflow | developer |
+| developer | GitHub, npm, StackOverflow, package registries | developer |
+| health | Epidemiology, public health, disease surveillance | epidemiology, public_health |
 | computed | Calculated features (temporal, etc.) | temporal |
 
 ### Scale
 
-- **Providers**: ~58 external APIs
-- **Collectors**: ~1,000 time series
+- **Providers**: ~100 external APIs
+- **Collectors**: ~1,067 time series
 - **Transforms**: 22 functions
-- **Signals**: ~23,000 (collectors × (1 + transforms))
+- **Signals**: ~24,500 (collectors × (1 + transforms))
 
 ## Architecture
 

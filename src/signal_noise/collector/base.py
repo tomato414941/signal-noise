@@ -25,6 +25,7 @@ DOMAINS = {
     "infrastructure",# logistics, aviation, shipping, internet
     "real_estate",   # housing, property prices, REITs
     "developer",     # GitHub, npm, StackOverflow, tech trends
+    "health",        # epidemiology, public health, disease surveillance
     "computed",      # calculated features (temporal, etc.)
 }
 
@@ -46,6 +47,8 @@ CATEGORIES = {
     "real_estate",
     # developer
     "developer",
+    # health
+    "epidemiology", "public_health",
     # misc
     "temporal",
 }

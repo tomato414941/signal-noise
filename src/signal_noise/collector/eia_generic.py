@@ -182,7 +182,7 @@ def _make_eia_collector(
                 "api_key": api_key,
                 f"facets[{facet_key}][]": facet_value,
                 "frequency": frequency,
-                f"data[]": data_col,
+                "data[]": data_col,
                 "sort[0][column]": "period",
                 "sort[0][direction]": "asc",
                 "length": "5000",
