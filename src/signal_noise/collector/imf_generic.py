@@ -12,42 +12,42 @@ _COUNTRIES = {
     "TUR": "Turkey", "MEX": "Mexico", "RUS": "Russia", "ZAF": "S.Africa",
 }
 
-# (indicator, country_iso3, collector_name, display_name, data_type, domain, category)
-IMF_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
+# (indicator, country_iso3, collector_name, display_name, domain, category)
+IMF_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── Real GDP growth ──
-    ("NGDP_RPCH", "USA", "imf_gdp_growth_us", "IMF GDP Growth: US", "economic", "macro", "economic"),
-    ("NGDP_RPCH", "CHN", "imf_gdp_growth_cn", "IMF GDP Growth: China", "economic", "macro", "economic"),
-    ("NGDP_RPCH", "JPN", "imf_gdp_growth_jp", "IMF GDP Growth: Japan", "economic", "macro", "economic"),
-    ("NGDP_RPCH", "DEU", "imf_gdp_growth_de", "IMF GDP Growth: Germany", "economic", "macro", "economic"),
-    ("NGDP_RPCH", "GBR", "imf_gdp_growth_gb", "IMF GDP Growth: UK", "economic", "macro", "economic"),
-    ("NGDP_RPCH", "IND", "imf_gdp_growth_in", "IMF GDP Growth: India", "economic", "macro", "economic"),
+    ("NGDP_RPCH", "USA", "imf_gdp_growth_us", "IMF GDP Growth: US", "macro", "economic"),
+    ("NGDP_RPCH", "CHN", "imf_gdp_growth_cn", "IMF GDP Growth: China", "macro", "economic"),
+    ("NGDP_RPCH", "JPN", "imf_gdp_growth_jp", "IMF GDP Growth: Japan", "macro", "economic"),
+    ("NGDP_RPCH", "DEU", "imf_gdp_growth_de", "IMF GDP Growth: Germany", "macro", "economic"),
+    ("NGDP_RPCH", "GBR", "imf_gdp_growth_gb", "IMF GDP Growth: UK", "macro", "economic"),
+    ("NGDP_RPCH", "IND", "imf_gdp_growth_in", "IMF GDP Growth: India", "macro", "economic"),
     # ── Inflation (avg consumer prices) ──
-    ("PCPIPCH", "USA", "imf_inflation_us", "IMF Inflation: US", "inflation", "macro", "inflation"),
-    ("PCPIPCH", "CHN", "imf_inflation_cn", "IMF Inflation: China", "inflation", "macro", "inflation"),
-    ("PCPIPCH", "JPN", "imf_inflation_jp", "IMF Inflation: Japan", "inflation", "macro", "inflation"),
-    ("PCPIPCH", "DEU", "imf_inflation_de", "IMF Inflation: Germany", "inflation", "macro", "inflation"),
-    ("PCPIPCH", "GBR", "imf_inflation_gb", "IMF Inflation: UK", "inflation", "macro", "inflation"),
-    ("PCPIPCH", "TUR", "imf_inflation_tr", "IMF Inflation: Turkey", "inflation", "macro", "inflation"),
+    ("PCPIPCH", "USA", "imf_inflation_us", "IMF Inflation: US", "macro", "inflation"),
+    ("PCPIPCH", "CHN", "imf_inflation_cn", "IMF Inflation: China", "macro", "inflation"),
+    ("PCPIPCH", "JPN", "imf_inflation_jp", "IMF Inflation: Japan", "macro", "inflation"),
+    ("PCPIPCH", "DEU", "imf_inflation_de", "IMF Inflation: Germany", "macro", "inflation"),
+    ("PCPIPCH", "GBR", "imf_inflation_gb", "IMF Inflation: UK", "macro", "inflation"),
+    ("PCPIPCH", "TUR", "imf_inflation_tr", "IMF Inflation: Turkey", "macro", "inflation"),
     # ── Current account balance (% GDP) ──
-    ("BCA_NGDPD", "USA", "imf_current_acct_us", "IMF Current Account: US", "trade", "macro", "trade"),
-    ("BCA_NGDPD", "CHN", "imf_current_acct_cn", "IMF Current Account: China", "trade", "macro", "trade"),
-    ("BCA_NGDPD", "DEU", "imf_current_acct_de", "IMF Current Account: Germany", "trade", "macro", "trade"),
-    ("BCA_NGDPD", "JPN", "imf_current_acct_jp", "IMF Current Account: Japan", "trade", "macro", "trade"),
+    ("BCA_NGDPD", "USA", "imf_current_acct_us", "IMF Current Account: US", "macro", "trade"),
+    ("BCA_NGDPD", "CHN", "imf_current_acct_cn", "IMF Current Account: China", "macro", "trade"),
+    ("BCA_NGDPD", "DEU", "imf_current_acct_de", "IMF Current Account: Germany", "macro", "trade"),
+    ("BCA_NGDPD", "JPN", "imf_current_acct_jp", "IMF Current Account: Japan", "macro", "trade"),
     # ── Government debt (% GDP) ──
-    ("GGXWDG_NGDP", "USA", "imf_gov_debt_us", "IMF Gov Debt/GDP: US", "fiscal", "macro", "fiscal"),
-    ("GGXWDG_NGDP", "JPN", "imf_gov_debt_jp", "IMF Gov Debt/GDP: Japan", "fiscal", "macro", "fiscal"),
-    ("GGXWDG_NGDP", "GBR", "imf_gov_debt_gb", "IMF Gov Debt/GDP: UK", "fiscal", "macro", "fiscal"),
-    ("GGXWDG_NGDP", "CHN", "imf_gov_debt_cn", "IMF Gov Debt/GDP: China", "fiscal", "macro", "fiscal"),
+    ("GGXWDG_NGDP", "USA", "imf_gov_debt_us", "IMF Gov Debt/GDP: US", "macro", "fiscal"),
+    ("GGXWDG_NGDP", "JPN", "imf_gov_debt_jp", "IMF Gov Debt/GDP: Japan", "macro", "fiscal"),
+    ("GGXWDG_NGDP", "GBR", "imf_gov_debt_gb", "IMF Gov Debt/GDP: UK", "macro", "fiscal"),
+    ("GGXWDG_NGDP", "CHN", "imf_gov_debt_cn", "IMF Gov Debt/GDP: China", "macro", "fiscal"),
     # ── Unemployment rate ──
-    ("LUR", "USA", "imf_unemp_us", "IMF Unemployment: US", "labor", "macro", "labor"),
-    ("LUR", "DEU", "imf_unemp_de", "IMF Unemployment: Germany", "labor", "macro", "labor"),
-    ("LUR", "GBR", "imf_unemp_gb", "IMF Unemployment: UK", "labor", "macro", "labor"),
-    ("LUR", "JPN", "imf_unemp_jp", "IMF Unemployment: Japan", "labor", "macro", "labor"),
+    ("LUR", "USA", "imf_unemp_us", "IMF Unemployment: US", "macro", "labor"),
+    ("LUR", "DEU", "imf_unemp_de", "IMF Unemployment: Germany", "macro", "labor"),
+    ("LUR", "GBR", "imf_unemp_gb", "IMF Unemployment: UK", "macro", "labor"),
+    ("LUR", "JPN", "imf_unemp_jp", "IMF Unemployment: Japan", "macro", "labor"),
 ]
 
 
 def _make_imf_collector(
-    indicator: str, country: str, name: str, display_name: str, data_type: str,
+    indicator: str, country: str, name: str, display_name: str,
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
@@ -55,7 +55,6 @@ def _make_imf_collector(
             name=name,
             display_name=display_name,
             update_frequency="yearly",
-            data_type=data_type,
             api_docs_url=f"https://www.imf.org/external/datamapper/{indicator}",
             domain=domain,
             category=category,

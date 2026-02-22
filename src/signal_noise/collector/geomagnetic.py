@@ -11,7 +11,6 @@ class GeomagneticCollector(BaseCollector):
         name="geomagnetic",
         display_name="NOAA Planetary K-index",
         update_frequency="hourly",
-        data_type="space_weather",
         api_docs_url="https://www.swpc.noaa.gov/products/planetary-k-index",
         domain="geophysical",
         category="space_weather",

@@ -13,7 +13,6 @@ class WikipediaBtcCollector(BaseCollector):
         name="wikipedia_btc",
         display_name="Wikipedia Bitcoin Pageviews",
         update_frequency="daily",
-        data_type="attention",
         api_docs_url="https://wikimedia.org/api/rest_v1/",
         domain="sentiment",
         category="attention",

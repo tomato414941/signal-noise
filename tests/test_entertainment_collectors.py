@@ -33,7 +33,7 @@ class TestMajorSportsEvent:
 
     def test_meta(self):
         assert MajorSportsEventCollector.meta.name == "major_sports_event"
-        assert MajorSportsEventCollector.meta.data_type == "entertainment"
+        assert MajorSportsEventCollector.meta.category == "attention"
 
 
 class TestSuperBowl:
@@ -87,7 +87,7 @@ class TestRedditCrypto:
 
     def test_meta(self):
         assert RedditCryptoCollector.meta.name == "reddit_crypto"
-        assert RedditCryptoCollector.meta.data_type == "social"
+        assert RedditCryptoCollector.meta.category == "attention"
 
 
 class TestRedditWsb:

@@ -30,7 +30,6 @@ def _make_gh_events_collector(
             name=name,
             display_name=display_name,
             update_frequency="hourly",
-            data_type="dev_activity",
             api_docs_url=f"https://github.com/{repo}",
             domain="developer",
             category="developer",

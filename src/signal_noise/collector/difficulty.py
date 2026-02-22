@@ -17,7 +17,6 @@ class DifficultyCollector(BaseCollector):
         name="btc_difficulty",
         display_name="Bitcoin Mining Difficulty",
         update_frequency="daily",
-        data_type="onchain",
         api_docs_url="https://mempool.space/docs/api",
         domain="financial",
         category="crypto",

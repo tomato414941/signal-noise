@@ -102,7 +102,7 @@ def _cmd_list() -> None:
         ds = "yes" if s["has_data"] else "no"
         rs = str(s["rows"]) if s["has_data"] else "-"
         dn = s["display_name"]
-        dt = c.meta.data_type
+        dt = c.meta.category
         uf = c.meta.update_frequency
         print(f"{dn:<25} {dt:<15} {uf:<10} {ks:<5} {ds:<6} {rs:>8}")
 

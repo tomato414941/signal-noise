@@ -79,8 +79,8 @@ class TestNASAEONET:
         assert df["value"].iloc[0] == 4.0
 
     def test_meta(self):
-        assert EONETWildfireCollector.meta.data_type == "natural_disaster"
-        assert EONETStormCollector.meta.data_type == "natural_disaster"
+        assert EONETWildfireCollector.meta.category == "seismic"
+        assert EONETStormCollector.meta.category == "seismic"
 
 
 class TestNASAPower:
@@ -94,7 +94,7 @@ class TestNASAPower:
     def test_factory_creates_collector(self):
         cls = _make_power_collector(35.0, 139.0, "Test", "test_power", "Test", "ALLSKY_SFC_SW_DWN")
         assert cls.meta.name == "test_power"
-        assert cls.meta.data_type == "satellite"
+        assert cls.meta.category == "satellite"
 
     def test_get_collectors_returns_dict(self):
         collectors = get_power_collectors()
@@ -137,7 +137,7 @@ class TestUSGSWater:
     def test_factory_creates_collector(self):
         cls = _make_water_collector("09380000", "test_water", "Test Water", "drought")
         assert cls.meta.name == "test_water"
-        assert cls.meta.data_type == "hydrology"
+        assert cls.meta.category == "hydrology"
 
     def test_get_collectors_returns_dict(self):
         collectors = get_water_collectors()

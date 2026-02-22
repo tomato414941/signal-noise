@@ -34,7 +34,7 @@ class TestHackerNews:
         assert HNTopCollector.meta.name == "hn_top"
         assert HNBestCollector.meta.name == "hn_best"
         assert HNNewCollector.meta.name == "hn_new"
-        assert HNTopCollector.meta.data_type == "tech_attention"
+        assert HNTopCollector.meta.category == "attention"
 
 
 # ── StackOverflow ───────────────────────────────────────────
@@ -141,8 +141,8 @@ class TestCoinGeckoGlobal:
         assert df["value"].iloc[0] == 56.5
 
     def test_meta_types(self):
-        assert CG_TotalMarketCapCollector.meta.data_type == "crypto_market"
-        assert CG_TotalVolumeCollector.meta.data_type == "crypto_market"
+        assert CG_TotalMarketCapCollector.meta.category == "crypto"
+        assert CG_TotalVolumeCollector.meta.category == "crypto"
 
 
 # ── Blockchain.com Charts ──────────────────────────────────
@@ -172,7 +172,7 @@ class TestBlockchainCharts:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_bc_collector("n-unique-addresses", "test_bc", "Test", "onchain", "financial", "crypto")
+        cls = _make_bc_collector("n-unique-addresses", "test_bc", "Test", "financial", "crypto")
         df = cls().fetch()
         assert len(df) == 2
         assert df["value"].iloc[0] == 500000.0

@@ -36,7 +36,7 @@ class TestFredGenericFactory:
         assert len(ids) == len(set(ids))
 
     def test_factory_creates_collector(self):
-        cls = _make_fred_collector("ICSA", "test_icsa", "Test ICSA", "labor", "weekly", "macro", "labor")
+        cls = _make_fred_collector("ICSA", "test_icsa", "Test ICSA", "weekly", "macro", "labor")
         assert cls.meta.name == "test_icsa"
         assert cls.meta.domain == "macro"
         assert cls.meta.category == "labor"
@@ -47,26 +47,23 @@ class TestFredGenericFactory:
         assert isinstance(collectors, dict)
         assert len(collectors) == len(FRED_SERIES)
 
-    def test_all_series_have_valid_data_type(self):
-        valid_types = {
-            "labor", "inflation", "monetary", "economic",
-            "sentiment", "housing", "stress", "forex",
-            "trade", "commodity", "logistics",
-        }
-        for series_id, name, display, dtype, freq, dom, cat in FRED_SERIES:
-            assert dtype in valid_types, f"{name} has invalid type: {dtype}"
+    def test_all_series_have_valid_domain_category(self):
+        from signal_noise.collector.base import DOMAINS, CATEGORIES
+        for series_id, name, display, freq, dom, cat in FRED_SERIES:
+            assert dom in DOMAINS, f"{name} has invalid domain: {dom}"
+            assert cat in CATEGORIES, f"{name} has invalid category: {cat}"
 
     def test_all_series_have_valid_frequency(self):
         valid_freqs = {"daily", "weekly", "monthly", "quarterly"}
-        for series_id, name, display, dtype, freq, dom, cat in FRED_SERIES:
+        for series_id, name, display, freq, dom, cat in FRED_SERIES:
             assert freq in valid_freqs, f"{name} has invalid frequency: {freq}"
 
     def test_all_categories_present(self):
-        data_types = {t[3] for t in FRED_SERIES}
-        assert "labor" in data_types
-        assert "inflation" in data_types
-        assert "monetary" in data_types
-        assert "economic" in data_types
+        categories = {t[5] for t in FRED_SERIES}
+        assert "labor" in categories
+        assert "inflation" in categories
+        assert "rates" in categories
+        assert "economic" in categories
 
 
 class TestFredGenericFetch:
@@ -78,7 +75,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("ICSA", "test_icsa", "Test", "labor", "weekly", "macro", "labor")
+        cls = _make_fred_collector("ICSA", "test_icsa", "Test", "weekly", "macro", "labor")
         df = cls().fetch()
         assert "date" in df.columns
         assert "value" in df.columns
@@ -94,7 +91,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("UNRATE", "test_unrate", "Test", "labor", "monthly", "macro", "labor")
+        cls = _make_fred_collector("UNRATE", "test_unrate", "Test", "monthly", "macro", "labor")
         df = cls().fetch()
         assert df["date"].is_monotonic_increasing
 
@@ -106,7 +103,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("GDP", "test_gdp", "Test", "economic", "quarterly", "macro", "economic")
+        cls = _make_fred_collector("GDP", "test_gdp", "Test", "quarterly", "macro", "economic")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 
@@ -123,7 +120,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("TEST", "test_miss", "Test", "labor", "daily", "macro", "labor")
+        cls = _make_fred_collector("TEST", "test_miss", "Test", "daily", "macro", "labor")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 

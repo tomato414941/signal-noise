@@ -41,7 +41,7 @@ class TestMempoolSize:
 
     def test_meta(self):
         assert MempoolSizeCollector.meta.name == "mempool_size"
-        assert MempoolSizeCollector.meta.data_type == "onchain"
+        assert MempoolSizeCollector.meta.category == "crypto"
 
 
 # ── Mempool Fee ─────────────────────────────────────────────

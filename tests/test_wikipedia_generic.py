@@ -31,9 +31,9 @@ class TestWikiGenericFactory:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_wiki_collector("Recession", "wiki_recession", "Wikipedia: Recession", "fear", "sentiment", "sentiment")
+        cls = _make_wiki_collector("Recession", "wiki_recession", "Wikipedia: Recession", "sentiment", "sentiment")
         assert cls.meta.name == "wiki_recession"
-        assert cls.meta.data_type == "fear"
+        assert cls.meta.category == "sentiment"
 
     def test_get_wiki_collectors_returns_dict(self):
         collectors = get_wiki_collectors()
@@ -41,12 +41,11 @@ class TestWikiGenericFactory:
         assert len(collectors) == len(WIKIPEDIA_PAGES)
 
     def test_all_categories_present(self):
-        data_types = {t[3] for t in WIKIPEDIA_PAGES}
-        assert "fear" in data_types
-        assert "safe_haven" in data_types
-        assert "crypto_attention" in data_types
-        assert "geopolitical" in data_types
-        assert "greed" in data_types
+        domains = {t[3] for t in WIKIPEDIA_PAGES}
+        categories = {t[4] for t in WIKIPEDIA_PAGES}
+        assert "sentiment" in domains
+        assert "sentiment" in categories
+        assert "attention" in categories
 
 
 class TestWikiGenericFetch:
@@ -57,7 +56,7 @@ class TestWikiGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_wiki_collector("Recession", "wiki_test", "Test", "fear", "sentiment", "sentiment")
+        cls = _make_wiki_collector("Recession", "wiki_test", "Test", "sentiment", "sentiment")
         df = cls().fetch()
         assert "date" in df.columns
         assert "value" in df.columns
@@ -71,7 +70,7 @@ class TestWikiGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_wiki_collector("Gold", "wiki_gold", "Gold", "safe_haven", "sentiment", "sentiment")
+        cls = _make_wiki_collector("Gold", "wiki_gold", "Gold", "sentiment", "sentiment")
         df = cls().fetch()
         assert df["date"].is_monotonic_increasing
 

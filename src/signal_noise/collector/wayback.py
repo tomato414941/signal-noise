@@ -27,7 +27,6 @@ def _make_wayback_collector(
             name=name,
             display_name=display_name,
             update_frequency="daily",
-            data_type="web_attention",
             api_docs_url="https://web.archive.org/",
             domain="sentiment",
             category="attention",

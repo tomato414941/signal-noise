@@ -13,7 +13,7 @@ class TestYahooGeneric:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "volatility", "financial", "equity")
+        cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "financial", "equity")
         assert cls.meta.name == "test_vix"
         assert cls._ticker == "^VIX"
         assert isinstance(cls.meta, SourceMeta)
@@ -25,10 +25,11 @@ class TestYahooGeneric:
         assert "vix" in collectors
         assert "nasdaq" in collectors
 
-    def test_all_tickers_have_valid_data_type(self):
-        valid_types = {"equity", "volatility", "commodity", "forex", "bond", "sector", "crypto_equity", "consumer", "mega_cap", "shipping", "aviation", "real_estate"}
-        for ticker, name, display, dtype, domain, category in YAHOO_TICKERS:
-            assert dtype in valid_types, f"{name} has invalid type: {dtype}"
+    def test_all_tickers_have_valid_domain_category(self):
+        from signal_noise.collector.base import DOMAINS, CATEGORIES
+        for ticker, name, display, domain, category in YAHOO_TICKERS:
+            assert domain in DOMAINS, f"{name} has invalid domain: {domain}"
+            assert category in CATEGORIES, f"{name} has invalid category: {category}"
 
 
 class TestCcxtGeneric:

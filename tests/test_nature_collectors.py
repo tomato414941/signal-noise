@@ -34,7 +34,7 @@ class TestMoonPhase:
 
     def test_meta(self):
         assert MoonPhaseCollector.meta.name == "moon_phase"
-        assert MoonPhaseCollector.meta.data_type == "celestial"
+        assert MoonPhaseCollector.meta.category == "celestial"
 
 
 # ── Earthquake ──────────────────────────────────────────────

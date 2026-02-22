@@ -11,7 +11,6 @@ class HashrateCollector(BaseCollector):
         name="hashrate",
         display_name="BTC Hash Rate",
         update_frequency="daily",
-        data_type="onchain",
         api_docs_url="https://www.blockchain.com/explorer/charts/hash-rate",
         domain="financial",
         category="crypto",

@@ -11,7 +11,6 @@ class FearGreedCollector(BaseCollector):
         name="fear_greed",
         display_name="Crypto Fear & Greed Index",
         update_frequency="daily",
-        data_type="sentiment",
         api_docs_url="https://alternative.me/crypto/fear-and-greed-index/",
         domain="sentiment",
         category="sentiment",

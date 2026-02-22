@@ -12,7 +12,6 @@ class NYWeatherCollector(BaseCollector):
         name="ny_weather",
         display_name="NYC Weather",
         update_frequency="hourly",
-        data_type="weather",
         api_docs_url="https://openweathermap.org/api",
         requires_key=True,
         domain="earth",

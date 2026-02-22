@@ -12,7 +12,6 @@ class ElectricityCollector(BaseCollector):
         name="electricity",
         display_name="US Electricity Price",
         update_frequency="monthly",
-        data_type="energy",
         api_docs_url="https://www.eia.gov/opendata/",
         requires_key=True,
         domain="financial",

@@ -39,7 +39,6 @@ def _make_air_collector(
             name=name,
             display_name=display_name,
             update_frequency="daily",
-            data_type="air_quality",
             api_docs_url="https://open-meteo.com/en/docs/air-quality-api",
             domain="earth",
             category="air_quality",

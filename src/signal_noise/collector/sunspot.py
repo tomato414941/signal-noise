@@ -17,7 +17,6 @@ class SunspotCollector(BaseCollector):
         name="sunspot",
         display_name="Daily Sunspot Number (SILSO)",
         update_frequency="daily",
-        data_type="space_weather",
         api_docs_url="https://www.sidc.be/SILSO/datafiles",
         domain="geophysical",
         category="space_weather",

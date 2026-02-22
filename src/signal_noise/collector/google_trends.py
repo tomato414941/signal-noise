@@ -14,7 +14,6 @@ class GoogleTrendsCollector(BaseCollector):
         name="google_trends",
         display_name="Google Trends (bitcoin)",
         update_frequency="weekly",
-        data_type="attention",
         api_docs_url="https://trends.google.com/trends/",
         domain="sentiment",
         category="attention",

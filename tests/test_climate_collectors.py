@@ -41,7 +41,7 @@ class TestOpenMeteoWeather:
     def test_factory_creates_collector(self):
         cls = _make_weather_collector(35.0, 139.0, "Test", "test_meteo", "Test Weather")
         assert cls.meta.name == "test_meteo"
-        assert cls.meta.data_type == "weather"
+        assert cls.meta.category == "weather"
         assert isinstance(cls.meta, SourceMeta)
 
     def test_get_collectors_returns_dict(self):
@@ -85,7 +85,7 @@ class TestOpenMeteoMarine:
     def test_factory_creates_collector(self):
         cls = _make_marine_collector(30.0, 32.5, "Suez", "test_marine", "Test Marine")
         assert cls.meta.name == "test_marine"
-        assert cls.meta.data_type == "marine"
+        assert cls.meta.category == "marine"
 
     def test_get_collectors_returns_dict(self):
         collectors = get_marine_collectors()
@@ -124,7 +124,7 @@ class TestOpenMeteoAir:
     def test_factory_creates_collector(self):
         cls = _make_air_collector(39.9, 116.4, "Beijing", "test_air", "Test Air")
         assert cls.meta.name == "test_air"
-        assert cls.meta.data_type == "air_quality"
+        assert cls.meta.category == "air_quality"
 
     def test_get_collectors_returns_dict(self):
         collectors = get_air_collectors()
@@ -159,7 +159,7 @@ class TestOpenMeteoAir:
 class TestNOAAClimate:
     def test_global_temp_meta(self):
         assert GlobalTempAnomalyCollector.meta.name == "noaa_global_temp"
-        assert GlobalTempAnomalyCollector.meta.data_type == "climate"
+        assert GlobalTempAnomalyCollector.meta.category == "climate"
 
     @patch("signal_noise.collector.noaa_climate.requests.get")
     def test_global_temp_fetch(self, mock_get):
@@ -181,7 +181,7 @@ class TestNOAAClimate:
 
     def test_co2_meta(self):
         assert CO2DailyCollector.meta.name == "noaa_co2_daily"
-        assert CO2DailyCollector.meta.data_type == "climate"
+        assert CO2DailyCollector.meta.category == "climate"
 
     @patch("signal_noise.collector.noaa_climate.requests.get")
     def test_co2_fetch(self, mock_get):

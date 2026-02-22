@@ -18,7 +18,6 @@ class TorUsersCollector(BaseCollector):
         name="tor_users",
         display_name="Tor Daily Users (estimated)",
         update_frequency="daily",
-        data_type="internet",
         api_docs_url="https://metrics.torproject.org/userstats-relay-country.html",
         domain="infrastructure",
         category="internet",

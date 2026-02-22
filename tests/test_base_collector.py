@@ -12,7 +12,6 @@ class DummyCollector(BaseCollector):
         name="dummy",
         display_name="Dummy Source",
         update_frequency="daily",
-        data_type="test",
         api_docs_url="https://example.com",
     )
 

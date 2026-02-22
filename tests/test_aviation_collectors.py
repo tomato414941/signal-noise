@@ -17,7 +17,7 @@ from signal_noise.collector.base import SourceMeta
 class TestOpenSkyTotal:
     def test_meta(self):
         assert OpenSkyTotalCollector.meta.name == "opensky_total"
-        assert OpenSkyTotalCollector.meta.data_type == "aviation"
+        assert OpenSkyTotalCollector.meta.category == "aviation"
         assert isinstance(OpenSkyTotalCollector.meta, SourceMeta)
 
     @patch("signal_noise.collector.aviation.requests.get")
@@ -53,7 +53,7 @@ class TestOpenSkyTotal:
 class TestOpenSkyUS:
     def test_meta(self):
         assert OpenSkyUSCollector.meta.name == "opensky_us"
-        assert OpenSkyUSCollector.meta.data_type == "aviation"
+        assert OpenSkyUSCollector.meta.category == "aviation"
 
     @patch("signal_noise.collector.aviation.requests.get")
     def test_fetch_filters_us_only(self, mock_get):
@@ -77,7 +77,7 @@ class TestOpenSkyUS:
 class TestFR24Total:
     def test_meta(self):
         assert FR24TotalCollector.meta.name == "fr24_total"
-        assert FR24TotalCollector.meta.data_type == "aviation"
+        assert FR24TotalCollector.meta.category == "aviation"
 
     @patch("signal_noise.collector.aviation.requests.get")
     def test_fetch_reads_full_count(self, mock_get):

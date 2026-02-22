@@ -59,11 +59,10 @@ class SourceMeta:
     name: str
     display_name: str
     update_frequency: str
-    data_type: str         # category (kept for backward compat)
     api_docs_url: str
     requires_key: bool = False
     domain: str = ""       # top-level grouping
-    category: str = ""     # concrete classification (== data_type when set)
+    category: str = ""     # concrete classification
 
 
 class BaseCollector(ABC):

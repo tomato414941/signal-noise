@@ -13,7 +13,6 @@ class EarthquakeCountCollector(BaseCollector):
         name="earthquake_count",
         display_name="Daily M4.5+ Earthquake Count",
         update_frequency="daily",
-        data_type="seismic",
         api_docs_url="https://earthquake.usgs.gov/fdsnws/event/1/",
         domain="geophysical",
         category="seismic",

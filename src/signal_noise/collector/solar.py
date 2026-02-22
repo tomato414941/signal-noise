@@ -17,7 +17,6 @@ class SolarXrayCollector(BaseCollector):
         name="solar_xray",
         display_name="GOES Solar X-ray Flux (1-8A)",
         update_frequency="hourly",
-        data_type="space_weather",
         api_docs_url="https://www.swpc.noaa.gov/products/goes-x-ray-flux",
         domain="geophysical",
         category="space_weather",

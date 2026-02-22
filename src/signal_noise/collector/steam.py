@@ -18,7 +18,6 @@ class SteamPlayersCollector(BaseCollector):
         name="steam_players",
         display_name="Steam Online Players",
         update_frequency="hourly",
-        data_type="entertainment",
         api_docs_url="https://store.steampowered.com/stats/",
         domain="sentiment",
         category="attention",
