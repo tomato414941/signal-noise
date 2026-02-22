@@ -106,7 +106,7 @@ def run_evaluation(
                         metrics = evaluate_signal(
                             signal=t_aligned,
                             returns=returns_df[ret_col],
-                            collector_name=signal_name,
+                            signal_name=signal_name,
                             period=period,
                             max_lag=config.max_lag_periods,
                         )
