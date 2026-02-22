@@ -7,34 +7,36 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class WHODiseaseOutbreakCollector(BaseCollector):
-    """WHO Disease Outbreak News (DON) event count."""
+    """WHO global measles reported cases as disease outbreak proxy."""
 
     meta = CollectorMeta(
         name="who_disease_outbreaks",
-        display_name="WHO Disease Outbreak Events",
-        update_frequency="weekly",
-        api_docs_url="https://www.who.int/emergencies/disease-outbreak-news",
+        display_name="WHO Global Measles Reported Cases",
+        update_frequency="yearly",
+        api_docs_url="https://www.who.int/data/gho/info/gho-odata-api",
         domain="health",
         category="epidemiology",
     )
 
-    URL = "https://www.who.int/api/hubs/diseaseoutbreaknews?$orderby=PublicationDate desc&$top=500"
+    URL = (
+        "https://ghoapi.azureedge.net/api/WHS3_62"
+        "?$filter=SpatialDim eq 'GLOBAL'&$orderby=TimeDim desc"
+    )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
         data = resp.json().get("value", [])
         if not data:
-            raise RuntimeError("No WHO DON data")
+            raise RuntimeError("No WHO disease outbreak data")
         rows = []
         for entry in data:
             try:
-                date_str = entry.get("PublicationDate", "")[:10]
-                dt = pd.Timestamp(date_str, tz="UTC")
-                rows.append({"date": dt.normalize()})
-            except (ValueError, TypeError):
+                year = int(entry["TimeDim"])
+                val = float(entry["NumericValue"])
+                dt = pd.Timestamp(year=year, month=1, day=1, tz="UTC")
+                rows.append({"date": dt, "value": val})
+            except (KeyError, ValueError, TypeError):
                 continue
         df = pd.DataFrame(rows)
-        monthly = df.groupby(df["date"].dt.to_period("M")).size().reset_index(name="value")
-        monthly["date"] = monthly["date"].dt.to_timestamp(tz="UTC")
-        return monthly.sort_values("date").reset_index(drop=True)
+        return df.sort_values("date").reset_index(drop=True)

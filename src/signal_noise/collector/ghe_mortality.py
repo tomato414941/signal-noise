@@ -20,7 +20,7 @@ class GHEMortalityCollector(BaseCollector):
 
     URL = (
         "https://ghoapi.azureedge.net/api/NCDMORT3070"
-        "?$filter=SpatialDim eq 'GLOBAL' and Dim1 eq 'BTSX'"
+        "?$filter=SpatialDim eq 'GLOBAL' and Dim1 eq 'SEX_BTSX'"
     )
 
     def fetch(self) -> pd.DataFrame:

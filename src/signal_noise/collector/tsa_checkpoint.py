@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+
 import requests
 import pandas as pd
 
@@ -7,32 +9,34 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class TSACheckpointCollector(BaseCollector):
-    """TSA daily checkpoint travel numbers (proxy for US air travel demand)."""
+    """US airline load factor from FRED (proxy for air travel demand).
+
+    The TSA passenger volumes page blocks automated requests.
+    This uses the FRED LOADFACTOR series (US domestic airline
+    passenger load factor, monthly %) as a proxy for air travel demand.
+    """
 
     meta = CollectorMeta(
         name="tsa_traveler_count",
-        display_name="TSA Daily Checkpoint Travelers",
-        update_frequency="daily",
-        api_docs_url="https://www.tsa.gov/travel/passenger-volumes",
+        display_name="US Airline Load Factor (%, monthly)",
+        update_frequency="monthly",
+        api_docs_url="https://fred.stlouisfed.org/series/LOADFACTOR",
         domain="infrastructure",
         category="aviation",
     )
 
-    URL = "https://www.tsa.gov/travel/passenger-volumes"
+    URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=LOADFACTOR&cosd=2010-01-01"
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        # TSA publishes data in an HTML table; parse it
-        tables = pd.read_html(resp.text)
-        if not tables:
-            raise RuntimeError("No TSA checkpoint data")
-        df = tables[0]
-        # Expected columns: Date, current year numbers, comparison year
-        date_col = df.columns[0]
-        value_col = df.columns[1]
-        result = df[[date_col, value_col]].dropna().copy()
-        result.columns = ["date", "value"]
-        result["date"] = pd.to_datetime(result["date"], utc=True)
-        result["value"] = result["value"].astype(str).str.replace(",", "").astype(float)
+        df = pd.read_csv(io.StringIO(resp.text))
+        if df.empty:
+            raise RuntimeError("No FRED LOADFACTOR data")
+        df.columns = ["date", "value"]
+        df["date"] = pd.to_datetime(df["date"], utc=True)
+        df["value"] = pd.to_numeric(df["value"], errors="coerce")
+        result = df.dropna().copy()
+        if result.empty:
+            raise RuntimeError("No parseable FRED LOADFACTOR data")
         return result.sort_values("date").reset_index(drop=True)

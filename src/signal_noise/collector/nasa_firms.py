@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+
 import requests
 import pandas as pd
 
@@ -7,37 +9,35 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class NASAFIRMSCollector(BaseCollector):
-    """NASA FIRMS active fire detections (VIIRS global count)."""
+    """NASA FIRMS active fire detections (NOAA-20 VIIRS global count).
+
+    Downloads the publicly available 24-hour global fire CSV from FIRMS
+    (no API key required) and counts fire detections per day.
+    """
 
     meta = CollectorMeta(
         name="nasa_active_fires",
         display_name="NASA FIRMS Active Fire Count",
         update_frequency="daily",
-        api_docs_url="https://firms.modaps.eosdis.nasa.gov/api/",
+        api_docs_url="https://firms.modaps.eosdis.nasa.gov/",
         domain="earth",
         category="satellite",
     )
 
-    URL = "https://firms.modaps.eosdis.nasa.gov/api/area/csv/DEMO_KEY/VIIRS_SNPP_NRT/world/1"
+    URL = (
+        "https://firms.modaps.eosdis.nasa.gov/data/active_fire/"
+        "noaa-20-viirs-c2/csv/J1_VIIRS_C2_Global_24h.csv"
+    )
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.URL, timeout=60)
+        resp = requests.get(self.URL, timeout=120)
         resp.raise_for_status()
-        lines = resp.text.strip().split("\n")
-        if len(lines) < 2:
+        # Read CSV to get the acq_date column
+        df_raw = pd.read_csv(io.StringIO(resp.text), usecols=["acq_date"])
+        if df_raw.empty:
             raise RuntimeError("No FIRMS data")
-        # Count fire detections per day from CSV
-        date_counts: dict[str, int] = {}
-        header = lines[0].split(",")
-        date_idx = header.index("acq_date") if "acq_date" in header else 5
-        for line in lines[1:]:
-            parts = line.split(",")
-            if len(parts) > date_idx:
-                d = parts[date_idx]
-                date_counts[d] = date_counts.get(d, 0) + 1
-        rows = [
-            {"date": pd.Timestamp(d, tz="UTC"), "value": float(c)}
-            for d, c in date_counts.items()
-        ]
-        df = pd.DataFrame(rows)
-        return df.sort_values("date").reset_index(drop=True)
+        counts = df_raw["acq_date"].value_counts().reset_index()
+        counts.columns = ["date", "value"]
+        counts["date"] = pd.to_datetime(counts["date"], utc=True)
+        counts["value"] = counts["value"].astype(float)
+        return counts.sort_values("date").reset_index(drop=True)

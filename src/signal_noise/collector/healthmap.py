@@ -19,7 +19,7 @@ class ProMEDAlertCollector(BaseCollector):
     )
 
     URL = (
-        "https://ghoapi.azureedge.net/api/CHOLERA_0000000001"
+        "https://ghoapi.azureedge.net/api/MDG_0000000020"
         "?$filter=SpatialDim eq 'GLOBAL'"
     )
 

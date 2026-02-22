@@ -7,34 +7,43 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class UVIndexCollector(BaseCollector):
-    """EPA UV Index forecast for major US city (New York)."""
+    """Open-Meteo UV Index forecast for New York City.
+
+    Uses the Open-Meteo free API to get daily maximum UV index
+    with 30 days of history.
+    """
 
     meta = CollectorMeta(
         name="uv_index_nyc",
         display_name="UV Index (New York)",
         update_frequency="daily",
-        api_docs_url="https://www.epa.gov/enviro/uv-index-overview",
+        api_docs_url="https://open-meteo.com/en/docs",
         domain="earth",
         category="weather",
     )
 
-    URL = "https://data.epa.gov/efservice/getEnvirofactsUVDAILY/CITY/New%20York/STATE/NY/JSON"
+    URL = (
+        "https://api.open-meteo.com/v1/forecast"
+        "?latitude=40.71&longitude=-74.01"
+        "&daily=uv_index_max&past_days=30&timezone=UTC"
+    )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
         data = resp.json()
-        if not data:
-            raise RuntimeError("No UV index data")
+        daily = data.get("daily", {})
+        times = daily.get("time", [])
+        values = daily.get("uv_index_max", [])
+        if not times or not values:
+            raise RuntimeError("No UV index data from Open-Meteo")
         rows = []
-        for entry in data:
-            try:
-                date_str = entry.get("DATE_TIME") or entry.get("date_time")
-                uv = float(entry.get("UV_INDEX") or entry.get("uv_index", 0))
-                if date_str:
-                    rows.append({"date": pd.Timestamp(date_str, tz="UTC"), "value": uv})
-            except (ValueError, TypeError):
-                continue
+        for t, v in zip(times, values):
+            if v is not None:
+                rows.append({
+                    "date": pd.Timestamp(t, tz="UTC"),
+                    "value": float(v),
+                })
         if not rows:
             raise RuntimeError("No parseable UV data")
         df = pd.DataFrame(rows)

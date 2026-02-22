@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+
 import requests
 import pandas as pd
 
@@ -9,8 +11,8 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 class LetsEncryptCollector(BaseCollector):
     """Let's Encrypt daily certificate issuance count.
 
-    Fetches aggregate issuance statistics from the
-    Let's Encrypt stats endpoint.
+    Fetches the cert-timeline TSV published on Let's Encrypt's CDN.
+    Columns: date, issued, active_certs, active_fqdns, active_registered_domains.
     """
 
     meta = CollectorMeta(
@@ -22,22 +24,20 @@ class LetsEncryptCollector(BaseCollector):
         category="internet",
     )
 
-    URL = "https://d4twhgtvn0ff5.cloudfront.net/stats/current"
+    URL = "https://d4twhgtvn0ff5.cloudfront.net/cert-timeline.tsv"
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
-        rows = []
-        for entry in data.get("certificatesIssued", {}).get("items", []):
-            try:
-                rows.append({
-                    "date": pd.Timestamp(entry["date"], tz="UTC"),
-                    "value": float(entry["count"]),
-                })
-            except (KeyError, ValueError, TypeError):
-                continue
-        if not rows:
+        df = pd.read_csv(
+            io.StringIO(resp.text),
+            sep="\t",
+            header=None,
+            names=["date", "issued", "active_certs", "active_fqdns", "active_regdoms"],
+        )
+        if df.empty:
             raise RuntimeError("No Let's Encrypt issuance data")
-        df = pd.DataFrame(rows)
-        return df.sort_values("date").reset_index(drop=True)
+        df["date"] = pd.to_datetime(df["date"], utc=True)
+        df["value"] = pd.to_numeric(df["issued"], errors="coerce")
+        result = df[["date", "value"]].dropna().copy()
+        return result.sort_values("date").reset_index(drop=True)

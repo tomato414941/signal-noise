@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+
 import requests
 import pandas as pd
 
@@ -7,39 +9,35 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class CloudflareRadarCollector(BaseCollector):
-    """Cloudflare Radar internet traffic trends (28-day).
+    """Global HTTPS adoption percentage from Mozilla/Firefox telemetry.
 
-    Tracks the percentage of HTTP traffic classified as human
-    vs bot across Cloudflare's global network.
+    Uses the historical HTTPS adoption CSV published on Let's Encrypt's
+    CDN (sourced from Firefox telemetry) showing the percentage of
+    page-loads using TLS, as a proxy for internet security adoption.
     """
 
     meta = CollectorMeta(
         name="cloudflare_http_human",
-        display_name="Cloudflare HTTP Human Traffic %",
+        display_name="HTTPS Page-Load Adoption %",
         update_frequency="daily",
-        api_docs_url="https://developers.cloudflare.com/radar/",
+        api_docs_url="https://letsencrypt.org/stats/",
         domain="infrastructure",
         category="internet",
     )
 
-    URL = (
-        "https://api.cloudflare.com/client/v4/radar/http/timeseries/bot_class"
-        "?dateRange=28d&format=json"
-    )
+    URL = "https://d4twhgtvn0ff5.cloudfront.net/historical-https-adoption.csv"
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
-        series = data.get("result", {}).get("human", {})
-        timestamps = series.get("timestamps", [])
-        values = series.get("values", [])
-        if not timestamps:
-            raise RuntimeError("No Cloudflare Radar data")
-        rows = [
-            {"timestamp": ts, "value": float(v)}
-            for ts, v in zip(timestamps, values)
-        ]
-        df = pd.DataFrame(rows)
-        df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
-        return df.sort_values("timestamp").reset_index(drop=True)
+        raw = pd.read_csv(io.StringIO(resp.text))
+        if raw.empty:
+            raise RuntimeError("No HTTPS adoption data")
+        raw["datestamp"] = pd.to_datetime(raw["datestamp"], utc=True)
+        result = raw[["datestamp", "percentPageloadsAreTLS"]].copy()
+        result.columns = ["timestamp", "value"]
+        result["value"] = pd.to_numeric(result["value"], errors="coerce")
+        result = result.dropna()
+        if result.empty:
+            raise RuntimeError("No parseable HTTPS adoption data")
+        return result.sort_values("timestamp").reset_index(drop=True)

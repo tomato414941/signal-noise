@@ -7,39 +7,47 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class ILOUnemploymentCollector(BaseCollector):
-    """ILO global unemployment rate."""
+    """Global unemployment rate from the World Bank API.
+
+    Uses the SL.UEM.TOTL.ZS indicator (modeled ILO estimate)
+    for the World aggregate (WLD).
+    """
 
     meta = CollectorMeta(
         name="ilo_unemployment_rate",
-        display_name="ILO Global Unemployment Rate (%)",
+        display_name="Global Unemployment Rate (%)",
         update_frequency="yearly",
-        api_docs_url="https://ilostat.ilo.org/data/",
+        api_docs_url="https://api.worldbank.org/v2/country/WLD/indicator/SL.UEM.TOTL.ZS",
         domain="macro",
         category="labor",
     )
 
     URL = (
-        "https://rplumber.ilo.org/data/indicator/"
-        "?id=UNE_DEAP_SEX_AGE_RT_A&ref_area=X01&sex=SEX_T&classif1=AGE_YTHADULT_YGE15"
-        "&timefrom=2000&format=.json"
+        "https://api.worldbank.org/v2/country/WLD/indicator/SL.UEM.TOTL.ZS"
+        "?format=json&per_page=100&date=2000:2025"
     )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
-        if isinstance(data, dict):
-            data = data.get("data", data.get("value", []))
-        if not data:
-            raise RuntimeError("No ILO data")
+        payload = resp.json()
+        if not isinstance(payload, list) or len(payload) < 2:
+            raise RuntimeError("Unexpected World Bank response format")
+        entries = payload[1]
+        if not entries:
+            raise RuntimeError("No World Bank unemployment data")
         rows = []
-        for entry in data:
+        for entry in entries:
             try:
-                year = int(entry.get("time") or entry.get("ref_period", {}).get("period"))
-                val = float(entry.get("obs_value") or entry.get("value"))
+                year = int(entry["date"])
+                val = entry.get("value")
+                if val is None:
+                    continue
                 dt = pd.Timestamp(year=year, month=1, day=1, tz="UTC")
-                rows.append({"date": dt, "value": val})
+                rows.append({"date": dt, "value": float(val)})
             except (KeyError, ValueError, TypeError):
                 continue
+        if not rows:
+            raise RuntimeError("No parseable World Bank unemployment data")
         df = pd.DataFrame(rows)
         return df.sort_values("date").reset_index(drop=True)

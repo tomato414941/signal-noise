@@ -7,42 +7,67 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class GlobalPrecipitationCollector(BaseCollector):
-    """CPC global daily precipitation index (NOAA)."""
+    """Global precipitation index via Open-Meteo archive API.
+
+    Queries the Open-Meteo historical weather archive for daily
+    precipitation at a representative equatorial grid point and
+    averages over multiple locations for a global indicator.
+    """
 
     meta = CollectorMeta(
         name="global_precip_index",
-        display_name="CPC Global Precipitation Index",
+        display_name="Global Precipitation Index (mm/day)",
         update_frequency="daily",
-        api_docs_url="https://psl.noaa.gov/data/gridded/data.cpc.globalprecip.html",
+        api_docs_url="https://open-meteo.com/en/docs/historical-weather-api",
         domain="earth",
         category="weather",
     )
 
-    URL = (
-        "https://psl.noaa.gov/cgi-bin/data/timeseries/timeseries1.pl"
-        "?ntype=1&var=Precipitation&level=Surface"
-        "&lat1=-90&lat2=90&lon1=0&lon2=360"
-        "&isession=0&iplot=0&icolor=0&istartyear=2024&iendyear=2026"
-    )
+    # Sample multiple representative locations for a rough global index
+    _LOCATIONS = [
+        (0, 0),        # Gulf of Guinea (equatorial)
+        (0, 120),      # Indonesia (equatorial)
+        (0, -60),      # Amazon (equatorial)
+        (30, -90),     # Gulf Coast (subtropical)
+        (-30, 150),    # Eastern Australia (subtropical)
+        (50, 10),      # Central Europe (temperate)
+    ]
+
+    _BASE_URL = "https://archive-api.open-meteo.com/v1/archive"
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.URL, timeout=60)
-        resp.raise_for_status()
-        rows = []
-        for line in resp.text.strip().split("\n"):
-            parts = line.strip().split()
-            if len(parts) == 2:
-                try:
-                    year_frac = float(parts[0])
-                    val = float(parts[1])
-                    year = int(year_frac)
-                    month = int((year_frac - year) * 12) + 1
-                    if 1 <= month <= 12:
-                        dt = pd.Timestamp(year=year, month=month, day=1, tz="UTC")
-                        rows.append({"date": dt, "value": val})
-                except (ValueError, TypeError):
-                    continue
-        if not rows:
-            raise RuntimeError("No precipitation data")
-        df = pd.DataFrame(rows)
+        end = pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=5)
+        start = end - pd.Timedelta(days=365)
+        all_series: list[pd.Series] = []
+
+        for lat, lon in self._LOCATIONS:
+            url = (
+                f"{self._BASE_URL}?latitude={lat}&longitude={lon}"
+                f"&start_date={start.strftime('%Y-%m-%d')}"
+                f"&end_date={end.strftime('%Y-%m-%d')}"
+                f"&daily=precipitation_sum&timezone=UTC"
+            )
+            resp = requests.get(url, timeout=60)
+            resp.raise_for_status()
+            data = resp.json()
+            daily = data.get("daily", {})
+            times = daily.get("time", [])
+            values = daily.get("precipitation_sum", [])
+            if times and values:
+                s = pd.Series(values, index=pd.to_datetime(times), name=f"{lat}_{lon}")
+                all_series.append(s)
+
+        if not all_series:
+            raise RuntimeError("No precipitation data from Open-Meteo")
+
+        # Average across locations for a global index
+        combined = pd.concat(all_series, axis=1)
+        avg = combined.mean(axis=1).dropna()
+        if avg.empty:
+            raise RuntimeError("No precipitation data after averaging")
+
+        df = pd.DataFrame({
+            "date": pd.to_datetime(avg.index, utc=True),
+            "value": avg.values.astype(float),
+        })
         return df.sort_values("date").reset_index(drop=True)

@@ -7,32 +7,37 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class OpenAQCollector(BaseCollector):
-    """OpenAQ global average PM2.5 air quality measurement."""
+    """WHO global average PM2.5 concentration (ug/m3)."""
 
     meta = CollectorMeta(
         name="openaq_pm25",
-        display_name="OpenAQ Global PM2.5 Average",
-        update_frequency="daily",
-        api_docs_url="https://docs.openaq.org/",
+        display_name="Global PM2.5 Average (WHO)",
+        update_frequency="yearly",
+        api_docs_url="https://www.who.int/data/gho/info/gho-odata-api",
         domain="earth",
         category="air_quality",
     )
 
-    URL = "https://api.openaq.org/v2/measurements?parameter=pm25&limit=1000&order_by=datetime&sort=desc"
+    URL = (
+        "https://ghoapi.azureedge.net/api/SDGPM25"
+        "?$filter=SpatialDim eq 'GLOBAL' and Dim1 eq 'RESIDENCEAREATYPE_TOTL'"
+        "&$orderby=TimeDim desc"
+    )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        results = resp.json().get("results", [])
-        if not results:
-            raise RuntimeError("No OpenAQ data")
+        data = resp.json().get("value", [])
+        if not data:
+            raise RuntimeError("No PM2.5 data")
         rows = []
-        for r in results:
+        for entry in data:
             try:
-                ts = pd.to_datetime(r["date"]["utc"], utc=True)
-                rows.append({"date": ts.normalize(), "value": float(r["value"])})
+                year = int(entry["TimeDim"])
+                val = float(entry["NumericValue"])
+                dt = pd.Timestamp(year=year, month=1, day=1, tz="UTC")
+                rows.append({"date": dt, "value": val})
             except (KeyError, ValueError, TypeError):
                 continue
         df = pd.DataFrame(rows)
-        daily = df.groupby("date")["value"].mean().reset_index()
-        return daily.sort_values("date").reset_index(drop=True)
+        return df.sort_values("date").reset_index(drop=True)

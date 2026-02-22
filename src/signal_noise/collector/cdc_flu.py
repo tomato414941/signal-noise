@@ -19,13 +19,12 @@ class CDCFluCollector(BaseCollector):
     )
 
     URL = (
-        "https://wonder.cdc.gov/nndss/static/2024/52/2024-52-table1aa.html"
+        "https://ghoapi.azureedge.net/api/WHS3_62"
+        "?$filter=SpatialDim eq 'USA'&$orderby=TimeDim desc"
     )
-    # Alternative: use WHO FluNet data (JSON)
-    ALT_URL = "https://ghoapi.azureedge.net/api/INFLUENZA_POSITIVE?$filter=SpatialDim eq 'USA'&$orderby=TimeDim desc&$top=200"
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.ALT_URL, timeout=self.config.request_timeout)
+        resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
         data = resp.json().get("value", [])
         if not data:

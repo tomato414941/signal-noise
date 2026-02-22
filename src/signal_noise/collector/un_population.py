@@ -7,37 +7,47 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class UNPopulationCollector(BaseCollector):
-    """UN World Population Prospects — total world population."""
+    """World total population from the World Bank API.
+
+    Uses the SP.POP.TOTL indicator for the World aggregate (WLD).
+    """
 
     meta = CollectorMeta(
         name="un_world_population",
-        display_name="UN World Population Estimate",
+        display_name="World Population Estimate",
         update_frequency="yearly",
-        api_docs_url="https://population.un.org/dataportal/about/dataapi",
+        api_docs_url="https://api.worldbank.org/v2/country/WLD/indicator/SP.POP.TOTL",
         domain="macro",
         category="economic",
     )
 
     URL = (
-        "https://population.un.org/dataportalapi/api/v1/data/indicators/49"
-        "/locations/900/start/1950/end/2025?pageSize=200"
+        "https://api.worldbank.org/v2/country/WLD/indicator/SP.POP.TOTL"
+        "?format=json&per_page=100&date=1960:2025"
     )
 
     def fetch(self) -> pd.DataFrame:
-        headers = {"Accept": "application/json"}
-        resp = requests.get(self.URL, headers=headers, timeout=self.config.request_timeout)
+        resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json().get("data", [])
-        if not data:
-            raise RuntimeError("No UN population data")
+        payload = resp.json()
+        # World Bank returns [metadata, data_array]
+        if not isinstance(payload, list) or len(payload) < 2:
+            raise RuntimeError("Unexpected World Bank response format")
+        entries = payload[1]
+        if not entries:
+            raise RuntimeError("No World Bank population data")
         rows = []
-        for entry in data:
+        for entry in entries:
             try:
-                year = int(entry["timeLabel"])
-                val = float(entry["value"])
+                year = int(entry["date"])
+                val = entry.get("value")
+                if val is None:
+                    continue
                 dt = pd.Timestamp(year=year, month=7, day=1, tz="UTC")
-                rows.append({"date": dt, "value": val})
+                rows.append({"date": dt, "value": float(val)})
             except (KeyError, ValueError, TypeError):
                 continue
+        if not rows:
+            raise RuntimeError("No parseable World Bank population data")
         df = pd.DataFrame(rows)
         return df.sort_values("date").reset_index(drop=True)

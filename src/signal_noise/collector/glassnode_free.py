@@ -7,28 +7,36 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class GlassnodeActiveAddressesCollector(BaseCollector):
-    """Glassnode BTC active addresses (free tier, limited history)."""
+    """BTC active (unique) addresses via blockchain.info free API."""
 
     meta = CollectorMeta(
         name="btc_active_addresses",
-        display_name="BTC Active Addresses (Glassnode)",
+        display_name="BTC Active Addresses (blockchain.info)",
         update_frequency="daily",
-        api_docs_url="https://docs.glassnode.com/",
+        api_docs_url="https://www.blockchain.com/explorer/api/charts_api",
         domain="financial",
         category="crypto",
     )
 
-    URL = "https://api.glassnode.com/v1/metrics/addresses/active_count?a=BTC&i=24h"
+    URL = (
+        "https://api.blockchain.info/charts/n-unique-addresses"
+        "?timespan=1year&format=json&cors=true"
+    )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
         data = resp.json()
-        if not data:
-            raise RuntimeError("No Glassnode data (API key may be required)")
+        values = data.get("values", [])
+        if not values:
+            raise RuntimeError("No blockchain.info unique-address data")
         rows = [
-            {"date": pd.Timestamp(d["t"], unit="s", tz="UTC"), "value": float(d["v"])}
-            for d in data if "t" in d and "v" in d
+            {
+                "date": pd.Timestamp(v["x"], unit="s", tz="UTC"),
+                "value": float(v["y"]),
+            }
+            for v in values
+            if "x" in v and "y" in v
         ]
         df = pd.DataFrame(rows)
         return df.sort_values("date").reset_index(drop=True)

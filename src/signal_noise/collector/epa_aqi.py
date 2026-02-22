@@ -7,26 +7,37 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class EPAAQICollector(BaseCollector):
-    """US EPA AirNow current AQI observations."""
+    """US PM2.5 concentration (ug/m3) from WHO as AQI proxy."""
 
     meta = CollectorMeta(
         name="epa_aqi_us",
-        display_name="US EPA AQI Average",
-        update_frequency="daily",
-        api_docs_url="https://aqs.epa.gov/aqsweb/documents/data_api.html",
+        display_name="US PM2.5 Average (WHO)",
+        update_frequency="yearly",
+        api_docs_url="https://www.who.int/data/gho/info/gho-odata-api",
         domain="earth",
         category="air_quality",
     )
 
-    URL = "https://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode=10001&distance=100&API_KEY=DEMO_KEY"
+    URL = (
+        "https://ghoapi.azureedge.net/api/SDGPM25"
+        "?$filter=SpatialDim eq 'USA' and Dim1 eq 'RESIDENCEAREATYPE_TOTL'"
+        "&$orderby=TimeDim desc"
+    )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
+        data = resp.json().get("value", [])
         if not data:
             raise RuntimeError("No EPA AQI data")
-        now = pd.Timestamp.now(tz="UTC").normalize()
-        aqi_values = [float(d["AQI"]) for d in data if "AQI" in d]
-        avg_aqi = sum(aqi_values) / len(aqi_values) if aqi_values else 0
-        return pd.DataFrame([{"date": now, "value": avg_aqi}])
+        rows = []
+        for entry in data:
+            try:
+                year = int(entry["TimeDim"])
+                val = float(entry["NumericValue"])
+                dt = pd.Timestamp(year=year, month=1, day=1, tz="UTC")
+                rows.append({"date": dt, "value": val})
+            except (KeyError, ValueError, TypeError):
+                continue
+        df = pd.DataFrame(rows)
+        return df.sort_values("date").reset_index(drop=True)
