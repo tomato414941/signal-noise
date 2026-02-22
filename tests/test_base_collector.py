@@ -10,7 +10,7 @@ from signal_noise.config import CollectorConfig
 class DummyCollector(BaseCollector):
     meta = CollectorMeta(
         name="dummy",
-        display_name="Dummy Source",
+        display_name="Dummy Collector",
         update_frequency="daily",
         api_docs_url="https://example.com",
     )

@@ -73,7 +73,7 @@ class BaseCollector(ABC):
 
     @abstractmethod
     def fetch(self) -> pd.DataFrame:
-        """Fetch data from source. Return DataFrame with [timestamp|date, value]."""
+        """Fetch data from provider. Return DataFrame with [timestamp|date, value]."""
         ...
 
     def cache_path(self) -> Path:

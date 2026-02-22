@@ -90,9 +90,9 @@ class TestEvaluateSignal:
         np.random.seed(42)
         signal = pd.Series(np.random.randn(200))
         returns = pd.Series(np.random.randn(200))
-        result = evaluate_signal(signal, returns, "test_source", "1h", max_lag=5)
+        result = evaluate_signal(signal, returns, "test_signal", "1h", max_lag=5)
         assert isinstance(result, SignalMetrics)
-        assert result.signal_name == "test_source"
+        assert result.signal_name == "test_signal"
         assert result.period == "1h"
         assert result.n_observations == 200
 
@@ -101,6 +101,6 @@ class TestEvaluateSignal:
         base = np.random.randn(200)
         signal = pd.Series(base)
         returns = pd.Series(base + np.random.randn(200) * 0.1)
-        result = evaluate_signal(signal, returns, "corr_source", "1d", max_lag=5)
+        result = evaluate_signal(signal, returns, "corr_signal", "1d", max_lag=5)
         assert abs(result.ic) > 0.5
         assert result.ic_pvalue < 0.01
