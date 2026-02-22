@@ -35,7 +35,7 @@ def generate_report(metrics: list[SignalMetrics], top_n: int | None = None) -> s
     for m in display:
         sig_mark = "*" if m.significant else ""
         lines.append(
-            f"{m.source_name:<32} {m.period:<6} {m.ic:>+.4f} {m.ic_pvalue:>10.6f} "
+            f"{m.collector_name:<32} {m.period:<6} {m.ic:>+.4f} {m.ic_pvalue:>10.6f} "
             f"{m.directional_accuracy:>6.1%} {m.best_lag:>4} {m.best_lag_ic:>+.4f} "
             f"{sig_mark:>4} {m.n_observations:>6}"
         )

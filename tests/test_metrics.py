@@ -92,7 +92,7 @@ class TestEvaluateSignal:
         returns = pd.Series(np.random.randn(200))
         result = evaluate_signal(signal, returns, "test_source", "1h", max_lag=5)
         assert isinstance(result, SignalMetrics)
-        assert result.source_name == "test_source"
+        assert result.collector_name == "test_source"
         assert result.period == "1h"
         assert result.n_observations == 200
 

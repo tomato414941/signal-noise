@@ -64,13 +64,13 @@ def run_evaluation(
 
     all_metrics: list[SignalMetrics] = []
 
-    for source_name in COLLECTORS:
-        if source_name == target_source:
+    for collector_name in COLLECTORS:
+        if collector_name == target_source:
             continue
 
-        parquet = RAW_DIR / f"{source_name}.parquet"
+        parquet = RAW_DIR / f"{collector_name}.parquet"
         if not parquet.exists():
-            log.info("Skipping %s (no data)", source_name)
+            log.info("Skipping %s (no data)", collector_name)
             continue
 
         signal_df = pd.read_parquet(parquet)
@@ -84,7 +84,7 @@ def run_evaluation(
             metrics = evaluate_signal(
                 signal=aligned,
                 returns=returns_df[ret_col],
-                source_name=source_name,
+                collector_name=collector_name,
                 period=period,
                 max_lag=config.max_lag_periods,
             )
@@ -97,7 +97,7 @@ def run_evaluation(
                     transformed_df = signal_df.copy()
                     transformed_df["value"] = transform.fn(transformed_df["value"])
                     t_aligned = _align_signal_to_target(transformed_df, target_df)
-                    signal_name = f"{source_name}__{transform.name}"
+                    signal_name = f"{collector_name}__{transform.name}"
 
                     for period in config.return_periods:
                         ret_col = f"ret_{period}"
@@ -106,7 +106,7 @@ def run_evaluation(
                         metrics = evaluate_signal(
                             signal=t_aligned,
                             returns=returns_df[ret_col],
-                            source_name=signal_name,
+                            collector_name=signal_name,
                             period=period,
                             max_lag=config.max_lag_periods,
                         )
@@ -114,7 +114,7 @@ def run_evaluation(
                 except Exception as e:
                     log.debug(
                         "Transform %s failed on %s: %s",
-                        transform.name, source_name, e,
+                        transform.name, collector_name, e,
                     )
 
     pvalues = [m.ic_pvalue for m in all_metrics]

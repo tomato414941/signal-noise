@@ -9,7 +9,7 @@ from scipy import stats
 
 @dataclass
 class SignalMetrics:
-    source_name: str
+    collector_name: str
     period: str
     ic: float
     ic_pvalue: float
@@ -61,7 +61,7 @@ def lagged_ic(signal: pd.Series, returns: pd.Series, max_lag: int) -> tuple[int,
 def evaluate_signal(
     signal: pd.Series,
     returns: pd.Series,
-    source_name: str,
+    collector_name: str,
     period: str,
     max_lag: int = 24,
 ) -> SignalMetrics:
@@ -71,7 +71,7 @@ def evaluate_signal(
     best_lag, best_lag_ic = lagged_ic(signal, returns, max_lag)
     mask = signal.notna() & returns.notna()
     return SignalMetrics(
-        source_name=source_name,
+        collector_name=collector_name,
         period=period,
         ic=ic,
         ic_pvalue=ic_pval,
