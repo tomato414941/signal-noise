@@ -32,6 +32,8 @@ def _make_gh_events_collector(
             update_frequency="hourly",
             data_type="dev_activity",
             api_docs_url=f"https://github.com/{repo}",
+            domain="developer",
+            category="developer",
         )
 
         def fetch(self) -> pd.DataFrame:

@@ -26,13 +26,15 @@ TREASURY_YIELD_MATURITIES: list[tuple[str, str, str]] = [
     ("30 Yr", "tsy_yield_30y", "Treasury Yield 30-Year"),
 ]
 
-# (endpoint_path, value_field, collector_name, display_name, data_type)
-TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str]] = [
+# (endpoint_path, value_field, collector_name, display_name, data_type, domain, category)
+TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
     (
         "v2/accounting/od/debt_to_penny",
         "tot_pub_debt_out_amt",
         "tsy_total_debt",
         "US Total Public Debt",
+        "fiscal",
+        "macro",
         "fiscal",
     ),
     (
@@ -41,6 +43,8 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str]] = [
         "tsy_debt_public",
         "US Debt Held by Public",
         "fiscal",
+        "macro",
+        "fiscal",
     ),
     (
         "v2/accounting/od/avg_interest_rates?filter=security_desc:eq:Treasury Bills",
@@ -48,6 +52,8 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str]] = [
         "tsy_avg_rate_bills",
         "Avg Interest Rate: T-Bills",
         "monetary",
+        "financial",
+        "rates",
     ),
     (
         "v2/accounting/od/avg_interest_rates?filter=security_desc:eq:Treasury Notes",
@@ -55,6 +61,8 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str]] = [
         "tsy_avg_rate_notes",
         "Avg Interest Rate: T-Notes",
         "monetary",
+        "financial",
+        "rates",
     ),
     (
         "v2/accounting/od/avg_interest_rates?filter=security_desc:eq:Treasury Bonds",
@@ -62,6 +70,8 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str]] = [
         "tsy_avg_rate_bonds",
         "Avg Interest Rate: T-Bonds",
         "monetary",
+        "financial",
+        "rates",
     ),
 ]
 
@@ -76,6 +86,8 @@ def _make_yield_collector(
             update_frequency="daily",
             data_type="bond",
             api_docs_url="https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
+            domain="financial",
+            category="rates",
         )
 
         def fetch(self) -> pd.DataFrame:
@@ -114,7 +126,8 @@ def _make_yield_collector(
 
 
 def _make_fiscal_collector(
-    endpoint: str, value_field: str, name: str, display_name: str, data_type: str
+    endpoint: str, value_field: str, name: str, display_name: str, data_type: str,
+    domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
         meta = SourceMeta(
@@ -123,6 +136,8 @@ def _make_fiscal_collector(
             update_frequency="daily",
             data_type=data_type,
             api_docs_url="https://fiscaldata.treasury.gov/",
+            domain=domain,
+            category=category,
         )
 
         def fetch(self) -> pd.DataFrame:
@@ -162,8 +177,8 @@ def get_treasury_collectors() -> dict[str, type[BaseCollector]]:
     collectors: dict[str, type[BaseCollector]] = {}
     for col_name, name, display_name in TREASURY_YIELD_MATURITIES:
         collectors[name] = _make_yield_collector(col_name, name, display_name)
-    for endpoint, value_field, name, display_name, data_type in TREASURY_FISCAL_SERIES:
+    for endpoint, value_field, name, display_name, data_type, domain, category in TREASURY_FISCAL_SERIES:
         collectors[name] = _make_fiscal_collector(
-            endpoint, value_field, name, display_name, data_type
+            endpoint, value_field, name, display_name, data_type, domain, category
         )
     return collectors

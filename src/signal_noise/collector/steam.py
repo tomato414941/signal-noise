@@ -20,6 +20,8 @@ class SteamPlayersCollector(BaseCollector):
         update_frequency="hourly",
         data_type="entertainment",
         api_docs_url="https://store.steampowered.com/stats/",
+        domain="sentiment",
+        category="attention",
     )
 
     # Unofficial but stable endpoint returning current player counts

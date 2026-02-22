@@ -19,6 +19,8 @@ class SunspotCollector(BaseCollector):
         update_frequency="daily",
         data_type="space_weather",
         api_docs_url="https://www.sidc.be/SILSO/datafiles",
+        domain="geophysical",
+        category="space_weather",
     )
 
     URL = "https://www.sidc.be/SILSO/INFO/sndtotcsv.php"

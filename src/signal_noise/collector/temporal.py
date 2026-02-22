@@ -12,6 +12,8 @@ class DayOfWeekCollector(BaseCollector):
         update_frequency="daily",
         data_type="temporal",
         api_docs_url="N/A",
+        domain="computed",
+        category="temporal",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -26,6 +28,8 @@ class HourOfDayCollector(BaseCollector):
         update_frequency="daily",
         data_type="temporal",
         api_docs_url="N/A",
+        domain="computed",
+        category="temporal",
     )
 
     def fetch(self) -> pd.DataFrame:

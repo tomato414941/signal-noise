@@ -19,6 +19,8 @@ class SolarXrayCollector(BaseCollector):
         update_frequency="hourly",
         data_type="space_weather",
         api_docs_url="https://www.swpc.noaa.gov/products/goes-x-ray-flux",
+        domain="geophysical",
+        category="space_weather",
     )
 
     URL = "https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json"

@@ -15,6 +15,8 @@ class BtcOhlcvCollector(BaseCollector):
         update_frequency="hourly",
         data_type="price",
         api_docs_url="https://binance-docs.github.io/apidocs/spot/en/",
+        domain="financial",
+        category="crypto",
     )
 
     def __init__(self, symbol: str = "BTC/USDT", timeframe: str = "1h", total: int = 5000, **kwargs):

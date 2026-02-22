@@ -39,6 +39,8 @@ def _make_ccxt_collector(
             update_frequency="hourly",
             data_type="crypto",
             api_docs_url="https://binance-docs.github.io/apidocs/spot/en/",
+            domain="financial",
+            category="crypto",
         )
 
         def fetch(self) -> pd.DataFrame:

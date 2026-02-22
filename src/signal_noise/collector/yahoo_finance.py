@@ -30,6 +30,8 @@ class DXYCollector(_YahooCollector):
         update_frequency="daily",
         data_type="macro",
         api_docs_url="https://finance.yahoo.com/quote/DX-Y.NYB/",
+        domain="financial",
+        category="forex",
     )
 
 
@@ -41,6 +43,8 @@ class GoldCollector(_YahooCollector):
         update_frequency="daily",
         data_type="macro",
         api_docs_url="https://finance.yahoo.com/quote/GC=F/",
+        domain="financial",
+        category="commodity",
     )
 
 
@@ -52,4 +56,6 @@ class SP500Collector(_YahooCollector):
         update_frequency="daily",
         data_type="macro",
         api_docs_url="https://finance.yahoo.com/quote/%5EGSPC/",
+        domain="financial",
+        category="equity",
     )

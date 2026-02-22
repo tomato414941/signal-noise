@@ -31,7 +31,7 @@ class TestWikiGenericFactory:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_wiki_collector("Recession", "wiki_recession", "Wikipedia: Recession", "fear")
+        cls = _make_wiki_collector("Recession", "wiki_recession", "Wikipedia: Recession", "fear", "sentiment", "sentiment")
         assert cls.meta.name == "wiki_recession"
         assert cls.meta.data_type == "fear"
 
@@ -57,7 +57,7 @@ class TestWikiGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_wiki_collector("Recession", "wiki_test", "Test", "fear")
+        cls = _make_wiki_collector("Recession", "wiki_test", "Test", "fear", "sentiment", "sentiment")
         df = cls().fetch()
         assert "date" in df.columns
         assert "value" in df.columns
@@ -71,7 +71,7 @@ class TestWikiGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_wiki_collector("Gold", "wiki_gold", "Gold", "safe_haven")
+        cls = _make_wiki_collector("Gold", "wiki_gold", "Gold", "safe_haven", "sentiment", "sentiment")
         df = cls().fetch()
         assert df["date"].is_monotonic_increasing
 

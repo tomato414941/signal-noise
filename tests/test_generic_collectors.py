@@ -13,7 +13,7 @@ class TestYahooGeneric:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "volatility")
+        cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "volatility", "financial", "equity")
         assert cls.meta.name == "test_vix"
         assert cls._ticker == "^VIX"
         assert isinstance(cls.meta, SourceMeta)
@@ -27,7 +27,7 @@ class TestYahooGeneric:
 
     def test_all_tickers_have_valid_data_type(self):
         valid_types = {"equity", "volatility", "commodity", "forex", "bond", "sector", "crypto_equity", "consumer", "mega_cap", "shipping", "aviation", "real_estate"}
-        for ticker, name, display, dtype in YAHOO_TICKERS:
+        for ticker, name, display, dtype, domain, category in YAHOO_TICKERS:
             assert dtype in valid_types, f"{name} has invalid type: {dtype}"
 
 

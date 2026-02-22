@@ -13,6 +13,8 @@ class HashrateCollector(BaseCollector):
         update_frequency="daily",
         data_type="onchain",
         api_docs_url="https://www.blockchain.com/explorer/charts/hash-rate",
+        domain="financial",
+        category="crypto",
     )
 
     URL = "https://api.blockchain.info/charts/hash-rate?timespan=2years&format=json"

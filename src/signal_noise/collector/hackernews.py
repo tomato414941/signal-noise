@@ -55,6 +55,8 @@ class HNTopCollector(_HNListCollector):
         update_frequency="hourly",
         data_type="tech_attention",
         api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
     )
 
 
@@ -66,6 +68,8 @@ class HNBestCollector(_HNListCollector):
         update_frequency="hourly",
         data_type="tech_attention",
         api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
     )
 
 
@@ -78,4 +82,6 @@ class HNNewCollector(_HNListCollector):
         update_frequency="hourly",
         data_type="tech_attention",
         api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
     )

@@ -32,6 +32,8 @@ def _make_so_collector(
             update_frequency="daily",
             data_type="dev_attention",
             api_docs_url="https://api.stackexchange.com/docs",
+            domain="developer",
+            category="developer",
         )
 
         def fetch(self) -> pd.DataFrame:

@@ -15,6 +15,8 @@ class NYWeatherCollector(BaseCollector):
         data_type="weather",
         api_docs_url="https://openweathermap.org/api",
         requires_key=True,
+        domain="earth",
+        category="weather",
     )
 
     def fetch(self) -> pd.DataFrame:

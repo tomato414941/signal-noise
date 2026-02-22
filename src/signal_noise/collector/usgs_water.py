@@ -38,6 +38,8 @@ def _make_water_collector(
             update_frequency="daily",
             data_type="hydrology",
             api_docs_url=f"https://waterdata.usgs.gov/nwis/dv?site_no={site_id}",
+            domain="earth",
+            category="hydrology",
         )
 
         def fetch(self) -> pd.DataFrame:

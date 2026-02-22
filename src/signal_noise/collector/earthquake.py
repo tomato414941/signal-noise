@@ -15,6 +15,8 @@ class EarthquakeCountCollector(BaseCollector):
         update_frequency="daily",
         data_type="seismic",
         api_docs_url="https://earthquake.usgs.gov/fdsnws/event/1/",
+        domain="geophysical",
+        category="seismic",
     )
 
     URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"

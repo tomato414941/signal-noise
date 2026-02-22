@@ -13,6 +13,8 @@ class FearGreedCollector(BaseCollector):
         update_frequency="daily",
         data_type="sentiment",
         api_docs_url="https://alternative.me/crypto/fear-and-greed-index/",
+        domain="sentiment",
+        category="sentiment",
     )
 
     URL = "https://api.alternative.me/fng/?limit=0&format=json"

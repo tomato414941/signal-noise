@@ -7,27 +7,28 @@ import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, SourceMeta
 
-# (chart_name, collector_name, display_name, data_type)
-BLOCKCHAIN_CHARTS: list[tuple[str, str, str, str]] = [
-    ("n-unique-addresses", "bc_unique_addrs", "BTC Unique Addresses", "onchain"),
-    ("n-transactions", "bc_tx_count", "BTC Transaction Count", "onchain"),
-    ("transaction-fees-usd", "bc_tx_fees_usd", "BTC Transaction Fees (USD)", "onchain"),
-    ("output-volume", "bc_output_volume", "BTC Output Volume", "onchain"),
-    ("estimated-transaction-volume-usd", "bc_est_volume_usd", "BTC Est. Transaction Volume (USD)", "onchain"),
-    ("my-wallet-n-users", "bc_wallet_users", "Blockchain.com Wallet Users", "onchain"),
-    ("utxo-count", "bc_utxo_count", "BTC UTXO Set Size", "onchain"),
-    ("cost-per-transaction", "bc_cost_per_tx", "BTC Cost Per Transaction", "onchain"),
-    ("miners-revenue", "bc_miners_revenue", "BTC Miners Revenue", "onchain"),
-    ("market-cap", "bc_market_cap", "BTC Market Cap", "onchain"),
-    ("trade-volume", "bc_exchange_volume", "BTC Exchange Trade Volume", "onchain"),
-    ("avg-block-size", "bc_avg_block_size", "BTC Average Block Size", "onchain"),
-    ("median-confirmation-time", "bc_confirm_time", "BTC Median Confirmation Time", "onchain"),
-    ("n-transactions-per-block", "bc_tx_per_block", "BTC Transactions Per Block", "onchain"),
+# (chart_name, collector_name, display_name, data_type, domain, category)
+BLOCKCHAIN_CHARTS: list[tuple[str, str, str, str, str, str]] = [
+    ("n-unique-addresses", "bc_unique_addrs", "BTC Unique Addresses", "onchain", "financial", "crypto"),
+    ("n-transactions", "bc_tx_count", "BTC Transaction Count", "onchain", "financial", "crypto"),
+    ("transaction-fees-usd", "bc_tx_fees_usd", "BTC Transaction Fees (USD)", "onchain", "financial", "crypto"),
+    ("output-volume", "bc_output_volume", "BTC Output Volume", "onchain", "financial", "crypto"),
+    ("estimated-transaction-volume-usd", "bc_est_volume_usd", "BTC Est. Transaction Volume (USD)", "onchain", "financial", "crypto"),
+    ("my-wallet-n-users", "bc_wallet_users", "Blockchain.com Wallet Users", "onchain", "financial", "crypto"),
+    ("utxo-count", "bc_utxo_count", "BTC UTXO Set Size", "onchain", "financial", "crypto"),
+    ("cost-per-transaction", "bc_cost_per_tx", "BTC Cost Per Transaction", "onchain", "financial", "crypto"),
+    ("miners-revenue", "bc_miners_revenue", "BTC Miners Revenue", "onchain", "financial", "crypto"),
+    ("market-cap", "bc_market_cap", "BTC Market Cap", "onchain", "financial", "crypto"),
+    ("trade-volume", "bc_exchange_volume", "BTC Exchange Trade Volume", "onchain", "financial", "crypto"),
+    ("avg-block-size", "bc_avg_block_size", "BTC Average Block Size", "onchain", "financial", "crypto"),
+    ("median-confirmation-time", "bc_confirm_time", "BTC Median Confirmation Time", "onchain", "financial", "crypto"),
+    ("n-transactions-per-block", "bc_tx_per_block", "BTC Transactions Per Block", "onchain", "financial", "crypto"),
 ]
 
 
 def _make_bc_collector(
-    chart: str, name: str, display_name: str, data_type: str
+    chart: str, name: str, display_name: str, data_type: str,
+    domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
         meta = SourceMeta(
@@ -36,6 +37,8 @@ def _make_bc_collector(
             update_frequency="daily",
             data_type=data_type,
             api_docs_url=f"https://www.blockchain.com/explorer/charts/{chart}",
+            domain=domain,
+            category=category,
         )
 
         def fetch(self) -> pd.DataFrame:

@@ -13,6 +13,8 @@ class BtcDominanceCollector(BaseCollector):
         update_frequency="daily",
         data_type="crypto",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
     URL = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=730"

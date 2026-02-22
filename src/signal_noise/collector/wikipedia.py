@@ -15,6 +15,8 @@ class WikipediaBtcCollector(BaseCollector):
         update_frequency="daily",
         data_type="attention",
         api_docs_url="https://wikimedia.org/api/rest_v1/",
+        domain="sentiment",
+        category="attention",
     )
 
     BASE_URL = (

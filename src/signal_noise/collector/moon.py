@@ -22,6 +22,8 @@ class MoonPhaseCollector(BaseCollector):
         update_frequency="daily",
         data_type="celestial",
         api_docs_url="N/A",
+        domain="geophysical",
+        category="celestial",
     )
 
     def fetch(self) -> pd.DataFrame:

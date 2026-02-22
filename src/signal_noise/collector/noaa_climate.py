@@ -17,6 +17,8 @@ class GlobalTempAnomalyCollector(BaseCollector):
         update_frequency="monthly",
         data_type="climate",
         api_docs_url="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series",
+        domain="earth",
+        category="climate",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -57,6 +59,8 @@ class LandTempAnomalyCollector(BaseCollector):
         update_frequency="monthly",
         data_type="climate",
         api_docs_url="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series",
+        domain="earth",
+        category="climate",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -97,6 +101,8 @@ class CO2DailyCollector(BaseCollector):
         update_frequency="daily",
         data_type="climate",
         api_docs_url="https://gml.noaa.gov/ccgg/trends/data.html",
+        domain="earth",
+        category="climate",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -147,6 +153,8 @@ class NASAGlobalTempCollector(BaseCollector):
         update_frequency="monthly",
         data_type="climate",
         api_docs_url="https://data.giss.nasa.gov/gistemp/",
+        domain="earth",
+        category="climate",
     )
 
     def fetch(self) -> pd.DataFrame:

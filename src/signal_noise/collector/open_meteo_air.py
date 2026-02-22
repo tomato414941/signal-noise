@@ -41,6 +41,8 @@ def _make_air_collector(
             update_frequency="daily",
             data_type="air_quality",
             api_docs_url="https://open-meteo.com/en/docs/air-quality-api",
+            domain="earth",
+            category="air_quality",
         )
 
         def fetch(self) -> pd.DataFrame:

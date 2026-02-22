@@ -19,6 +19,8 @@ class MempoolSizeCollector(BaseCollector):
         update_frequency="hourly",
         data_type="onchain",
         api_docs_url="https://mempool.space/docs/api",
+        domain="financial",
+        category="crypto",
     )
 
     URL = "https://mempool.space/api/v1/mining/mempool-stats/2y"
@@ -58,6 +60,8 @@ class MempoolFeeCollector(BaseCollector):
         update_frequency="hourly",
         data_type="onchain",
         api_docs_url="https://mempool.space/docs/api",
+        domain="financial",
+        category="crypto",
     )
 
     URL = "https://mempool.space/api/v1/fees/recommended"

@@ -20,6 +20,8 @@ class TorUsersCollector(BaseCollector):
         update_frequency="daily",
         data_type="internet",
         api_docs_url="https://metrics.torproject.org/userstats-relay-country.html",
+        domain="infrastructure",
+        category="internet",
     )
 
     # CSV: date, country, users (we aggregate globally)

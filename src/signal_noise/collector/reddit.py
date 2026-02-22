@@ -55,6 +55,8 @@ class RedditCryptoCollector(_RedditSubredditCollector):
         update_frequency="hourly",
         data_type="social",
         api_docs_url="https://www.reddit.com/dev/api/",
+        domain="sentiment",
+        category="attention",
     )
 
 
@@ -66,6 +68,8 @@ class RedditWsbCollector(_RedditSubredditCollector):
         update_frequency="hourly",
         data_type="social",
         api_docs_url="https://www.reddit.com/dev/api/",
+        domain="sentiment",
+        category="attention",
     )
 
 
@@ -77,4 +81,6 @@ class RedditBitcoinCollector(_RedditSubredditCollector):
         update_frequency="hourly",
         data_type="social",
         api_docs_url="https://www.reddit.com/dev/api/",
+        domain="sentiment",
+        category="attention",
     )

@@ -17,6 +17,8 @@ class OpenSkyTotalCollector(BaseCollector):
         update_frequency="hourly",
         data_type="aviation",
         api_docs_url="https://openskynetwork.github.io/opensky-api/",
+        domain="infrastructure",
+        category="aviation",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -42,6 +44,8 @@ class OpenSkyUSCollector(BaseCollector):
         update_frequency="hourly",
         data_type="aviation",
         api_docs_url="https://openskynetwork.github.io/opensky-api/",
+        domain="infrastructure",
+        category="aviation",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -66,6 +70,8 @@ class FR24TotalCollector(BaseCollector):
         update_frequency="hourly",
         data_type="aviation",
         api_docs_url="https://www.flightradar24.com/",
+        domain="infrastructure",
+        category="aviation",
     )
 
     def fetch(self) -> pd.DataFrame:

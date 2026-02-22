@@ -53,10 +53,10 @@ class TestWorldBankFactory:
 
     def test_factory_creates_collector(self):
         cls = _make_wb_collector(
-            "NY.GDP.MKTP.KD.ZG", "US", "test_wb", "Test WB", "economic"
+            "NY.GDP.MKTP.KD.ZG", "US", "test_wb", "Test WB", "economic", "macro", "economic"
         )
         assert cls.meta.name == "test_wb"
-        assert cls.meta.data_type == "economic"
+        assert cls.meta.domain == "macro"
 
     def test_get_wb_collectors_returns_dict(self):
         collectors = get_wb_collectors()
@@ -64,8 +64,9 @@ class TestWorldBankFactory:
 
     def test_all_have_valid_data_type(self):
         valid = {"economic", "inflation", "trade", "monetary", "labor"}
-        for _, _, name, _, dtype in WORLDBANK_SERIES:
-            assert dtype in valid, f"{name} has invalid type: {dtype}"
+        for entry in WORLDBANK_SERIES:
+            dtype = entry[4]
+            assert dtype in valid, f"{entry[2]} has invalid type: {dtype}"
 
 
 class TestWorldBankFetch:
@@ -76,7 +77,7 @@ class TestWorldBankFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_wb_collector("X", "US", "test_wb", "Test", "economic")
+        cls = _make_wb_collector("X", "US", "test_wb", "Test", "economic", "macro", "economic")
         df = cls().fetch()
         assert len(df) == 3  # one None skipped
         assert df["date"].is_monotonic_increasing
@@ -88,7 +89,7 @@ class TestWorldBankFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_wb_collector("X", "US", "test_wb", "Test", "economic")
+        cls = _make_wb_collector("X", "US", "test_wb", "Test", "economic", "macro", "economic")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 
@@ -112,7 +113,7 @@ class TestECBFactory:
 
     def test_factory_creates_collector(self):
         cls = _make_ecb_collector(
-            "EXR/D.USD.EUR.SP00.A", "test_ecb", "Test ECB", "forex", "daily"
+            "EXR/D.USD.EUR.SP00.A", "test_ecb", "Test ECB", "forex", "daily", "financial", "forex"
         )
         assert cls.meta.name == "test_ecb"
 
@@ -122,7 +123,7 @@ class TestECBFactory:
 
     def test_all_have_valid_data_type(self):
         valid = {"forex", "monetary", "bond", "inflation"}
-        for _, name, _, dtype, _ in ECB_SERIES:
+        for _, name, _, dtype, _, dom, cat in ECB_SERIES:
             assert dtype in valid, f"{name} has invalid type: {dtype}"
 
 
@@ -135,7 +136,7 @@ class TestECBFetch:
         mock_get.return_value = mock_resp
 
         cls = _make_ecb_collector(
-            "EXR/D.USD.EUR.SP00.A", "test_ecb", "Test", "forex", "daily"
+            "EXR/D.USD.EUR.SP00.A", "test_ecb", "Test", "forex", "daily", "financial", "forex"
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -201,7 +202,7 @@ class TestTreasuryFiscalFetch:
         cls = _make_fiscal_collector(
             "v2/accounting/od/debt_to_penny",
             "tot_pub_debt_out_amt",
-            "test_debt", "Test Debt", "fiscal",
+            "test_debt", "Test Debt", "fiscal", "macro", "fiscal",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -234,7 +235,7 @@ class TestIMFFactory:
 
     def test_factory_creates_collector(self):
         cls = _make_imf_collector(
-            "NGDP_RPCH", "USA", "test_imf", "Test IMF", "economic"
+            "NGDP_RPCH", "USA", "test_imf", "Test IMF", "economic", "macro", "economic"
         )
         assert cls.meta.name == "test_imf"
 
@@ -244,7 +245,7 @@ class TestIMFFactory:
 
     def test_all_have_valid_data_type(self):
         valid = {"economic", "inflation", "trade", "fiscal", "labor"}
-        for _, _, name, _, dtype in IMF_SERIES:
+        for _, _, name, _, dtype, dom, cat in IMF_SERIES:
             assert dtype in valid, f"{name} has invalid type: {dtype}"
 
 
@@ -256,7 +257,7 @@ class TestIMFFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_imf_collector("NGDP_RPCH", "USA", "test_imf", "Test", "economic")
+        cls = _make_imf_collector("NGDP_RPCH", "USA", "test_imf", "Test", "economic", "macro", "economic")
         df = cls().fetch()
         assert len(df) == 4
         assert df["date"].is_monotonic_increasing
@@ -269,7 +270,7 @@ class TestIMFFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_imf_collector("X", "USA", "test_imf", "Test", "economic")
+        cls = _make_imf_collector("X", "USA", "test_imf", "Test", "economic", "macro", "economic")
         with pytest.raises(RuntimeError, match="No IMF data"):
             cls().fetch()
 

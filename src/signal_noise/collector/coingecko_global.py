@@ -42,6 +42,8 @@ class CG_TotalMarketCapCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -53,6 +55,8 @@ class CG_TotalVolumeCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -64,6 +68,8 @@ class CG_BtcDominanceCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -75,6 +81,8 @@ class CG_EthDominanceCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -86,6 +94,8 @@ class CG_ActiveCryptosCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -97,6 +107,8 @@ class CG_OngoingICOsCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -108,6 +120,8 @@ class CG_MarketsCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )
 
 
@@ -119,4 +133,6 @@ class CG_MarketCapChangePct24hCollector(_CoinGeckoGlobalCollector):
         update_frequency="hourly",
         data_type="crypto_market",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
+        domain="financial",
+        category="crypto",
     )

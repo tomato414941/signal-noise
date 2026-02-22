@@ -53,6 +53,8 @@ def _make_weather_collector(
             update_frequency="daily",
             data_type="weather",
             api_docs_url="https://open-meteo.com/en/docs/historical-weather-api",
+            domain="earth",
+            category="weather",
         )
 
         def fetch(self) -> pd.DataFrame:

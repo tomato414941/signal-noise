@@ -36,9 +36,10 @@ class TestFredGenericFactory:
         assert len(ids) == len(set(ids))
 
     def test_factory_creates_collector(self):
-        cls = _make_fred_collector("ICSA", "test_icsa", "Test ICSA", "labor", "weekly")
+        cls = _make_fred_collector("ICSA", "test_icsa", "Test ICSA", "labor", "weekly", "macro", "labor")
         assert cls.meta.name == "test_icsa"
-        assert cls.meta.data_type == "labor"
+        assert cls.meta.domain == "macro"
+        assert cls.meta.category == "labor"
         assert cls.meta.requires_key is True
 
     def test_get_fred_collectors_returns_dict(self):
@@ -52,12 +53,12 @@ class TestFredGenericFactory:
             "sentiment", "housing", "stress", "forex",
             "trade", "commodity", "logistics",
         }
-        for series_id, name, display, dtype, freq in FRED_SERIES:
+        for series_id, name, display, dtype, freq, dom, cat in FRED_SERIES:
             assert dtype in valid_types, f"{name} has invalid type: {dtype}"
 
     def test_all_series_have_valid_frequency(self):
         valid_freqs = {"daily", "weekly", "monthly", "quarterly"}
-        for series_id, name, display, dtype, freq in FRED_SERIES:
+        for series_id, name, display, dtype, freq, dom, cat in FRED_SERIES:
             assert freq in valid_freqs, f"{name} has invalid frequency: {freq}"
 
     def test_all_categories_present(self):
@@ -77,7 +78,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("ICSA", "test_icsa", "Test", "labor", "weekly")
+        cls = _make_fred_collector("ICSA", "test_icsa", "Test", "labor", "weekly", "macro", "labor")
         df = cls().fetch()
         assert "date" in df.columns
         assert "value" in df.columns
@@ -93,7 +94,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("UNRATE", "test_unrate", "Test", "labor", "monthly")
+        cls = _make_fred_collector("UNRATE", "test_unrate", "Test", "labor", "monthly", "macro", "labor")
         df = cls().fetch()
         assert df["date"].is_monotonic_increasing
 
@@ -105,7 +106,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("GDP", "test_gdp", "Test", "economic", "quarterly")
+        cls = _make_fred_collector("GDP", "test_gdp", "Test", "economic", "quarterly", "macro", "economic")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 
@@ -122,7 +123,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("TEST", "test_miss", "Test", "labor", "daily")
+        cls = _make_fred_collector("TEST", "test_miss", "Test", "labor", "daily", "macro", "labor")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 

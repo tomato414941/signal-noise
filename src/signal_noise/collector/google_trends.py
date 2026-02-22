@@ -16,6 +16,8 @@ class GoogleTrendsCollector(BaseCollector):
         update_frequency="weekly",
         data_type="attention",
         api_docs_url="https://trends.google.com/trends/",
+        domain="sentiment",
+        category="attention",
     )
 
     def fetch(self) -> pd.DataFrame:

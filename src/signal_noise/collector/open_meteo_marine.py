@@ -43,6 +43,8 @@ def _make_marine_collector(
             update_frequency="daily",
             data_type="marine",
             api_docs_url="https://open-meteo.com/en/docs/marine-weather-api",
+            domain="earth",
+            category="marine",
         )
 
         def fetch(self) -> pd.DataFrame:

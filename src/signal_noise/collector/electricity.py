@@ -15,6 +15,8 @@ class ElectricityCollector(BaseCollector):
         data_type="energy",
         api_docs_url="https://www.eia.gov/opendata/",
         requires_key=True,
+        domain="financial",
+        category="commodity",
     )
 
     def fetch(self) -> pd.DataFrame:

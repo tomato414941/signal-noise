@@ -19,6 +19,8 @@ class LightningCapacityCollector(BaseCollector):
         update_frequency="daily",
         data_type="onchain",
         api_docs_url="https://mempool.space/docs/api",
+        domain="financial",
+        category="crypto",
     )
 
     URL = "https://mempool.space/api/v1/lightning/statistics/2y"

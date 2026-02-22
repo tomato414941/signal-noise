@@ -75,6 +75,8 @@ class MajorSportsEventCollector(BaseCollector):
         update_frequency="daily",
         data_type="entertainment",
         api_docs_url="N/A",
+        domain="sentiment",
+        category="attention",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -93,6 +95,8 @@ class SuperBowlCollector(BaseCollector):
         update_frequency="daily",
         data_type="entertainment",
         api_docs_url="N/A",
+        domain="sentiment",
+        category="attention",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -108,6 +112,8 @@ class OlympicsCollector(BaseCollector):
         update_frequency="daily",
         data_type="entertainment",
         api_docs_url="N/A",
+        domain="sentiment",
+        category="attention",
     )
 
     def fetch(self) -> pd.DataFrame:

@@ -29,6 +29,8 @@ def _make_wayback_collector(
             update_frequency="daily",
             data_type="web_attention",
             api_docs_url="https://web.archive.org/",
+            domain="sentiment",
+            category="attention",
         )
 
         def fetch(self) -> pd.DataFrame:

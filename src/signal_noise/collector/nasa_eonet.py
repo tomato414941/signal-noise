@@ -17,6 +17,8 @@ class EONETWildfireCollector(BaseCollector):
         update_frequency="daily",
         data_type="natural_disaster",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
+        domain="geophysical",
+        category="seismic",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -43,6 +45,8 @@ class EONETStormCollector(BaseCollector):
         update_frequency="daily",
         data_type="natural_disaster",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
+        domain="geophysical",
+        category="seismic",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -69,6 +73,8 @@ class EONETVolcanoCollector(BaseCollector):
         update_frequency="daily",
         data_type="natural_disaster",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
+        domain="geophysical",
+        category="seismic",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -95,6 +101,8 @@ class EONETTotalCollector(BaseCollector):
         update_frequency="daily",
         data_type="natural_disaster",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
+        domain="geophysical",
+        category="seismic",
     )
 
     def fetch(self) -> pd.DataFrame:

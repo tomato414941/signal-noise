@@ -26,6 +26,8 @@ class EnsoCollector(BaseCollector):
         update_frequency="monthly",
         data_type="climate",
         api_docs_url="https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
+        domain="earth",
+        category="climate",
     )
 
     URL = "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt"
@@ -70,6 +72,8 @@ class ArcticOscillationCollector(BaseCollector):
         update_frequency="monthly",
         data_type="climate",
         api_docs_url="https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/ao.shtml",
+        domain="earth",
+        category="climate",
     )
 
     URL = "https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/monthly.ao.index.b50.current.ascii"
@@ -118,6 +122,8 @@ class NaoCollector(BaseCollector):
         update_frequency="monthly",
         data_type="climate",
         api_docs_url="https://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/nao.shtml",
+        domain="earth",
+        category="climate",
     )
 
     URL = "https://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii"

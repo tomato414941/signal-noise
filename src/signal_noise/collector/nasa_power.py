@@ -50,6 +50,8 @@ def _make_power_collector(
             update_frequency="daily",
             data_type="satellite",
             api_docs_url="https://power.larc.nasa.gov/docs/services/api/",
+            domain="earth",
+            category="satellite",
         )
 
         def fetch(self) -> pd.DataFrame:
