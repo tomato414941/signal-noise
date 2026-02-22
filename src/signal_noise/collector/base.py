@@ -25,6 +25,7 @@ DOMAINS = {
     "infrastructure",# logistics, aviation, shipping, internet
     "real_estate",   # housing, property prices, REITs
     "developer",     # GitHub, npm, StackOverflow, tech trends
+    "computed",      # calculated features (temporal, etc.)
 }
 
 # category: concrete data classification
@@ -40,7 +41,7 @@ CATEGORIES = {
     # geophysical
     "space_weather", "seismic", "celestial",
     # infrastructure
-    "logistics", "aviation",
+    "logistics", "aviation", "internet",
     # real_estate
     "real_estate",
     # developer

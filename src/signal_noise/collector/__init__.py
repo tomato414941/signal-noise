@@ -57,7 +57,7 @@ _TAXONOMY: dict[str, tuple[str, str]] = {
     "air_quality": ("earth", "air_quality"),
     "hydrology": ("earth", "hydrology"),
     "satellite": ("earth", "satellite"),
-    "energy": ("earth", "weather"),
+    "energy": ("financial", "commodity"),
     # ── geophysical ──
     "space_weather": ("geophysical", "space_weather"),
     "seismic": ("geophysical", "seismic"),
@@ -67,8 +67,8 @@ _TAXONOMY: dict[str, tuple[str, str]] = {
     "logistics": ("infrastructure", "logistics"),
     "shipping": ("infrastructure", "logistics"),
     "aviation": ("infrastructure", "aviation"),
-    "internet": ("infrastructure", "logistics"),
-    "web_attention": ("infrastructure", "logistics"),
+    "internet": ("infrastructure", "internet"),
+    "web_attention": ("sentiment", "attention"),
     # ── real_estate ──
     "real_estate": ("real_estate", "real_estate"),
     "housing": ("real_estate", "real_estate"),
@@ -77,7 +77,7 @@ _TAXONOMY: dict[str, tuple[str, str]] = {
     "dev_activity": ("developer", "developer"),
     "dev_attention": ("developer", "developer"),
     # ── misc ──
-    "temporal": ("financial", "temporal"),
+    "temporal": ("computed", "temporal"),
 }
 
 
