@@ -99,6 +99,7 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.defillama import get_defillama_collectors
     from signal_noise.collector.cftc_cot import get_cot_collectors
     from signal_noise.collector.eia_generic import get_eia_collectors
+    from signal_noise.collector.bls_generic import get_bls_collectors
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -193,6 +194,7 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_defillama_collectors())
     collectors.update(get_cot_collectors())
     collectors.update(get_eia_collectors())
+    collectors.update(get_bls_collectors())
 
     return collectors
 
