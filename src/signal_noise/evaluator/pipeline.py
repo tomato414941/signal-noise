@@ -84,7 +84,7 @@ def run_evaluation(
             metrics = evaluate_signal(
                 signal=aligned,
                 returns=returns_df[ret_col],
-                collector_name=collector_name,
+                signal_name=collector_name,
                 period=period,
                 max_lag=config.max_lag_periods,
             )

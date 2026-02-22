@@ -96,6 +96,7 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     )
     from signal_noise.collector.nasa_power import get_power_collectors
     from signal_noise.collector.usgs_water import get_water_collectors
+    from signal_noise.collector.defillama import get_defillama_collectors
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -187,7 +188,7 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_air_collectors())
     collectors.update(get_power_collectors())
     collectors.update(get_water_collectors())
-
+    collectors.update(get_defillama_collectors())
 
     return collectors
 
