@@ -42,7 +42,7 @@ class WikimediaTotalCollector(BaseCollector):
             raise RuntimeError("No Wikimedia pageview data")
         rows = [
             {
-                "date": pd.Timestamp(item["timestamp"], tz="UTC"),
+                "date": pd.to_datetime(item["timestamp"], format="%Y%m%d%H", utc=True),
                 "value": float(item["views"]),
             }
             for item in items
