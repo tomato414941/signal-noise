@@ -3,7 +3,7 @@ from __future__ import annotations
 import ccxt
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 CRYPTO_PAIRS: list[tuple[str, str, str]] = [
     ("SOL/USDT", "sol_usdt", "SOL/USDT"),
@@ -33,7 +33,7 @@ def _make_ccxt_collector(
     pair: str, name: str, display_name: str
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="hourly",

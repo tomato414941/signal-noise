@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # Reference New Moon: 2000-01-06 18:14 UTC
 _REF_NEW_MOON = pd.Timestamp("2000-01-06 18:14:00", tz="UTC")
@@ -16,7 +16,7 @@ class MoonPhaseCollector(BaseCollector):
     Academic reference: Dichev & Janes (2003) "Lunar Cycle Effects in Stock Returns"
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="moon_phase",
         display_name="Moon Phase (0=New, 0.5=Full)",
         update_frequency="daily",

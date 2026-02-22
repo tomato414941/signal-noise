@@ -5,13 +5,13 @@ from collections import Counter
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class EONETWildfireCollector(BaseCollector):
     """Count of currently active wildfire events worldwide (NASA EONET)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="eonet_wildfires",
         display_name="NASA EONET: Active Wildfires",
         update_frequency="daily",
@@ -38,7 +38,7 @@ class EONETWildfireCollector(BaseCollector):
 class EONETStormCollector(BaseCollector):
     """Count of currently active severe storm events (NASA EONET)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="eonet_storms",
         display_name="NASA EONET: Active Severe Storms",
         update_frequency="daily",
@@ -65,7 +65,7 @@ class EONETStormCollector(BaseCollector):
 class EONETVolcanoCollector(BaseCollector):
     """Count of currently active volcanic events (NASA EONET)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="eonet_volcanoes",
         display_name="NASA EONET: Active Volcanoes",
         update_frequency="daily",
@@ -92,7 +92,7 @@ class EONETVolcanoCollector(BaseCollector):
 class EONETTotalCollector(BaseCollector):
     """Total count of all active natural events (NASA EONET)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="eonet_total",
         display_name="NASA EONET: Total Active Events",
         update_frequency="daily",

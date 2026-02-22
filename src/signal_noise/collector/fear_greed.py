@@ -3,11 +3,11 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class FearGreedCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="fear_greed",
         display_name="Crypto Fear & Greed Index",
         update_frequency="daily",

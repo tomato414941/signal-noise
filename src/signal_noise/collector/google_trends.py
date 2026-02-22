@@ -4,13 +4,13 @@ import logging
 
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 log = logging.getLogger(__name__)
 
 
 class GoogleTrendsCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="google_trends",
         display_name="Google Trends (bitcoin)",
         update_frequency="weekly",

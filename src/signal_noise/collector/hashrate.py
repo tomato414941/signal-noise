@@ -3,11 +3,11 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class HashrateCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="hashrate",
         display_name="BTC Hash Rate",
         update_frequency="daily",

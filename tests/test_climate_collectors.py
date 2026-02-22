@@ -27,7 +27,7 @@ from signal_noise.collector.noaa_climate import (
     CO2DailyCollector,
     NASAGlobalTempCollector,
 )
-from signal_noise.collector.base import SourceMeta
+from signal_noise.collector.base import CollectorMeta
 
 
 class TestOpenMeteoWeather:
@@ -42,7 +42,7 @@ class TestOpenMeteoWeather:
         cls = _make_weather_collector(35.0, 139.0, "Test", "test_meteo", "Test Weather")
         assert cls.meta.name == "test_meteo"
         assert cls.meta.category == "weather"
-        assert isinstance(cls.meta, SourceMeta)
+        assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_collectors_returns_dict(self):
         collectors = get_weather_collectors()

@@ -22,7 +22,7 @@ from signal_noise.collector.usgs_water import (
     get_water_collectors,
     _make_water_collector,
 )
-from signal_noise.collector.base import SourceMeta
+from signal_noise.collector.base import CollectorMeta
 
 
 EONET_RESPONSE = {

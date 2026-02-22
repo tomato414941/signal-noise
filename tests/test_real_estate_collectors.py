@@ -17,7 +17,7 @@ from signal_noise.collector.bis_property import (
     get_bis_pp_collectors,
     _make_bis_pp_collector,
 )
-from signal_noise.collector.base import SourceMeta
+from signal_noise.collector.base import CollectorMeta
 
 
 OECD_CSV_RESPONSE = """STRUCTURE,STRUCTURE_ID,STRUCTURE_NAME,ACTION,REF_AREA,Reference area,FREQ,Frequency of observation,MEASURE,Measure,UNIT_MEASURE,Unit of measure,TIME_PERIOD,Time period,OBS_VALUE,Observation value,OBS_STATUS,Observation status,UNIT_MULT,Unit multiplier,ADJUSTMENT,Adjustment,DECIMALS,Decimals,BASE_PER,Base period
@@ -48,7 +48,7 @@ class TestOECDHousePrices:
         cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test OECD", "real_estate", "real_estate")
         assert cls.meta.name == "test_oecd"
         assert cls.meta.update_frequency == "quarterly"
-        assert isinstance(cls.meta, SourceMeta)
+        assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_collectors_returns_dict(self):
         collectors = get_oecd_hp_collectors()
@@ -105,7 +105,7 @@ class TestBISPropertyPrices:
         cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test BIS", "real_estate", "real_estate")
         assert cls.meta.name == "test_bis"
         assert cls.meta.update_frequency == "quarterly"
-        assert isinstance(cls.meta, SourceMeta)
+        assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_collectors_returns_dict(self):
         collectors = get_bis_pp_collectors()

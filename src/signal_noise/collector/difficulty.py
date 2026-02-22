@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class DifficultyCollector(BaseCollector):
@@ -13,7 +13,7 @@ class DifficultyCollector(BaseCollector):
     Falling difficulty = miners capitulating.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="btc_difficulty",
         display_name="Bitcoin Mining Difficulty",
         update_frequency="daily",

@@ -11,14 +11,14 @@ from signal_noise.collector.aviation import (
     OpenSkyTotalCollector,
     OpenSkyUSCollector,
 )
-from signal_noise.collector.base import SourceMeta
+from signal_noise.collector.base import CollectorMeta
 
 
 class TestOpenSkyTotal:
     def test_meta(self):
         assert OpenSkyTotalCollector.meta.name == "opensky_total"
         assert OpenSkyTotalCollector.meta.category == "aviation"
-        assert isinstance(OpenSkyTotalCollector.meta, SourceMeta)
+        assert isinstance(OpenSkyTotalCollector.meta, CollectorMeta)
 
     @patch("signal_noise.collector.aviation.requests.get")
     def test_fetch_counts_all_states(self, mock_get):

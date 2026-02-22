@@ -3,12 +3,12 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from signal_noise.collector.base import BaseCollector, SourceMeta, DOMAINS, CATEGORIES, FREQUENCIES
+from signal_noise.collector.base import BaseCollector, CollectorMeta, DOMAINS, CATEGORIES, FREQUENCIES
 from signal_noise.config import CollectorConfig
 
 
 class DummyCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="dummy",
         display_name="Dummy Source",
         update_frequency="daily",

@@ -5,7 +5,7 @@ import io
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (country_code, measure, collector_name, display_name, domain, category)
 # Measures: HPI = nominal, RHP = real, HPI_YDH = price-to-income, HPI_RPI = price-to-rent
@@ -69,7 +69,7 @@ def _make_oecd_hp_collector(
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="quarterly",

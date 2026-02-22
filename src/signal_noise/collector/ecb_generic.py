@@ -5,7 +5,7 @@ from io import StringIO
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (flow_key, collector_name, display_name, frequency, domain, category)
 # flow_key = "{dataflow}/{series_key}" for ECB SDMX API
@@ -52,7 +52,7 @@ def _make_ecb_collector(
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency=frequency,

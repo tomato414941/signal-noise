@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _USER_AGENT = "signal-noise/0.1 (https://github.com/tomato414941/signal-noise)"
 
@@ -49,7 +49,7 @@ class _RedditSubredditCollector(BaseCollector):
 
 class RedditCryptoCollector(_RedditSubredditCollector):
     _subreddit = "cryptocurrency"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="reddit_crypto",
         display_name="Reddit r/cryptocurrency Activity",
         update_frequency="hourly",
@@ -61,7 +61,7 @@ class RedditCryptoCollector(_RedditSubredditCollector):
 
 class RedditWsbCollector(_RedditSubredditCollector):
     _subreddit = "wallstreetbets"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="reddit_wsb",
         display_name="Reddit r/wallstreetbets Activity",
         update_frequency="hourly",
@@ -73,7 +73,7 @@ class RedditWsbCollector(_RedditSubredditCollector):
 
 class RedditBitcoinCollector(_RedditSubredditCollector):
     _subreddit = "Bitcoin"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="reddit_bitcoin",
         display_name="Reddit r/Bitcoin Activity",
         update_frequency="hourly",

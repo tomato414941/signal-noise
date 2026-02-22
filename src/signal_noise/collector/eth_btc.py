@@ -3,11 +3,11 @@ from __future__ import annotations
 import ccxt
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class EthBtcCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="eth_btc",
         display_name="ETH/BTC Ratio",
         update_frequency="hourly",

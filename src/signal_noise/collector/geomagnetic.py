@@ -3,11 +3,11 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class GeomagneticCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="geomagnetic",
         display_name="NOAA Planetary K-index",
         update_frequency="hourly",

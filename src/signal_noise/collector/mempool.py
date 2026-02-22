@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class MempoolSizeCollector(BaseCollector):
@@ -13,7 +13,7 @@ class MempoolSizeCollector(BaseCollector):
     mempool.space API is free, no key required.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="mempool_size",
         display_name="Bitcoin Mempool Size (vMB)",
         update_frequency="hourly",
@@ -53,7 +53,7 @@ class MempoolFeeCollector(BaseCollector):
     data accumulates across runs via parquet append.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="mempool_fee",
         display_name="Bitcoin Fee Rate (sat/vB)",
         update_frequency="hourly",

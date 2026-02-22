@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # FRED API key: set FRED_API_KEY env var or place in ~/.secrets/fred
 _FRED_API_KEY: str | None = None
@@ -98,7 +98,7 @@ def _make_fred_collector(
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency=frequency,

@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (site_id, collector_name, display_name, description)
 # USGS NWIS stations for major rivers / reservoirs
@@ -32,7 +32,7 @@ def _make_water_collector(
     site_id: str, name: str, display_name: str, data_type_detail: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

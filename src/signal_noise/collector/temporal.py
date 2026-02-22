@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class DayOfWeekCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="day_of_week",
         display_name="Day of Week (0=Mon)",
         update_frequency="daily",
@@ -21,7 +21,7 @@ class DayOfWeekCollector(BaseCollector):
 
 
 class HourOfDayCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="hour_of_day",
         display_name="Hour of Day (UTC)",
         update_frequency="daily",

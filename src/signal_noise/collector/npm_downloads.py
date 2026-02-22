@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (package_name, collector_name, display_name)
 NPM_PACKAGES: list[tuple[str, str, str]] = [
@@ -28,7 +28,7 @@ def _make_npm_collector(
     package: str, name: str, display_name: str
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

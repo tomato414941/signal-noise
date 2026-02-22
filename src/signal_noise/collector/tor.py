@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class TorUsersCollector(BaseCollector):
@@ -14,7 +14,7 @@ class TorUsersCollector(BaseCollector):
     Tor Metrics provides free CSV downloads.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="tor_users",
         display_name="Tor Daily Users (estimated)",
         update_frequency="daily",

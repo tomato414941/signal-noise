@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (indicator_id, country_code, collector_name, display_name, domain, category)
 WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
@@ -63,7 +63,7 @@ def _make_wb_collector(
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="yearly",

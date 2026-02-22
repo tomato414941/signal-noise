@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from signal_noise.collector.base import SourceMeta
+from signal_noise.collector.base import CollectorMeta
 from signal_noise.collector.yahoo_finance import _YahooCollector
 
 YAHOO_TICKERS: list[tuple[str, str, str, str, str]] = [
@@ -150,7 +150,7 @@ def _make_yahoo_collector(
 ) -> type[_YahooCollector]:
     class _Collector(_YahooCollector):
         _ticker = ticker
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

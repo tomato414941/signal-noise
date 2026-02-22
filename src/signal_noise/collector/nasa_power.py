@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (lat, lon, location, collector_name, display_name, parameter)
 # Parameters: ALLSKY_SFC_SW_DWN = solar radiation (kW-hr/m²/day)
@@ -44,7 +44,7 @@ def _make_power_collector(
     name: str, display_name: str, parameter: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

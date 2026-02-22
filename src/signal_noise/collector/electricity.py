@@ -4,11 +4,11 @@ import os
 
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class ElectricityCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="electricity",
         display_name="US Electricity Price",
         update_frequency="monthly",

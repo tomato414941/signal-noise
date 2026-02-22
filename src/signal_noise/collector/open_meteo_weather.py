@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (lat, lon, city_name, collector_name, display_name)
 WEATHER_CITIES: list[tuple[float, float, str, str, str]] = [
@@ -47,7 +47,7 @@ def _make_weather_collector(
     lat: float, lon: float, city: str, name: str, display_name: str
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

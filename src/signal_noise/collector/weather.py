@@ -4,11 +4,11 @@ import os
 
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class NYWeatherCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="ny_weather",
         display_name="NYC Weather",
         update_frequency="hourly",

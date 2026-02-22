@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class LightningCapacityCollector(BaseCollector):
@@ -13,7 +13,7 @@ class LightningCapacityCollector(BaseCollector):
     mempool.space provides historical stats.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="lightning_capacity",
         display_name="Lightning Network Capacity (BTC)",
         update_frequency="daily",

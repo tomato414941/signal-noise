@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class SolarXrayCollector(BaseCollector):
@@ -13,7 +13,7 @@ class SolarXrayCollector(BaseCollector):
     data accumulates across collection runs via parquet append.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="solar_xray",
         display_name="GOES Solar X-ray Flux (1-8A)",
         update_frequency="hourly",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import yfinance as yf
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class _YahooCollector(BaseCollector):
@@ -24,7 +24,7 @@ class _YahooCollector(BaseCollector):
 
 class DXYCollector(_YahooCollector):
     _ticker = "DX-Y.NYB"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="dxy",
         display_name="US Dollar Index (DXY)",
         update_frequency="daily",
@@ -36,7 +36,7 @@ class DXYCollector(_YahooCollector):
 
 class GoldCollector(_YahooCollector):
     _ticker = "GC=F"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="gold",
         display_name="Gold Futures",
         update_frequency="daily",
@@ -48,7 +48,7 @@ class GoldCollector(_YahooCollector):
 
 class SP500Collector(_YahooCollector):
     _ticker = "^GSPC"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="sp500",
         display_name="S&P 500",
         update_frequency="daily",

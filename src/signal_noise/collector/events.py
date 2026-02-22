@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # Major global events that absorb mass attention.
 # Format: (start_date, end_date) inclusive, spanning 2022-2026+.
@@ -69,7 +69,7 @@ class MajorSportsEventCollector(BaseCollector):
     Hypothesis: mass attention diversion reduces market participation.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="major_sports_event",
         display_name="Major Sports Event (0/1)",
         update_frequency="daily",
@@ -88,7 +88,7 @@ class SuperBowlCollector(BaseCollector):
     Single biggest TV event in the US — ~115M viewers.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="super_bowl",
         display_name="Super Bowl Day (0/1)",
         update_frequency="daily",
@@ -104,7 +104,7 @@ class SuperBowlCollector(BaseCollector):
 class OlympicsCollector(BaseCollector):
     """Binary flag: 1 during Olympic Games."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="olympics",
         display_name="Olympic Games (0/1)",
         update_frequency="daily",

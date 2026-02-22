@@ -5,13 +5,13 @@ import io
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class GlobalTempAnomalyCollector(BaseCollector):
     """NOAA Global Land & Ocean Temperature Anomaly (monthly)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="noaa_global_temp",
         display_name="NOAA Global Temperature Anomaly",
         update_frequency="monthly",
@@ -52,7 +52,7 @@ class GlobalTempAnomalyCollector(BaseCollector):
 class LandTempAnomalyCollector(BaseCollector):
     """NOAA Global Land-Only Temperature Anomaly (monthly)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="noaa_land_temp",
         display_name="NOAA Land Temperature Anomaly",
         update_frequency="monthly",
@@ -93,7 +93,7 @@ class LandTempAnomalyCollector(BaseCollector):
 class CO2DailyCollector(BaseCollector):
     """NOAA/GML Mauna Loa daily CO2 concentration (ppm)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="noaa_co2_daily",
         display_name="Mauna Loa CO2 (Daily)",
         update_frequency="daily",
@@ -144,7 +144,7 @@ class CO2DailyCollector(BaseCollector):
 class NASAGlobalTempCollector(BaseCollector):
     """NASA GISS Global Land-Ocean Temperature Index (monthly)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="nasa_giss_temp",
         display_name="NASA GISS Global Temperature Index",
         update_frequency="monthly",

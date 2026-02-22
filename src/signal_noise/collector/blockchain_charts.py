@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (chart_name, collector_name, display_name, domain, category)
 BLOCKCHAIN_CHARTS: list[tuple[str, str, str, str, str]] = [
@@ -31,7 +31,7 @@ def _make_bc_collector(
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

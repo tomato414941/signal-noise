@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class SteamPlayersCollector(BaseCollector):
@@ -14,7 +14,7 @@ class SteamPlayersCollector(BaseCollector):
     Data accumulates across runs via parquet append.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="steam_players",
         display_name="Steam Online Players",
         update_frequency="hourly",

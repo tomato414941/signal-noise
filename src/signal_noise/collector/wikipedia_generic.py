@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (article_title, collector_name, display_name, domain, category)
 # Article title must match the exact Wikipedia URL slug (case-sensitive)
@@ -115,7 +115,7 @@ def _make_wiki_collector(
     )
 
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

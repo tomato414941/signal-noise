@@ -5,7 +5,7 @@ import io
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (country_code, value_type, unit, collector_name, display_name, domain, category)
 # value_type: N=Nominal, R=Real
@@ -65,7 +65,7 @@ def _make_bis_pp_collector(
     domain: str, category: str,
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="quarterly",

@@ -5,11 +5,11 @@ import time
 import ccxt
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class BtcOhlcvCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="btc_ohlcv",
         display_name="BTC/USDT OHLCV",
         update_frequency="hourly",

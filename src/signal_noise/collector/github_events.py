@@ -5,7 +5,7 @@ from collections import Counter
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _GITHUB_HEADERS = {"Accept": "application/vnd.github+json"}
 
@@ -26,7 +26,7 @@ def _make_gh_events_collector(
     repo: str, name: str, display_name: str
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="hourly",

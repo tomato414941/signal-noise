@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # Season midpoint mapping for ONI data
 _SEASON_MONTH = {
@@ -20,7 +20,7 @@ class EnsoCollector(BaseCollector):
     Strong influence on global commodity prices.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="enso",
         display_name="ENSO Oceanic Niño Index",
         update_frequency="monthly",
@@ -65,7 +65,7 @@ class ArcticOscillationCollector(BaseCollector):
     Negative AO = weak polar vortex, cold outbreaks, energy demand spikes.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="arctic_oscillation",
         display_name="Arctic Oscillation Index (monthly)",
         update_frequency="monthly",
@@ -114,7 +114,7 @@ class NaoCollector(BaseCollector):
     Influences European equity and energy markets.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="nao",
         display_name="North Atlantic Oscillation Index (monthly)",
         update_frequency="monthly",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class SunspotCollector(BaseCollector):
@@ -13,7 +13,7 @@ class SunspotCollector(BaseCollector):
     11-year solar cycle is a well-studied phenomenon.
     """
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="sunspot",
         display_name="Daily Sunspot Number (SILSO)",
         update_frequency="daily",

@@ -3,11 +3,11 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class BtcDominanceCollector(BaseCollector):
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="btc_dominance",
         display_name="BTC Market Dominance",
         update_frequency="daily",

@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 # (lat, lon, location_name, collector_name, display_name)
 # Key shipping lanes and ocean monitoring points
@@ -37,7 +37,7 @@ def _make_marine_collector(
     lat: float, lon: float, location: str, name: str, display_name: str
 ) -> type[BaseCollector]:
     class _Collector(BaseCollector):
-        meta = SourceMeta(
+        meta = CollectorMeta(
             name=name,
             display_name=display_name,
             update_frequency="daily",

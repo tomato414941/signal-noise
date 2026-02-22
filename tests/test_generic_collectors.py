@@ -1,7 +1,7 @@
 
 from signal_noise.collector.yahoo_generic import YAHOO_TICKERS, _make_yahoo_collector, get_yahoo_collectors
 from signal_noise.collector.ccxt_generic import CRYPTO_PAIRS, _make_ccxt_collector, get_ccxt_collectors
-from signal_noise.collector.base import SourceMeta
+from signal_noise.collector.base import CollectorMeta
 
 
 class TestYahooGeneric:
@@ -16,7 +16,7 @@ class TestYahooGeneric:
         cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "financial", "equity")
         assert cls.meta.name == "test_vix"
         assert cls._ticker == "^VIX"
-        assert isinstance(cls.meta, SourceMeta)
+        assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_yahoo_collectors_returns_dict(self):
         collectors = get_yahoo_collectors()
@@ -43,7 +43,7 @@ class TestCcxtGeneric:
     def test_factory_creates_collector(self):
         cls = _make_ccxt_collector("TEST/USDT", "test_usdt", "TEST/USDT")
         assert cls.meta.name == "test_usdt"
-        assert isinstance(cls.meta, SourceMeta)
+        assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_ccxt_collectors_returns_dict(self):
         collectors = get_ccxt_collectors()

@@ -3,13 +3,13 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class EarthquakeCountCollector(BaseCollector):
     """Daily count of M4.5+ earthquakes worldwide (USGS)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="earthquake_count",
         display_name="Daily M4.5+ Earthquake Count",
         update_frequency="daily",

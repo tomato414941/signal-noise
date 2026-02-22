@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _HN_BASE = "https://hacker-news.firebaseio.com/v0"
 
@@ -49,7 +49,7 @@ class _HNListCollector(BaseCollector):
 
 class HNTopCollector(_HNListCollector):
     _endpoint = "topstories"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="hn_top",
         display_name="Hacker News Top Stories Activity",
         update_frequency="hourly",
@@ -61,7 +61,7 @@ class HNTopCollector(_HNListCollector):
 
 class HNBestCollector(_HNListCollector):
     _endpoint = "beststories"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="hn_best",
         display_name="Hacker News Best Stories Activity",
         update_frequency="hourly",
@@ -74,7 +74,7 @@ class HNBestCollector(_HNListCollector):
 class HNNewCollector(_HNListCollector):
     _endpoint = "newstories"
     _sample_size = 50
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="hn_new",
         display_name="Hacker News New Stories Activity",
         update_frequency="hourly",

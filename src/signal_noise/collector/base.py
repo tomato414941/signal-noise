@@ -55,7 +55,7 @@ FREQUENCIES = {"hourly", "daily", "weekly", "monthly", "quarterly", "yearly"}
 
 
 @dataclass
-class SourceMeta:
+class CollectorMeta:
     name: str
     display_name: str
     update_frequency: str
@@ -66,7 +66,7 @@ class SourceMeta:
 
 
 class BaseCollector(ABC):
-    meta: SourceMeta
+    meta: CollectorMeta
 
     def __init__(self, config: CollectorConfig | None = None):
         self.config = config or DEFAULT_COLLECTOR

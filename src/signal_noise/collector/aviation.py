@@ -5,13 +5,13 @@ from collections import Counter
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class OpenSkyTotalCollector(BaseCollector):
     """Total aircraft currently in flight worldwide (OpenSky Network)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="opensky_total",
         display_name="OpenSky: Aircraft In Flight (Total)",
         update_frequency="hourly",
@@ -37,7 +37,7 @@ class OpenSkyTotalCollector(BaseCollector):
 class OpenSkyUSCollector(BaseCollector):
     """Aircraft currently in flight with US origin (OpenSky Network)."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="opensky_us",
         display_name="OpenSky: US Aircraft In Flight",
         update_frequency="hourly",
@@ -62,7 +62,7 @@ class OpenSkyUSCollector(BaseCollector):
 class FR24TotalCollector(BaseCollector):
     """Total aircraft tracked by FlightRadar24."""
 
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="fr24_total",
         display_name="FlightRadar24: Total Aircraft Tracked",
         update_frequency="hourly",

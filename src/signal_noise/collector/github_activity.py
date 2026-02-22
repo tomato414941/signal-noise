@@ -3,7 +3,7 @@ from __future__ import annotations
 import requests
 import pandas as pd
 
-from signal_noise.collector.base import BaseCollector, SourceMeta
+from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class _GithubCommitCollector(BaseCollector):
@@ -50,7 +50,7 @@ class _GithubCommitCollector(BaseCollector):
 class BitcoinCommitsCollector(_GithubCommitCollector):
     _owner = "bitcoin"
     _repo = "bitcoin"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="github_bitcoin",
         display_name="GitHub bitcoin/bitcoin Weekly Commits",
         update_frequency="weekly",
@@ -63,7 +63,7 @@ class BitcoinCommitsCollector(_GithubCommitCollector):
 class EthereumCommitsCollector(_GithubCommitCollector):
     _owner = "ethereum"
     _repo = "go-ethereum"
-    meta = SourceMeta(
+    meta = CollectorMeta(
         name="github_ethereum",
         display_name="GitHub ethereum/go-ethereum Weekly Commits",
         update_frequency="weekly",
