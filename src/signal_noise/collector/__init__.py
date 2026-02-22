@@ -101,6 +101,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.eia_generic import get_eia_collectors
     from signal_noise.collector.bls_generic import get_bls_collectors
     from signal_noise.collector.eurostat_generic import get_eurostat_collectors
+    from signal_noise.collector.mempool_extended import get_mempool_extended_collectors
+    from signal_noise.collector.gdelt import get_gdelt_collectors
+    from signal_noise.collector.census_generic import get_census_collectors
 
     collectors: dict[str, type[BaseCollector]] = {
         "day_of_week": DayOfWeekCollector,
@@ -197,6 +200,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     collectors.update(get_eia_collectors())
     collectors.update(get_bls_collectors())
     collectors.update(get_eurostat_collectors())
+    collectors.update(get_mempool_extended_collectors())
+    collectors.update(get_gdelt_collectors())
+    collectors.update(get_census_collectors())
 
     return collectors
 
