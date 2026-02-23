@@ -42,5 +42,6 @@ class BtcOhlcvCollector(BaseCollector):
 
         df = pd.DataFrame(all_data, columns=["timestamp", "open", "high", "low", "close", "volume"])
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
+        df["value"] = df["close"]
         df = df.drop_duplicates(subset=["timestamp"]).sort_values("timestamp").reset_index(drop=True)
         return df.head(self.total)
