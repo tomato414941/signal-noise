@@ -1,6 +1,6 @@
 # signal-noise
 
-Collect worldwide signals and evaluate predictive power against any target time series.
+Collect worldwide time series and deliver via REST API.
 
 > "even noise is worth collecting -- the signal hides within"
 
@@ -10,9 +10,8 @@ Collect worldwide signals and evaluate predictive power against any target time 
 |------|-----------|---------|
 | **Provider** | External API / service | Yahoo Finance, FRED, CoinGecko |
 | **Collector** | Class that fetches one time series | `BtcOhlcvCollector`, `FearGreedCollector` |
-| **CollectorMeta** | Collector metadata (name, domain, category) | `CollectorMeta(name="fear_greed", ...)` |
-| **Signal** | Data entering the evaluation pipeline (raw or transformed) | `fear_greed`, `fear_greed__z_20` |
-| **Transform** | Function applied to a raw signal to derive a new signal | z-score, SMA ratio, RSI |
+| **CollectorMeta** | Collector metadata (name, domain, category, interval) | `CollectorMeta(name="fear_greed", ...)` |
+| **Signal** | A raw time series delivered via API | `fear_greed`, `btc_ohlcv` |
 | **Domain** | Stable top-level grouping (10 types) | financial, earth, macro |
 | **Category** | Concrete classification (~29 types) | equity, weather, labor |
 
@@ -35,15 +34,13 @@ Collect worldwide signals and evaluate predictive power against any target time 
 
 - **Providers**: ~100 external APIs
 - **Collectors**: ~1,067 time series
-- **Transforms**: 22 functions
-- **Signals**: ~24,500 (collectors × (1 + transforms))
 
 ## Architecture
 
 ```
-Provider (API) → Collector → Parquet/Cache → Evaluator → Report
-                                               ↑
-                                          Transforms
+Scheduler ──→ Collector ──→ SQLite Store ──→ REST API ──→ Consumer
+(per-collector   (API        (WAL mode)      (FastAPI)
+ frequency)       fetch)
 ```
 
 ### Modules
@@ -53,25 +50,34 @@ Provider (API) → Collector → Parquet/Cache → Evaluator → Report
 | `collector/base.py` | `BaseCollector` ABC, `CollectorMeta`, taxonomy constants |
 | `collector/__init__.py` | Collector registry (`COLLECTORS` dict), `collect_all()` |
 | `collector/*.py` | Individual collector implementations |
-| `evaluator/pipeline.py` | Main evaluation loop (align signals, compute metrics) |
-| `evaluator/metrics.py` | `SignalMetrics`, IC/Pearson/directional accuracy |
-| `evaluator/returns.py` | Forward return computation |
-| `evaluator/corrections.py` | Multiple testing correction (FDR, Bonferroni) |
-| `transforms.py` | Signal transform functions (z-score, SMA, RSI, etc.) |
-| `reporter/report.py` | Text/JSON report generation |
+| `store/sqlite_store.py` | `SignalStore` — SQLite WAL storage for time series + metadata |
+| `store/migration.py` | Parquet → SQLite migration |
+| `scheduler/loop.py` | asyncio scheduler — per-collector intervals |
+| `api/app.py` | FastAPI REST API for data delivery |
 | `cli.py` | CLI entrypoint |
-| `config.py` | Paths, `CollectorConfig`, `EvaluationConfig` |
+| `config.py` | Paths, `CollectorConfig` |
 
 ## CLI
 
 ```bash
-python -m signal_noise collect              # Fetch all collectors
+python -m signal_noise collect              # Fetch all collectors (SQLite)
 python -m signal_noise collect -s fear_greed # Fetch specific collector
-python -m signal_noise evaluate             # Run evaluation pipeline
-python -m signal_noise evaluate --top 20    # Show top 20 signals
-python -m signal_noise report               # Show latest report
+python -m signal_noise collect --parquet    # Use legacy Parquet storage
 python -m signal_noise list                 # List collectors with status
-python -m signal_noise count                # Show signal count
+python -m signal_noise count                # Show collector count
+python -m signal_noise serve                # Start scheduler + REST API
+python -m signal_noise serve --migrate      # Import Parquet data first
+python -m signal_noise serve --no-scheduler # API only
+```
+
+## REST API
+
+```
+GET /health                        # Service health check
+GET /signals                       # List all signals (name, domain, category, ...)
+GET /signals/{name}                # Signal metadata
+GET /signals/{name}/data?since=... # Time series data (timestamp, value)
+GET /signals/{name}/latest         # Latest value + timestamp
 ```
 
 ## Adding a New Collector

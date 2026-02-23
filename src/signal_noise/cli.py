@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import logging
 
+log = logging.getLogger(__name__)
+
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
@@ -14,9 +16,20 @@ def main(argv: list[str] | None = None) -> None:
     p_collect = sub.add_parser("collect", help="Fetch data from collectors")
     p_collect.add_argument("--collector", "-s", help="Specific collector name")
     p_collect.add_argument("--force", action="store_true", help="Ignore cache")
+    p_collect.add_argument("--parquet", action="store_true", help="Use legacy Parquet storage")
 
     sub.add_parser("list", help="List available collectors with status")
     sub.add_parser("count", help="Show collector count")
+
+    p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
+    p_serve.add_argument("--host", default="0.0.0.0", help="API bind host")
+    p_serve.add_argument("--port", type=int, default=8000, help="API bind port")
+    p_serve.add_argument(
+        "--no-scheduler", action="store_true", help="API only, skip collector scheduling"
+    )
+    p_serve.add_argument(
+        "--migrate", action="store_true", help="Import existing Parquet files before starting"
+    )
 
     args = parser.parse_args(argv)
     logging.basicConfig(
@@ -30,13 +43,18 @@ def main(argv: list[str] | None = None) -> None:
         _cmd_list()
     elif args.command == "count":
         _cmd_count()
+    elif args.command == "serve":
+        _cmd_serve(args)
     else:
         parser.print_help()
 
 
 def _cmd_collect(args: argparse.Namespace) -> None:
     from signal_noise.collector import COLLECTORS, collect_all
-    from signal_noise.config import CACHE_DIR
+    from signal_noise.config import CACHE_DIR, DB_PATH
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = None if args.parquet else SignalStore(DB_PATH)
 
     collectors = [args.collector] if args.collector else None
     if args.force:
@@ -44,9 +62,12 @@ def _cmd_collect(args: argparse.Namespace) -> None:
             cache = CACHE_DIR / f"{name}.json"
             if cache.exists():
                 cache.unlink()
-    results = collect_all(collectors)
+    results = collect_all(collectors, store=store)
     for name, df in results.items():
         print(f"  {name}: {len(df)} rows")
+
+    if store:
+        store.close()
 
 
 def _cmd_list() -> None:
@@ -73,3 +94,45 @@ def _cmd_count() -> None:
     from signal_noise.collector import COLLECTORS
 
     print(f"Collectors: {len(COLLECTORS)}")
+
+
+def _cmd_serve(args: argparse.Namespace) -> None:
+    import asyncio
+
+    import uvicorn
+
+    from signal_noise.config import DB_PATH, RAW_DIR
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = SignalStore(DB_PATH)
+
+    if args.migrate:
+        from signal_noise.collector import COLLECTORS
+        from signal_noise.store.migration import migrate_parquet_to_sqlite
+
+        count = migrate_parquet_to_sqlite(RAW_DIR, store, COLLECTORS)
+        log.info("Migrated %d signals from Parquet", count)
+
+    import signal_noise.api.app as api_mod
+
+    api_mod._store = store
+
+    async def _run() -> None:
+        tasks = []
+        if not args.no_scheduler:
+            from signal_noise.scheduler.loop import run_scheduler
+
+            tasks.append(asyncio.create_task(run_scheduler(store)))
+
+        config = uvicorn.Config(
+            api_mod.app,
+            host=args.host,
+            port=args.port,
+            log_level="info",
+        )
+        server = uvicorn.Server(config)
+        tasks.append(asyncio.create_task(server.serve()))
+
+        await asyncio.gather(*tasks)
+
+    asyncio.run(_run())
