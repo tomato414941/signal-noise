@@ -71,7 +71,7 @@ class TestSignalStore:
         assert len(signals) == 2
         assert signals[0]["name"] == "btc"
         assert signals[0]["domain"] == "financial"
-        assert signals[0]["interval_s"] == 3600
+        assert signals[0]["interval"] == 3600
 
     def test_get_meta(self, store: SignalStore) -> None:
         store.save_meta("btc", "financial", "crypto", 3600)
