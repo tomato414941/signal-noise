@@ -7,6 +7,7 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = PROJECT_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 CACHE_DIR = DATA_DIR / "cache"
+DB_PATH = DATA_DIR / "signals.db"
 
 
 @dataclass

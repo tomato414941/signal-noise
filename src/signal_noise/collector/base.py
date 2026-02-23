@@ -6,10 +6,14 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
 from signal_noise.config import CACHE_DIR, RAW_DIR, DEFAULT_COLLECTOR, CollectorConfig
+
+if TYPE_CHECKING:
+    from signal_noise.store.sqlite_store import SignalStore
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +60,15 @@ CATEGORIES = {
 # update_frequency: allowed values
 FREQUENCIES = {"hourly", "daily", "weekly", "monthly", "quarterly", "yearly"}
 
+FREQUENCY_TO_SECONDS: dict[str, int] = {
+    "hourly": 3600,
+    "daily": 86400,
+    "weekly": 604800,
+    "monthly": 2592000,
+    "quarterly": 7776000,
+    "yearly": 31536000,
+}
+
 
 @dataclass
 class CollectorMeta:
@@ -66,6 +79,10 @@ class CollectorMeta:
     requires_key: bool = False
     domain: str = ""       # top-level grouping
     category: str = ""     # concrete classification
+
+    @property
+    def interval(self) -> int:
+        return FREQUENCY_TO_SECONDS[self.update_frequency]
 
 
 class BaseCollector(ABC):
@@ -85,17 +102,28 @@ class BaseCollector(ABC):
     def parquet_path(self) -> Path:
         return RAW_DIR / f"{self.meta.name}.parquet"
 
-    def collect(self) -> pd.DataFrame:
+    def collect(self, store: SignalStore | None = None) -> pd.DataFrame:
         cache = self.cache_path()
         if cache.exists():
             age_hours = (time.time() - cache.stat().st_mtime) / 3600
             if age_hours < self.config.cache_max_age_hours:
                 log.debug("Using cache for %s (%.1fh old)", self.meta.name, age_hours)
+                if store:
+                    df = store.get_data(self.meta.name)
+                    if not df.empty:
+                        return df
                 return self._read_parquet()
 
         df = self._fetch_with_retry()
         self._save_cache(df)
-        self._save_parquet(df)
+        if store:
+            store.save(self.meta.name, df)
+            store.save_meta(
+                self.meta.name, self.meta.domain,
+                self.meta.category, self.meta.interval,
+            )
+        else:
+            self._save_parquet(df)
         return df
 
     def _fetch_with_retry(self) -> pd.DataFrame:

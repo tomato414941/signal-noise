@@ -357,7 +357,10 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
 COLLECTORS = _get_collectors()
 
 
-def collect_all(collectors: list[str] | None = None) -> dict[str, pd.DataFrame]:
+def collect_all(
+    collectors: list[str] | None = None,
+    store: "SignalStore | None" = None,
+) -> dict[str, pd.DataFrame]:
     targets = collectors or list(COLLECTORS.keys())
     results: dict[str, pd.DataFrame] = {}
     for name in targets:
@@ -367,7 +370,7 @@ def collect_all(collectors: list[str] | None = None) -> dict[str, pd.DataFrame]:
             continue
         try:
             collector = cls()
-            results[name] = collector.collect()
+            results[name] = collector.collect(store=store)
         except Exception as e:
             log.warning("Failed to collect %s: %s", name, e)
     return results
