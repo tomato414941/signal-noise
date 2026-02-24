@@ -15,8 +15,8 @@ def _normalize_ts(ts) -> str:
             ts = ts.tz_localize("UTC")
         return ts.isoformat()
     s = str(ts)
-    # "2025-02-24 00:00:00+00:00" → "2025-02-24T00:00:00+00:00"
-    if len(s) >= 19 and s[10] == " " and (len(s) == 19 or s[19] in ("+", "-")):
+    # "2025-02-24 00:00:00+00:00" or "2025-02-24 14:30:01.142929+00:00"
+    if len(s) >= 19 and s[10] == " ":
         s = s[:10] + "T" + s[11:]
     return s
 
@@ -72,10 +72,19 @@ class SignalStore:
             )
 
         # Normalize existing space-separated timestamps to ISO 8601 T-separator
+        # Step 1: delete space-separated rows where a T-separated duplicate exists
         self._conn.execute(
-            "UPDATE signals SET timestamp = REPLACE(timestamp, ' ', 'T')"
+            "DELETE FROM signals WHERE substr(timestamp, 11, 1) = ' '"
+            " AND EXISTS (SELECT 1 FROM signals b"
+            " WHERE b.name = signals.name"
+            " AND b.timestamp = substr(signals.timestamp, 1, 10)"
+            " || 'T' || substr(signals.timestamp, 12))"
+        )
+        # Step 2: convert remaining space-separated timestamps
+        self._conn.execute(
+            "UPDATE signals"
+            " SET timestamp = substr(timestamp, 1, 10) || 'T' || substr(timestamp, 12)"
             " WHERE length(timestamp) >= 19 AND substr(timestamp, 11, 1) = ' '"
-            " AND (length(timestamp) = 19 OR substr(timestamp, 20, 1) IN ('+', '-'))"
         )
         self._conn.commit()
 
