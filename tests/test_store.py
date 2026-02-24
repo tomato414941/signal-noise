@@ -100,6 +100,91 @@ class TestSignalStore:
         assert list(result.columns) == ["timestamp", "value"]
 
 
+class TestOHLCV:
+    def test_save_ohlcv_data(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01", "2024-01-02"],
+            "value": [100.0, 110.0],
+            "open": [95.0, 105.0],
+            "high": [105.0, 115.0],
+            "low": [90.0, 100.0],
+            "volume": [1000.0, 1200.0],
+        })
+        store.save("btc", df)
+        result = store.get_data("btc")
+        assert len(result) == 2
+        assert "open" in result.columns
+        assert "high" in result.columns
+        assert "low" in result.columns
+        assert "volume" in result.columns
+        assert result.iloc[0]["open"] == 95.0
+        assert result.iloc[1]["high"] == 115.0
+
+    def test_scalar_data_no_ohlcv_columns(self, store: SignalStore) -> None:
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [42.0]})
+        store.save("scalar_sig", df)
+        result = store.get_data("scalar_sig")
+        assert list(result.columns) == ["timestamp", "value"]
+
+    def test_get_data_columns_filter(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01"],
+            "value": [100.0],
+            "open": [95.0],
+            "high": [105.0],
+            "low": [90.0],
+            "volume": [1000.0],
+        })
+        store.save("btc", df)
+        result = store.get_data("btc", columns=["timestamp", "high", "low"])
+        assert list(result.columns) == ["timestamp", "high", "low"]
+
+    def test_get_latest_ohlcv(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01"],
+            "value": [100.0],
+            "open": [95.0],
+            "high": [105.0],
+            "low": [90.0],
+            "volume": [1000.0],
+        })
+        store.save("btc", df)
+        latest = store.get_latest("btc")
+        assert latest is not None
+        assert latest["open"] == 95.0
+        assert latest["volume"] == 1000.0
+
+    def test_get_latest_scalar_no_ohlcv(self, store: SignalStore) -> None:
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [42.0]})
+        store.save("s", df)
+        latest = store.get_latest("s")
+        assert latest is not None
+        assert "open" not in latest
+        assert "high" not in latest
+
+
+class TestSignalType:
+    def test_save_meta_with_signal_type(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        meta = store.get_meta("btc")
+        assert meta is not None
+        assert meta["signal_type"] == "ohlcv"
+
+    def test_signal_type_default(self, store: SignalStore) -> None:
+        store.save_meta("fear_greed", "sentiment", "sentiment", 86400)
+        meta = store.get_meta("fear_greed")
+        assert meta is not None
+        assert meta["signal_type"] == "scalar"
+
+    def test_signal_type_in_list(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("fear", "sentiment", "sentiment", 86400)
+        signals = store.list_signals()
+        types = {s["name"]: s["signal_type"] for s in signals}
+        assert types["btc"] == "ohlcv"
+        assert types["fear"] == "scalar"
+
+
 class TestMigration:
     def test_migrate_parquet_files(self, store: SignalStore, tmp_path: Path) -> None:
         from signal_noise.store.migration import migrate_parquet_to_sqlite
