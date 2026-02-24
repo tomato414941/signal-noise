@@ -26,8 +26,10 @@ class BtcOhlcvCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         exchange = ccxt.binance({"enableRateLimit": True})
+        tf_ms = {"1m": 60_000, "5m": 300_000, "1h": 3_600_000, "4h": 14_400_000, "1d": 86_400_000}
+        candle_ms = tf_ms.get(self.timeframe, 3_600_000)
+        since = exchange.milliseconds() - self.total * candle_ms
         all_data: list[list] = []
-        since = None
         while len(all_data) < self.total:
             batch = exchange.fetch_ohlcv(
                 self.symbol, self.timeframe, since=since, limit=1000

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 import ccxt
 import pandas as pd
 
@@ -42,18 +44,35 @@ def _make_ccxt_collector(
             category="crypto",
         )
 
+        def __init__(self, total: int = 5000, **kwargs):
+            super().__init__(**kwargs)
+            self.total = total
+
         def fetch(self) -> pd.DataFrame:
             exchange = ccxt.binance({"enableRateLimit": True})
-            ohlcv = exchange.fetch_ohlcv(pair, "1h", limit=1000)
+            since = exchange.milliseconds() - self.total * 3_600_000
+            all_data: list[list] = []
+            while len(all_data) < self.total:
+                batch = exchange.fetch_ohlcv(
+                    pair, "1h", since=since, limit=1000
+                )
+                if not batch:
+                    break
+                all_data.extend(batch)
+                since = batch[-1][0] + 1
+                if len(batch) < 1000:
+                    break
+                time.sleep(0.2)
+
             df = pd.DataFrame(
-                ohlcv,
+                all_data,
                 columns=["timestamp", "open", "high", "low", "close", "volume"],
             )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
             df["value"] = df["close"]
             df = df[["timestamp", "value"]].drop_duplicates(subset=["timestamp"])
             df = df.sort_values("timestamp").reset_index(drop=True)
-            return df
+            return df.head(self.total)
 
     _Collector.__name__ = f"Ccxt_{name}"
     _Collector.__qualname__ = f"Ccxt_{name}"

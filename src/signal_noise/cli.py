@@ -21,6 +21,11 @@ def main(argv: list[str] | None = None) -> None:
     sub.add_parser("list", help="List available collectors with status")
     sub.add_parser("count", help="Show collector count")
 
+    p_backfill = sub.add_parser("backfill", help="Fetch extended historical data")
+    p_backfill.add_argument("--collector", "-s", help="Specific collector name")
+    p_backfill.add_argument("--category", "-c", help="Collector category (e.g. crypto)")
+    p_backfill.add_argument("--total", "-t", type=int, default=20000, help="Total rows to fetch")
+
     p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
     p_serve.add_argument("--host", default="0.0.0.0", help="API bind host")
     p_serve.add_argument("--port", type=int, default=8000, help="API bind port")
@@ -39,6 +44,8 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.command == "collect":
         _cmd_collect(args)
+    elif args.command == "backfill":
+        _cmd_backfill(args)
     elif args.command == "list":
         _cmd_list()
     elif args.command == "count":
@@ -68,6 +75,52 @@ def _cmd_collect(args: argparse.Namespace) -> None:
 
     if store:
         store.close()
+
+
+def _cmd_backfill(args: argparse.Namespace) -> None:
+    from signal_noise.collector import COLLECTORS
+    from signal_noise.config import CACHE_DIR, DB_PATH
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = SignalStore(DB_PATH)
+    total = args.total
+
+    targets: list[str] = []
+    if args.collector:
+        targets = [args.collector]
+    elif args.category:
+        for name, cls in COLLECTORS.items():
+            if cls().meta.category == args.category:
+                targets.append(name)
+    else:
+        targets = list(COLLECTORS.keys())
+
+    if not targets:
+        print("No collectors matched.")
+        store.close()
+        return
+
+    print(f"Backfilling {len(targets)} collectors (total={total})...")
+    for name in targets:
+        cls = COLLECTORS.get(name)
+        if not cls:
+            log.warning("Unknown collector: %s", name)
+            continue
+        try:
+            collector = cls(total=total)
+        except TypeError:
+            collector = cls()
+        # Clear cache to force fresh fetch
+        cache = CACHE_DIR / f"{name}.json"
+        if cache.exists():
+            cache.unlink()
+        try:
+            df = collector.collect(store=store)
+            print(f"  {name}: {len(df)} rows")
+        except Exception as e:
+            log.warning("Failed to backfill %s: %s", name, e)
+
+    store.close()
 
 
 def _cmd_list() -> None:
