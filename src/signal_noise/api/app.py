@@ -84,6 +84,26 @@ def signal_latest(name: str) -> dict:
     return latest
 
 
+@app.get("/signals/{name}/anomalies")
+def signal_anomalies(name: str, lookback: int = Query(100)) -> dict:
+    store = get_store()
+    meta = store.get_meta(name)
+    if not meta:
+        raise HTTPException(404, f"Signal not found: {name}")
+    # Check most recent data point against history
+    df = store.get_data(name)
+    if df.empty:
+        return {"name": name, "anomalies": []}
+    recent = df.tail(1)
+    anomalies = store.check_anomalies(name, recent, lookback=lookback)
+    return {"name": name, "anomalies": anomalies}
+
+
+@app.get("/audit")
+def audit_log(name: str | None = Query(None), limit: int = Query(100)) -> list[dict]:
+    return get_store().get_audit_log(name=name, limit=limit)
+
+
 class BatchRequest(BaseModel):
     names: list[str]
     since: str | None = None

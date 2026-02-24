@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 import sqlite3
 from pathlib import Path
 
 import pandas as pd
+
+log = logging.getLogger(__name__)
 
 _OHLCV_COLS = ("open", "high", "low", "volume")
 
@@ -51,6 +54,14 @@ class SignalStore:
                 interval     INTEGER NOT NULL DEFAULT 86400,
                 signal_type  TEXT NOT NULL DEFAULT 'scalar',
                 last_updated TEXT
+            );
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+                name      TEXT NOT NULL,
+                event     TEXT NOT NULL,
+                rows      INTEGER,
+                detail    TEXT
             );
         """)
 
@@ -212,6 +223,50 @@ class SignalStore:
                 stale.append(d)
         return stale
 
+    def check_anomalies(
+        self, name: str, df: pd.DataFrame, *, z_threshold: float = 4.0,
+        lookback: int = 100,
+    ) -> list[dict]:
+        """Detect outliers in new data against recent history using z-scores.
+
+        Returns list of anomaly dicts with timestamp, value, z_score, mean, std.
+        Does NOT modify data — caller decides whether to save.
+        """
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        new_values = df[val_col].dropna()
+        if new_values.empty:
+            return []
+
+        # Fetch recent history for comparison
+        rows = self._conn.execute(
+            "SELECT value FROM signals WHERE name = ? AND value IS NOT NULL"
+            " ORDER BY timestamp DESC LIMIT ?",
+            (name, lookback),
+        ).fetchall()
+        if len(rows) < 10:
+            return []  # Not enough history to judge
+
+        hist = pd.Series([r[0] for r in rows], dtype=float)
+        mean = hist.mean()
+        std = hist.std()
+        if std == 0 or pd.isna(std):
+            return []
+
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        anomalies = []
+        for idx, val in new_values.items():
+            z = abs((val - mean) / std)
+            if z > z_threshold:
+                ts = str(df[ts_col].loc[idx]) if ts_col in df.columns else ""
+                anomalies.append({
+                    "timestamp": ts,
+                    "value": float(val),
+                    "z_score": round(float(z), 2),
+                    "mean": round(float(mean), 4),
+                    "std": round(float(std), 4),
+                })
+        return anomalies
+
     def reset_failures(self, name: str) -> None:
         self._conn.execute(
             "UPDATE signal_meta SET consecutive_failures = 0 WHERE name = ?",
@@ -226,6 +281,26 @@ class SignalStore:
             (name,),
         )
         self._conn.commit()
+
+    def log_event(self, name: str, event: str, rows: int = 0, detail: str = "") -> None:
+        self._conn.execute(
+            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
+            (name, event, rows, detail),
+        )
+        self._conn.commit()
+
+    def get_audit_log(self, name: str | None = None, limit: int = 100) -> list[dict]:
+        if name:
+            rows = self._conn.execute(
+                "SELECT * FROM audit_log WHERE name = ? ORDER BY id DESC LIMIT ?",
+                (name, limit),
+            ).fetchall()
+        else:
+            rows = self._conn.execute(
+                "SELECT * FROM audit_log ORDER BY id DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return [dict(r) for r in rows]
 
     def close(self) -> None:
         self._conn.close()
