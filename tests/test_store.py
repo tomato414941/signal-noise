@@ -351,3 +351,91 @@ class TestMigration:
 
         count = migrate_parquet_to_sqlite(tmp_path / "nope", store, {})
         assert count == 0
+
+
+class TestAnomalies:
+    def test_no_anomaly_insufficient_history(self, store: SignalStore) -> None:
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [100.0]})
+        result = store.check_anomalies("s", df)
+        assert result == []
+
+    def test_no_anomaly_normal_value(self, store: SignalStore) -> None:
+        # Seed history
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i * 0.1 for i in range(20)],
+        })
+        store.save("s", hist)
+        # New data within normal range
+        new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [101.0]})
+        result = store.check_anomalies("s", new)
+        assert result == []
+
+    def test_detects_anomaly(self, store: SignalStore) -> None:
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i * 0.01 for i in range(20)],
+        })
+        store.save("s", hist)
+        # Extreme outlier
+        new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [999999.0]})
+        result = store.check_anomalies("s", new)
+        assert len(result) == 1
+        assert result[0]["value"] == 999999.0
+        assert result[0]["z_score"] > 4.0
+
+    def test_custom_threshold(self, store: SignalStore) -> None:
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i for i in range(20)],
+        })
+        store.save("s", hist)
+        new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [200.0]})
+        # Strict threshold should flag more
+        strict = store.check_anomalies("s", new, z_threshold=1.0)
+        # Lenient threshold should flag fewer
+        lenient = store.check_anomalies("s", new, z_threshold=20.0)
+        assert len(strict) >= len(lenient)
+
+    def test_zero_std(self, store: SignalStore) -> None:
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0] * 20,
+        })
+        store.save("s", hist)
+        # Different value but std=0 → no anomaly reported (can't compute z)
+        new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [200.0]})
+        result = store.check_anomalies("s", new)
+        assert result == []
+
+
+class TestAuditLog:
+    def test_log_event(self, store: SignalStore) -> None:
+        store.log_event("btc", "collected", rows=10)
+        logs = store.get_audit_log("btc")
+        assert len(logs) == 1
+        assert logs[0]["name"] == "btc"
+        assert logs[0]["event"] == "collected"
+        assert logs[0]["rows"] == 10
+
+    def test_log_multiple_events(self, store: SignalStore) -> None:
+        store.log_event("btc", "collected", rows=10)
+        store.log_event("btc", "failed", detail="timeout")
+        store.log_event("eth", "collected", rows=5)
+        all_logs = store.get_audit_log()
+        assert len(all_logs) == 3
+        btc_logs = store.get_audit_log("btc")
+        assert len(btc_logs) == 2
+
+    def test_log_limit(self, store: SignalStore) -> None:
+        for i in range(10):
+            store.log_event("btc", "collected", rows=i)
+        logs = store.get_audit_log("btc", limit=3)
+        assert len(logs) == 3
+        # Most recent first
+        assert logs[0]["rows"] == 9
+
+    def test_log_timestamp_format(self, store: SignalStore) -> None:
+        store.log_event("btc", "collected")
+        logs = store.get_audit_log("btc")
+        assert "T" in logs[0]["timestamp"]

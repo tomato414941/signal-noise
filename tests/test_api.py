@@ -254,3 +254,55 @@ class TestBatch:
         })
         row = r.json()["btc"][0]
         assert set(row.keys()) == {"timestamp", "high", "low"}
+
+
+class TestAnomaliesAPI:
+    def test_anomalies_not_found(self, client: TestClient) -> None:
+        r = client.get("/signals/nonexistent/anomalies")
+        assert r.status_code == 404
+
+    def test_anomalies_empty(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        r = client.get("/signals/btc/anomalies")
+        assert r.status_code == 200
+        assert r.json()["anomalies"] == []
+
+    def test_anomalies_detected(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        # Seed history with small variance
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i * 0.1 for i in range(20)],
+        })
+        store.save("btc", hist)
+        # Add extreme outlier as latest
+        outlier = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [999999.0]})
+        store.save("btc", outlier)
+        r = client.get("/signals/btc/anomalies")
+        assert r.status_code == 200
+        data = r.json()
+        assert len(data["anomalies"]) == 1
+        assert data["anomalies"][0]["z_score"] > 4.0
+
+
+class TestAuditAPI:
+    def test_audit_empty(self, client: TestClient) -> None:
+        r = client.get("/audit")
+        assert r.status_code == 200
+        assert r.json() == []
+
+    def test_audit_with_events(self, client: TestClient, store: SignalStore) -> None:
+        store.log_event("btc", "collected", rows=10)
+        store.log_event("eth", "failed", detail="timeout")
+        r = client.get("/audit")
+        assert r.status_code == 200
+        assert len(r.json()) == 2
+
+    def test_audit_filter_by_name(self, client: TestClient, store: SignalStore) -> None:
+        store.log_event("btc", "collected", rows=10)
+        store.log_event("eth", "collected", rows=5)
+        r = client.get("/audit?name=btc")
+        assert r.status_code == 200
+        data = r.json()
+        assert len(data) == 1
+        assert data[0]["name"] == "btc"
