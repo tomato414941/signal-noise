@@ -24,6 +24,7 @@ async def run_collector_loop(
                 collector.meta.domain,
                 collector.meta.category,
                 collector.meta.interval,
+                collector.meta.signal_type,
             )
             log.info("Collected %s: %d rows", collector.meta.name, len(df))
         except Exception:

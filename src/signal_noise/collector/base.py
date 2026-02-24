@@ -79,6 +79,7 @@ class CollectorMeta:
     requires_key: bool = False
     domain: str = ""       # top-level grouping
     category: str = ""     # concrete classification
+    signal_type: str = "scalar"  # "scalar" or "ohlcv"
 
     @property
     def interval(self) -> int:
@@ -121,6 +122,7 @@ class BaseCollector(ABC):
             store.save_meta(
                 self.meta.name, self.meta.domain,
                 self.meta.category, self.meta.interval,
+                self.meta.signal_type,
             )
         else:
             self._save_parquet(df)

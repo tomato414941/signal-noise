@@ -157,6 +157,7 @@ def _make_yahoo_collector(
             api_docs_url=f"https://finance.yahoo.com/quote/{ticker}/",
             domain=domain,
             category=category,
+            signal_type="ohlcv",
         )
 
     _Collector.__name__ = f"Yahoo_{name}"

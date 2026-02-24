@@ -42,6 +42,7 @@ def _make_ccxt_collector(
             api_docs_url="https://binance-docs.github.io/apidocs/spot/en/",
             domain="financial",
             category="crypto",
+            signal_type="ohlcv",
         )
 
         def __init__(self, total: int = 5000, **kwargs):
@@ -70,7 +71,8 @@ def _make_ccxt_collector(
             )
             df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
             df["value"] = df["close"]
-            df = df[["timestamp", "value"]].drop_duplicates(subset=["timestamp"])
+            df = df[["timestamp", "value", "open", "high", "low", "volume"]]
+            df = df.drop_duplicates(subset=["timestamp"])
             df = df.sort_values("timestamp").reset_index(drop=True)
             return df.head(self.total)
 

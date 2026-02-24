@@ -14,9 +14,14 @@ class _YahooCollector(BaseCollector):
         hist = ticker.history(period="2y", interval="1d")
         if hist.empty:
             raise RuntimeError(f"No data returned for {self._ticker}")
+        ts = hist.index.tz_localize("UTC") if hist.index.tz is None else hist.index.tz_convert("UTC")
         df = pd.DataFrame({
-            "date": hist.index.tz_localize("UTC") if hist.index.tz is None else hist.index.tz_convert("UTC"),
+            "date": ts,
             "value": hist["Close"].values,
+            "open": hist["Open"].values,
+            "high": hist["High"].values,
+            "low": hist["Low"].values,
+            "volume": hist["Volume"].values,
         })
         df = df.sort_values("date").reset_index(drop=True)
         return df
@@ -31,6 +36,7 @@ class DXYCollector(_YahooCollector):
         api_docs_url="https://finance.yahoo.com/quote/DX-Y.NYB/",
         domain="financial",
         category="forex",
+        signal_type="ohlcv",
     )
 
 
@@ -43,6 +49,7 @@ class GoldCollector(_YahooCollector):
         api_docs_url="https://finance.yahoo.com/quote/GC=F/",
         domain="financial",
         category="commodity",
+        signal_type="ohlcv",
     )
 
 
@@ -55,4 +62,5 @@ class SP500Collector(_YahooCollector):
         api_docs_url="https://finance.yahoo.com/quote/%5EGSPC/",
         domain="financial",
         category="equity",
+        signal_type="ohlcv",
     )
