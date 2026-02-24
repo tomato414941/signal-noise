@@ -26,9 +26,11 @@ async def run_collector_loop(
                 collector.meta.interval,
                 collector.meta.signal_type,
             )
+            store.reset_failures(collector.meta.name)
             log.info("Collected %s: %d rows", collector.meta.name, len(df))
         except Exception:
             log.exception("Collector %s failed", collector.meta.name)
+            store.increment_failures(collector.meta.name)
         await asyncio.sleep(interval)
 
 

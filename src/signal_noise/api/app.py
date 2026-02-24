@@ -19,7 +19,22 @@ def get_store() -> SignalStore:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok"}
+    store = get_store()
+    stale = store.check_freshness()
+    return {
+        "status": "degraded" if stale else "ok",
+        "stale_count": len(stale),
+    }
+
+
+@app.get("/health/signals")
+def health_signals() -> dict:
+    store = get_store()
+    stale = store.check_freshness()
+    return {
+        "stale_count": len(stale),
+        "stale_signals": stale,
+    }
 
 
 @app.get("/signals")

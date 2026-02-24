@@ -8,6 +8,19 @@ import pandas as pd
 _OHLCV_COLS = ("open", "high", "low", "volume")
 
 
+def _normalize_ts(ts) -> str:
+    """Normalize timestamp to ISO 8601 format (T-separator)."""
+    if isinstance(ts, pd.Timestamp):
+        if ts.tzinfo is None:
+            ts = ts.tz_localize("UTC")
+        return ts.isoformat()
+    s = str(ts)
+    # "2025-02-24 00:00:00+00:00" → "2025-02-24T00:00:00+00:00"
+    if len(s) >= 19 and s[10] == " " and (len(s) == 19 or s[19] in ("+", "-")):
+        s = s[:10] + "T" + s[11:]
+    return s
+
+
 class SignalStore:
     """SQLite-backed storage for time-series signals (WAL mode)."""
 
@@ -53,6 +66,17 @@ class SignalStore:
             self._conn.execute(
                 "ALTER TABLE signal_meta ADD COLUMN signal_type TEXT NOT NULL DEFAULT 'scalar'"
             )
+        if "consecutive_failures" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN consecutive_failures INTEGER NOT NULL DEFAULT 0"
+            )
+
+        # Normalize existing space-separated timestamps to ISO 8601 T-separator
+        self._conn.execute(
+            "UPDATE signals SET timestamp = REPLACE(timestamp, ' ', 'T')"
+            " WHERE length(timestamp) >= 19 AND substr(timestamp, 11, 1) = ' '"
+            " AND (length(timestamp) = 19 OR substr(timestamp, 20, 1) IN ('+', '-'))"
+        )
         self._conn.commit()
 
     def save(self, name: str, df: pd.DataFrame) -> None:
@@ -64,17 +88,18 @@ class SignalStore:
 
         rows = []
         for _, row in df.iterrows():
+            ts = _normalize_ts(row[ts_col])
             val = float(row[val_col]) if pd.notna(row[val_col]) else None
             if has_ohlcv:
                 rows.append((
-                    name, str(row[ts_col]), val,
+                    name, ts, val,
                     float(row["open"]) if pd.notna(row["open"]) else None,
                     float(row["high"]) if pd.notna(row["high"]) else None,
                     float(row["low"]) if pd.notna(row["low"]) else None,
                     float(row["volume"]) if pd.notna(row["volume"]) else None,
                 ))
             else:
-                rows.append((name, str(row[ts_col]), val, None, None, None, None))
+                rows.append((name, ts, val, None, None, None, None))
 
         self._conn.executemany(
             "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
@@ -82,7 +107,8 @@ class SignalStore:
             rows,
         )
         self._conn.execute(
-            "UPDATE signal_meta SET last_updated = datetime('now') WHERE name = ?",
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')"
+            " WHERE name = ?",
             (name,),
         )
         self._conn.commit()
@@ -94,7 +120,7 @@ class SignalStore:
         self._conn.execute(
             """INSERT OR REPLACE INTO signal_meta
                (name, domain, category, interval, signal_type, last_updated)
-               VALUES (?, ?, ?, ?, ?, datetime('now'))""",
+               VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))""",
             (name, domain, category, interval, signal_type),
         )
         self._conn.commit()
@@ -114,7 +140,7 @@ class SignalStore:
         where = "name = ?"
         if since:
             where += " AND timestamp >= ?"
-            params.append(since)
+            params.append(_normalize_ts(since))
 
         rows = self._conn.execute(
             f"SELECT {col_sql} FROM signals WHERE {where} ORDER BY timestamp",
@@ -159,6 +185,38 @@ class SignalStore:
             "SELECT * FROM signal_meta ORDER BY name"
         ).fetchall()
         return [dict(r) for r in rows]
+
+    def check_freshness(self, threshold_factor: float = 2.0) -> list[dict]:
+        """Return signals that haven't been updated within threshold_factor * interval."""
+        rows = self._conn.execute("""
+            SELECT name, signal_type, interval, last_updated, consecutive_failures,
+                   CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)
+                       AS age_seconds
+            FROM signal_meta
+            WHERE last_updated IS NOT NULL
+        """).fetchall()
+        stale = []
+        for r in rows:
+            d = dict(r)
+            if d["age_seconds"] > d["interval"] * threshold_factor:
+                d["expected_interval"] = d["interval"]
+                stale.append(d)
+        return stale
+
+    def reset_failures(self, name: str) -> None:
+        self._conn.execute(
+            "UPDATE signal_meta SET consecutive_failures = 0 WHERE name = ?",
+            (name,),
+        )
+        self._conn.commit()
+
+    def increment_failures(self, name: str) -> None:
+        self._conn.execute(
+            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1"
+            " WHERE name = ?",
+            (name,),
+        )
+        self._conn.commit()
 
     def close(self) -> None:
         self._conn.close()
