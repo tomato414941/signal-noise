@@ -185,6 +185,145 @@ class TestSignalType:
         assert types["fear"] == "scalar"
 
 
+class TestTimestampNormalization:
+    def test_save_normalizes_space_to_t(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": pd.to_datetime(["2024-01-01 12:00:00+00:00"]),
+            "value": [1.0],
+        })
+        store.save("s", df)
+        row = store._conn.execute("SELECT timestamp FROM signals WHERE name = 's'").fetchone()
+        assert "T" in row[0]
+        assert " " not in row[0][:19]
+
+    def test_save_normalizes_pandas_timestamp(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": [pd.Timestamp("2024-06-15 08:30:00", tz="UTC")],
+            "value": [42.0],
+        })
+        store.save("s", df)
+        row = store._conn.execute("SELECT timestamp FROM signals WHERE name = 's'").fetchone()
+        assert row[0].startswith("2024-06-15T08:30:00")
+
+    def test_since_works_with_t_format(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00", "2024-01-02T00:00:00", "2024-01-03T00:00:00"],
+            "value": [1.0, 2.0, 3.0],
+        })
+        store.save("s", df)
+        result = store.get_data("s", since="2024-01-02T00:00:00")
+        assert len(result) == 2
+
+    def test_since_normalizes_space_format(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00", "2024-01-02T00:00:00"],
+            "value": [1.0, 2.0],
+        })
+        store.save("s", df)
+        # Pass space-separated since — should still work
+        result = store.get_data("s", since="2024-01-02 00:00:00")
+        assert len(result) == 1
+
+    def test_migrate_normalizes_existing_space_timestamps(self, tmp_path) -> None:
+        import sqlite3
+
+        db_path = tmp_path / "legacy.db"
+        conn = sqlite3.connect(str(db_path))
+        conn.execute(
+            "CREATE TABLE signals (name TEXT, timestamp TEXT, value REAL,"
+            " open REAL, high REAL, low REAL, volume REAL,"
+            " PRIMARY KEY (name, timestamp))"
+        )
+        conn.execute(
+            "CREATE TABLE signal_meta (name TEXT PRIMARY KEY, domain TEXT DEFAULT '',"
+            " category TEXT DEFAULT '', interval INTEGER DEFAULT 86400,"
+            " signal_type TEXT DEFAULT 'scalar', last_updated TEXT)"
+        )
+        # Insert space-separated timestamps
+        conn.execute(
+            "INSERT INTO signals VALUES ('s', '2024-01-01 12:00:00+00:00', 1.0,"
+            " NULL, NULL, NULL, NULL)"
+        )
+        conn.commit()
+        conn.close()
+
+        # Opening SignalStore triggers _migrate which normalizes timestamps
+        s = SignalStore(db_path)
+        row = s._conn.execute("SELECT timestamp FROM signals WHERE name = 's'").fetchone()
+        assert row[0] == "2024-01-01T12:00:00+00:00"
+        s.close()
+
+    def test_save_meta_iso_format(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        meta = store.get_meta("btc")
+        assert meta is not None
+        assert "T" in meta["last_updated"]
+        assert meta["last_updated"].endswith("Z")
+
+
+class TestFreshness:
+    def test_check_freshness_no_stale(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 86400)
+        stale = store.check_freshness()
+        assert stale == []
+
+    def test_check_freshness_stale(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        # Backdate last_updated by 3 hours (> 3600 * 2.0 = 7200s)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 'btc'"
+        )
+        store._conn.commit()
+        stale = store.check_freshness()
+        assert len(stale) == 1
+        assert stale[0]["name"] == "btc"
+        assert stale[0]["expected_interval"] == 3600
+
+    def test_check_freshness_custom_threshold(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-2 hours') WHERE name = 'btc'"
+        )
+        store._conn.commit()
+        # threshold_factor=1.0 → stale after 3600s (1h), so 2h old = stale
+        stale = store.check_freshness(threshold_factor=1.0)
+        assert len(stale) == 1
+        # threshold_factor=3.0 → stale after 10800s (3h), so 2h old = fresh
+        stale = store.check_freshness(threshold_factor=3.0)
+        assert len(stale) == 0
+
+    def test_reset_failures(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        store.increment_failures("btc")
+        store.increment_failures("btc")
+        meta = store.get_meta("btc")
+        assert meta["consecutive_failures"] == 2
+        store.reset_failures("btc")
+        meta = store.get_meta("btc")
+        assert meta["consecutive_failures"] == 0
+
+    def test_increment_failures(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        store.increment_failures("btc")
+        meta = store.get_meta("btc")
+        assert meta["consecutive_failures"] == 1
+
+    def test_check_freshness_includes_failures(self, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        store.increment_failures("btc")
+        store.increment_failures("btc")
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 'btc'"
+        )
+        store._conn.commit()
+        stale = store.check_freshness()
+        assert len(stale) == 1
+        assert stale[0]["consecutive_failures"] == 2
+
+
 class TestMigration:
     def test_migrate_parquet_files(self, store: SignalStore, tmp_path: Path) -> None:
         from signal_noise.store.migration import migrate_parquet_to_sqlite

@@ -32,7 +32,41 @@ class TestHealth:
     def test_health_ok(self, client: TestClient) -> None:
         r = client.get("/health")
         assert r.status_code == 200
-        assert r.json() == {"status": "ok"}
+        data = r.json()
+        assert data["status"] == "ok"
+        assert data["stale_count"] == 0
+
+    def test_health_degraded(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        # Backdate last_updated to make it stale (3600s interval * 2.0 threshold = 7200s)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 'btc'"
+        )
+        store._conn.commit()
+        r = client.get("/health")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["status"] == "degraded"
+        assert data["stale_count"] == 1
+
+    def test_health_signals(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("btc", "financial", "crypto", 3600)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 'btc'"
+        )
+        store._conn.commit()
+        r = client.get("/health/signals")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["stale_count"] == 1
+        assert data["stale_signals"][0]["name"] == "btc"
+
+    def test_health_signals_empty(self, client: TestClient) -> None:
+        r = client.get("/health/signals")
+        assert r.status_code == 200
+        assert r.json() == {"stale_count": 0, "stale_signals": []}
 
 
 class TestSignals:
