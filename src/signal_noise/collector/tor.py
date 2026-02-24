@@ -23,8 +23,8 @@ class TorUsersCollector(BaseCollector):
         category="internet",
     )
 
-    # CSV: date, country, users (we aggregate globally)
-    URL = "https://metrics.torproject.org/userstats-relay-table.csv?start={start}&end={end}"
+    # CSV: date, country, users, lower, upper, frac (country=all for global)
+    URL = "https://metrics.torproject.org/userstats-relay-country.csv?start={start}&end={end}&country=all"
 
     def fetch(self) -> pd.DataFrame:
         end = pd.Timestamp.now(tz="UTC")
@@ -38,7 +38,7 @@ class TorUsersCollector(BaseCollector):
 
         rows = []
         for line in resp.text.strip().split("\n"):
-            if line.startswith("date") or line.startswith("#"):
+            if line.startswith("date") or line.startswith("#") or not line.strip():
                 continue
             parts = line.split(",")
             if len(parts) < 3:
@@ -54,6 +54,4 @@ class TorUsersCollector(BaseCollector):
             raise RuntimeError("No Tor user data parsed")
 
         df = pd.DataFrame(rows)
-        # Aggregate by date (sum across countries)
-        daily = df.groupby("date")["value"].sum().reset_index()
-        return daily.sort_values("date").reset_index(drop=True)
+        return df.sort_values("date").reset_index(drop=True)

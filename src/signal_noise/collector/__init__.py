@@ -22,7 +22,6 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     )
     from signal_noise.collector.difficulty import DifficultyCollector
     from signal_noise.collector.earthquake import EarthquakeCountCollector
-    from signal_noise.collector.electricity import ElectricityCollector
     from signal_noise.collector.eth_btc import EthBtcCollector
     from signal_noise.collector.events import (
         MajorSportsEventCollector,
@@ -35,7 +34,6 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         BitcoinCommitsCollector,
         EthereumCommitsCollector,
     )
-    from signal_noise.collector.google_trends import GoogleTrendsCollector
     from signal_noise.collector.hashrate import HashrateCollector
     from signal_noise.collector.lightning import LightningCapacityCollector
     from signal_noise.collector.mempool import MempoolFeeCollector, MempoolSizeCollector
@@ -50,10 +48,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
     from signal_noise.collector.sunspot import SunspotCollector
     from signal_noise.collector.temporal import DayOfWeekCollector, HourOfDayCollector
     from signal_noise.collector.tor import TorUsersCollector
-    from signal_noise.collector.weather import NYWeatherCollector
     from signal_noise.collector.wikipedia import WikipediaBtcCollector
     from signal_noise.collector.wikipedia_generic import get_wiki_collectors
-    from signal_noise.collector.aviation import FR24TotalCollector, OpenSkyTotalCollector, OpenSkyUSCollector
+    from signal_noise.collector.aviation import OpenSkyTotalCollector, OpenSkyUSCollector
     from signal_noise.collector.blockchain_charts import get_blockchain_collectors
     from signal_noise.collector.coingecko_global import (
         CG_ActiveCryptosCollector,
@@ -192,9 +189,6 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         "eth_btc": EthBtcCollector,
         "btc_dominance": BtcDominanceCollector,
         "wikipedia_btc": WikipediaBtcCollector,
-        "google_trends": GoogleTrendsCollector,
-        "ny_weather": NYWeatherCollector,
-        "electricity": ElectricityCollector,
         # Nature / physical phenomena
         "moon_phase": MoonPhaseCollector,
         "earthquake_count": EarthquakeCountCollector,
@@ -237,7 +231,6 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         # Aviation
         "opensky_total": OpenSkyTotalCollector,
         "opensky_us": OpenSkyUSCollector,
-        "fr24_total": FR24TotalCollector,
         # Climate / atmosphere
         "noaa_global_temp": GlobalTempAnomalyCollector,
         "noaa_land_temp": LandTempAnomalyCollector,

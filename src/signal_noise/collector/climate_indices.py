@@ -38,11 +38,11 @@ class EnsoCollector(BaseCollector):
         rows = []
         for line in resp.text.strip().split("\n"):
             parts = line.split()
-            if len(parts) < 5 or parts[0] not in _SEASON_MONTH:
+            if len(parts) < 4 or parts[0] not in _SEASON_MONTH:
                 continue
             try:
                 season, year = parts[0], int(parts[1])
-                anom = float(parts[4])
+                anom = float(parts[-1])
                 month = _SEASON_MONTH[season]
                 date = pd.Timestamp(year=year, month=month, day=15, tz="UTC")
                 rows.append({"date": date, "value": anom})

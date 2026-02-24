@@ -108,7 +108,7 @@ class TestFR24Total:
 class TestAviationRegistration:
     def test_all_registered(self):
         from signal_noise.collector import COLLECTORS
-        for name in ["opensky_total", "opensky_us", "fr24_total"]:
+        for name in ["opensky_total", "opensky_us"]:
             assert name in COLLECTORS, f"{name} not registered"
 
     def test_wiki_logistics_registered(self):

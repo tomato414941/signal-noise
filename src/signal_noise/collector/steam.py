@@ -35,9 +35,11 @@ class SteamPlayersCollector(BaseCollector):
         # in multiple categories; we use the first (total online)
         rows = []
         for series in data:
-            if not isinstance(series, list):
+            # Handle both old format (list of lists) and new format (dict with "data" key)
+            points = series.get("data", series) if isinstance(series, dict) else series
+            if not isinstance(points, list):
                 continue
-            for point in series:
+            for point in points:
                 if not isinstance(point, list) or len(point) < 2:
                     continue
                 try:

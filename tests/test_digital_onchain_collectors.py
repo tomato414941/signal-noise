@@ -154,16 +154,14 @@ class TestGitHub:
 
 TOR_CSV = """\
 date,country,users
-2024-01-01,US,500000
-2024-01-01,DE,300000
-2024-01-02,US,520000
-2024-01-02,DE,310000
+2024-01-01,all,800000
+2024-01-02,all,830000
 """
 
 
 class TestTor:
     @patch("signal_noise.collector.tor.requests.get")
-    def test_fetch_aggregates_daily(self, mock_get):
+    def test_fetch_parses_daily(self, mock_get):
         mock_resp = MagicMock()
         mock_resp.text = TOR_CSV
         mock_resp.raise_for_status = MagicMock()
@@ -172,7 +170,6 @@ class TestTor:
         df = TorUsersCollector().fetch()
         assert "date" in df.columns
         assert len(df) == 2
-        # Day 1: 500000 + 300000 = 800000
         assert df["value"].iloc[0] == 800000.0
 
     def test_meta(self):
