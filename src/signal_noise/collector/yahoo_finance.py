@@ -9,9 +9,22 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 class _YahooCollector(BaseCollector):
     _ticker: str = ""
 
+    def __init__(self, total: int | None = None, **kwargs):
+        super().__init__(**kwargs)
+        # Map total rows to yfinance period
+        # ~250 trading days/year: >500 → 5y, >1250 → 10y, >2500 → max
+        if total and total > 2500:
+            self._period = "max"
+        elif total and total > 1250:
+            self._period = "10y"
+        elif total and total > 500:
+            self._period = "5y"
+        else:
+            self._period = "2y"
+
     def fetch(self) -> pd.DataFrame:
         ticker = yf.Ticker(self._ticker)
-        hist = ticker.history(period="2y", interval="1d")
+        hist = ticker.history(period=self._period, interval="1d")
         if hist.empty:
             raise RuntimeError(f"No data returned for {self._ticker}")
         ts = hist.index.tz_localize("UTC") if hist.index.tz is None else hist.index.tz_convert("UTC")

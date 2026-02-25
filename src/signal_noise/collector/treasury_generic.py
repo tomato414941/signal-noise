@@ -84,11 +84,21 @@ def _make_yield_collector(
             category="rates",
         )
 
+        def __init__(self, total: int | None = None, **kwargs):
+            super().__init__(**kwargs)
+            # ~250 trading days/year
+            if total and total > 2500:
+                self._lookback_years = 25
+            elif total and total > 1250:
+                self._lookback_years = 10
+            else:
+                self._lookback_years = 4
+
         def fetch(self) -> pd.DataFrame:
             from datetime import UTC, datetime
             current_year = datetime.now(UTC).year
             all_rows = []
-            for year in range(current_year - 4, current_year + 1):
+            for year in range(current_year - self._lookback_years, current_year + 1):
                 url = _TREASURY_YIELD_URL.format(year=year)
                 try:
                     resp = requests.get(url, timeout=self.config.request_timeout)
