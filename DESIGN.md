@@ -224,6 +224,141 @@ This follows the "prediction with expert advice" framework — each signal is an
 - **Incremental adoption**: new signals start contributing immediately at low weight
 - **Interpretability**: signal weights show "what is driving the decision right now"
 
+## Potential Use Cases
+
+signal-noise has no purpose — but its data has many potential uses. This section
+documents every use case we can imagine, without filtering by feasibility or
+priority. The list serves as a creative inventory, not a roadmap.
+
+### Trading & Finance
+
+1. **Quantitative trading signals** — alpha generation from cross-domain time series (current use via alpha-os)
+2. **Recession early warning** — composite stress indicators from labor, credit, freight, volatility
+3. **Inflation nowcasting** — price pressures via CPI components, shipping costs, commodities, wages
+4. **Financial stress index** — VIX, credit spreads, liquidity proxies, shipping, news intensity
+5. **Cross-asset correlation regime map** — detect when diversification fails or returns
+6. **Risk parity / allocation context** — macro + volatility + liquidity signals for portfolio posture
+7. **Central bank policy regime detector** — ECB/BOJ/PBOC signals + yields, FX, risk assets
+8. **Currency crisis early warning** — FX, reserves proxies, inflation, news stress indicators
+9. **Sovereign risk monitor** — bond yields + macro deterioration + geopolitics intensity
+10. **Emerging market fragility index** — commodity terms-of-trade + FX + shipping + news
+11. **Commodity supercycle detection** — multi-commodity trends + shipping + industrial production
+12. **Sector rotation explainer** — macro regime + commodity + rates + geopolitics drivers
+13. **Earnings surprise context** — leading indicators for specific industries
+14. **Hedge fund research backbone** — fast context layer for discretionary + systematic teams
+15. **Family office briefing** — weekly "world context" memo from multi-domain indicators
+
+### Crypto
+
+16. **Crypto market health monitor** — hashrate, mempool, DeFi liquidations, stablecoin stress
+17. **On-chain / off-chain coupling study** — crypto network activity vs macro/tech adoption proxies
+18. **Crypto protocol risk dashboard** — liquidation cascades + mempool + macro stress alignment
+19. **DeFi systemic risk tracking** — cross-protocol contagion via shared collateral stress
+
+### Geopolitics & Security
+
+20. **Geopolitical risk monitor** — GDELT topic spikes + market/commodity reactions
+21. **Trade war / sanctions impact tracker** — GDELT + shipping + FX + sector equities
+22. **Social unrest risk proxy** — news intensity + inflation + unemployment + sentiment
+23. **Election cycle impact map** — political news volume + market/commodity responses
+24. **Misinformation early detection** — topic surges + Wikipedia edit wars + social chatter
+25. **Compliance / AML context** — geopolitical events + flow proxies + market anomalies
+
+### Supply Chain & Trade
+
+26. **Supply chain disruption radar** — port congestion, freight indices, AIS traffic anomalies
+27. **Maritime chokepoint alerting** — congestion around key straits/ports + freight spikes
+28. **Corporate supply risk scoring** — procurement risk from freight/ports/geopolitics
+29. **Shipping company capacity planning** — forward-looking congestion and demand proxies
+30. **Retail demand proxy** — macro + mobility + sentiment + freight for inventory planning
+
+### Climate & Natural Phenomena
+
+31. **Climate / ENSO impact tracker** — ENSO + weather extremes + commodity/insurance proxies
+32. **Space weather operations alerting** — geomagnetic storms vs comms/logistics/infra proxies
+33. **Disaster impact estimation** — earthquakes/storms → trade, mobility, prices, news volume
+34. **Food security watch** — weather/ENSO + grain prices + freight + geopolitics
+35. **Energy transition watch** — renewables/commodities/macros reflecting electrification trends
+
+### Health & Society
+
+36. **Pandemic / health surveillance** — WHO signals + mobility proxies + sentiment shifts
+37. **Consumer stress pulse** — inflation proxies + TSA throughput + sentiment/social activity
+38. **Cost-of-living tracker** — Numbeo + macro releases + wage proxies over time
+39. **Labor market dynamics explorer** — BLS series + tech hiring proxies + market rotations
+40. **Housing cycle monitor** — Census/housing starts + rates + materials + mobility
+41. **Tourism recovery tracker** — TSA throughput + FX + macro + health alerts
+42. **Migration / mobility proxy** — TSA + macro data + geopolitical news shifts
+
+### Technology & Developer Ecosystem
+
+43. **Tech adoption tempo index** — npm/PyPI/crates downloads + GitHub activity + HN attention
+44. **Open-source ecosystem health** — maintainer activity, release cadence, dependency churn
+45. **AI / ML hype cycle meter** — HN/GDELT/GitHub topic bursts vs market proxies
+46. **Developer productivity / morale proxy** — Stack Overflow/HN trends vs macro stress
+47. **Innovation diffusion study** — new libraries/tools → hiring → valuations → productivity
+48. **Vulnerability risk proxy** — sudden package download spikes + exploit/news correlation
+
+### Anomaly Detection & Pattern Discovery
+
+49. **Anomaly-of-the-day feed** — daily "weirdness" report across domains
+50. **Regime change detector** — identify phase transitions in the civilization state vector
+51. **Unexpected coupling discovery** — detect when unrelated domains move together
+52. **Broken coupling alerting** — detect when correlated series suddenly decouple
+53. **Lead-lag reversal detection** — find when A→B causality flips to B→A
+54. **Narrative dominance detector** — news volume explodes but reality indicators stay flat
+55. **Measurement anomaly flagging** — detect API changes, data revisions, collection artifacts
+
+### Curiosity & Understanding
+
+56. **Question generation engine** — surface surprising couplings + suggested investigations
+57. **"World debugger" workflow** — symptoms → suspects → disconfirmers → follow-up data
+58. **Civilization "build status" page** — like CI for the world (green/yellow/red subsystems)
+59. **Causal discovery playground** — search for stable causal graphs across regimes
+60. **News-market reflexivity lab** — how narratives propagate into prices and back
+61. **Narrative-to-policy pipeline analysis** — topic spikes → central bank language → markets
+
+### Academic & Research
+
+62. **Econometrics sandbox** — stress-test models across heterogeneous time series
+63. **Social science research dataset** — unified multi-domain data for hypothesis testing
+64. **Forecasting competition benchmark** — host prediction challenges with real-world data
+65. **Academic replication platform** — stable storage for historical daily series snapshots
+66. **Policy evaluation tracker** — measure effects of interventions across multiple indicators
+67. **Complex systems teaching tool** — live data labs for macro/network/chaos courses
+
+### Journalism & Communication
+
+68. **Quant journalism assistant** — story leads backed by multi-source time series shifts
+69. **Investigative reporting triage** — detect coordinated behavior or hidden shocks
+70. **Educational newsletter** — daily/weekly "3 strange charts" with explanations
+71. **Fraud / manipulation spotting** — odd co-movements across news/social/markets
+
+### Humanitarian & Public Good
+
+72. **NGO resource allocation aid** — prioritize regions via stress signals (health, food, conflict)
+73. **Philanthropy timing signal** — when/where stress rises to act faster
+74. **Insurance risk context** — weather extremes + economic stress + supply-chain risk
+75. **Commodity producer ops planning** — align output/hedging with macro + logistics
+
+### Creative & Experimental
+
+76. **"Reality compression" art** — visualizations/sonifications of the world state vector
+77. **Generative music engine** — map macro/geo/weather/crypto rhythms to sound
+78. **Data-driven fiction prompts** — world anomalies become plot seeds
+79. **Interactive museum exhibit** — "living planet" dashboard with daily narratives
+80. **Game world simulator input** — drive in-game economy/weather/news from real data
+81. **Meditation / reflection tool** — daily "world pulse" to contextualize personal concerns
+
+### Infrastructure & Platform
+
+82. **Public data API** — serve unified time series to other projects and developers
+83. **Data quality monitoring platform** — track API reliability across 1052 sources
+84. **Historical snapshot archive** — immutable daily snapshots for reproducibility
+85. **Webhook / event streaming** — push notifications when specific thresholds are crossed
+86. **Multi-tenant data service** — different consumers subscribe to different signal subsets
+87. **Collector marketplace** — community-contributed collectors with standardized interface
+
 ## Open Questions
 
 - [ ] Scheduler implementation: cron-based, APScheduler, or custom event loop?
