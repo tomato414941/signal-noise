@@ -58,9 +58,9 @@ BLS_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("LNS11300000", "bls_participation", "BLS Labor Force Participation Rate", "monthly", "macro", "labor"),
     ("LNS12032194", "bls_u6_rate", "BLS U-6 Unemployment Rate", "monthly", "macro", "labor"),
 
-    # ── Weekly claims ──────────────────────────────────────────
-    ("LNS13023621", "bls_initial_claims", "BLS Initial Unemployment Claims", "weekly", "macro", "labor"),
-    ("LNS13023557", "bls_continuing_claims", "BLS Continuing Claims", "weekly", "macro", "labor"),
+    # ── Unemployment components ────────────────────────────────
+    ("LNS13023621", "bls_job_losers", "BLS Unemployment - Job Losers", "monthly", "macro", "labor"),
+    ("LNS13023557", "bls_reentrants", "BLS Unemployment - Reentrants", "monthly", "macro", "labor"),
 
     # ── Average hourly/weekly earnings ─────────────────────────
     ("CES0500000003", "bls_avg_hourly_priv", "BLS Avg Hourly Earnings (Private)", "monthly", "macro", "labor"),
@@ -101,7 +101,7 @@ def _make_bls_collector(
 
         def fetch(self) -> pd.DataFrame:
             now = datetime.now(UTC)
-            start_year = 2000
+            start_year = now.year - 19  # 20 years inclusive, fits in 1 BLS request
             end_year = now.year
             all_rows: list[dict] = []
 
