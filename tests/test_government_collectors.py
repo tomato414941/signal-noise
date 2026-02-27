@@ -292,6 +292,7 @@ class TestGovernmentRegistration:
         from signal_noise.collector import COLLECTORS
         assert "ecb_eur_usd" in COLLECTORS
         assert "ecb_main_refi_rate" in COLLECTORS
+        assert "ecb_ester" in COLLECTORS
         assert "ecb_hicp_ea" in COLLECTORS
 
     def test_treasury_registered(self):

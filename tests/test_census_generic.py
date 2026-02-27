@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
 import pytest
 
 from signal_noise.collector.census_generic import (
@@ -14,10 +13,12 @@ from signal_noise.collector.census_generic import (
 
 
 CENSUS_RESPONSE = [
-    ["cell_value", "time"],
-    ["1500", "2024-01"],
-    ["1520", "2024-02"],
-    ["1540", "2024-03"],
+    ["data_type_code", "time_slot_id", "seasonally_adj", "category_code", "cell_value", "error_data", "time"],
+    ["TOTAL", "0", "yes", "PERMITS", "1500", "no", "2024-01"],
+    ["TOTAL", "0", "no", "PERMITS", "1400", "no", "2024-01"],
+    ["TOTAL", "0", "yes", "PERMITS", "1520", "no", "2024-02"],
+    ["TOTAL", "0", "yes", "PERMITS", "1540", "no", "2024-03"],
+    ["SINGLE", "0", "yes", "PERMITS", "900", "no", "2024-01"],
 ]
 
 
@@ -30,26 +31,26 @@ class TestCensusFactory:
         mock_get.return_value = mock_resp
 
         cls = _make_census_collector(
-            "/eits/resconst", "category_code=TOTAL&data_type_code=PERMITS",
-            "time", "cell_value",
+            "/eits/resconst", "TOTAL", "PERMITS", "yes",
             "test_permits", "Test Permits",
             "monthly", "macro", "economic",
         )
         df = cls().fetch()
-        assert len(df) == 3
+        assert len(df) == 3  # only TOTAL/PERMITS/SA=yes
         assert df["value"].iloc[0] == 1500.0
         assert df["date"].is_monotonic_increasing
 
     @patch("signal_noise.collector.census_generic.requests.get")
     def test_empty_raises(self, mock_get):
         mock_resp = MagicMock()
-        mock_resp.json.return_value = [["cell_value", "time"]]
+        mock_resp.json.return_value = [
+            ["data_type_code", "time_slot_id", "seasonally_adj", "category_code", "cell_value", "error_data", "time"],
+        ]
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
         cls = _make_census_collector(
-            "/eits/resconst", "category_code=TOTAL&data_type_code=PERMITS",
-            "time", "cell_value",
+            "/eits/resconst", "TOTAL", "PERMITS", "yes",
             "test_permits", "Test Permits",
             "monthly", "macro", "economic",
         )
@@ -60,8 +61,7 @@ class TestCensusFactory:
 class TestCensusMeta:
     def test_domain_category(self):
         cls = _make_census_collector(
-            "/eits/ressales", "category_code=AVGPRICE&data_type_code=TOTAL",
-            "time", "cell_value",
+            "/eits/ressales", "AVERAG", "SOLD", "no",
             "test_price", "Test Price",
             "monthly", "real_estate", "real_estate",
         )
@@ -86,8 +86,7 @@ class TestCensusRegistry:
 
         expected = [
             "census_building_permits", "census_housing_starts",
-            "census_retail_total", "census_durable_orders",
-            "census_construction_spend",
+            "census_retail_total", "census_construction_spend",
         ]
         for name in expected:
             assert name in COLLECTORS, f"{name} not registered"

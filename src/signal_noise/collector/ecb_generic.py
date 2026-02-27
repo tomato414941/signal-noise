@@ -21,20 +21,17 @@ ECB_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("EXR/D.INR.EUR.SP00.A", "ecb_eur_inr", "ECB EUR/INR Rate", "daily", "financial", "forex"),
     ("EXR/D.KRW.EUR.SP00.A", "ecb_eur_krw", "ECB EUR/KRW Rate", "daily", "financial", "forex"),
     ("EXR/D.AUD.EUR.SP00.A", "ecb_eur_aud", "ECB EUR/AUD Rate", "daily", "financial", "forex"),
-    # ── Key interest rates (monthly/daily) ──
-    ("FM/M.U2.EUR.4F.KR.MRR_FR.LEV", "ecb_main_refi_rate", "ECB Main Refinancing Rate", "monthly", "financial", "rates"),
-    ("FM/M.U2.EUR.4F.KR.DFR.LEV", "ecb_deposit_rate", "ECB Deposit Facility Rate", "monthly", "financial", "rates"),
-    ("FM/M.U2.EUR.4F.KR.MLFR.LEV", "ecb_marginal_rate", "ECB Marginal Lending Rate", "monthly", "financial", "rates"),
-    # ── Money market rates ──
-    ("FM/M.U2.EUR.4F.MM.EURIBOR3MD_.HSTA", "ecb_euribor_3m", "Euribor 3-Month", "monthly", "financial", "rates"),
-    ("FM/M.U2.EUR.4F.MM.EURIBOR6MD_.HSTA", "ecb_euribor_6m", "Euribor 6-Month", "monthly", "financial", "rates"),
-    ("FM/M.U2.EUR.4F.MM.EABORON.HSTA", "ecb_eonia", "EONIA/ESTER Rate", "monthly", "financial", "rates"),
-    # ── Government bond yields (monthly) ──
+    # ── Key interest rates (daily — FM dataset only serves daily for these) ──
+    ("FM/D.U2.EUR.4F.KR.MRR_FR.LEV", "ecb_main_refi_rate", "ECB Main Refinancing Rate", "daily", "financial", "rates"),
+    ("FM/D.U2.EUR.4F.KR.DFR.LEV", "ecb_deposit_rate", "ECB Deposit Facility Rate", "daily", "financial", "rates"),
+    ("FM/D.U2.EUR.4F.KR.MLFR.LEV", "ecb_marginal_rate", "ECB Marginal Lending Rate", "daily", "financial", "rates"),
+    # ── Money market rates (Euribor via Refinitiv provider) ──
+    ("FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA", "ecb_euribor_3m", "Euribor 3-Month", "monthly", "financial", "rates"),
+    ("FM/M.U2.EUR.RT.MM.EURIBOR6MD_.HSTA", "ecb_euribor_6m", "Euribor 6-Month", "monthly", "financial", "rates"),
+    # ── ESTER (replaced EONIA in 2022) ──
+    ("EST/B.EU000A2X2A25.WT", "ecb_ester", "ECB ESTER Rate", "daily", "financial", "rates"),
+    # ── Government bond yields (monthly, Euro Area aggregate only) ──
     ("FM/M.U2.EUR.4F.BB.U2_10Y.YLD", "ecb_ea_10y_yield", "Euro Area 10Y Yield", "monthly", "financial", "rates"),
-    ("FM/M.DE.EUR.4F.BB.DE_10Y.YLD", "ecb_de_10y_yield", "Germany 10Y Yield", "monthly", "financial", "rates"),
-    ("FM/M.FR.EUR.4F.BB.FR_10Y.YLD", "ecb_fr_10y_yield", "France 10Y Yield", "monthly", "financial", "rates"),
-    ("FM/M.IT.EUR.4F.BB.IT_10Y.YLD", "ecb_it_10y_yield", "Italy 10Y Yield", "monthly", "financial", "rates"),
-    ("FM/M.ES.EUR.4F.BB.ES_10Y.YLD", "ecb_es_10y_yield", "Spain 10Y Yield", "monthly", "financial", "rates"),
     # ── Money supply ──
     ("BSI/M.U2.Y.V.M10.X.1.U2.2300.Z01.E", "ecb_m1", "Euro Area M1", "monthly", "financial", "rates"),
     ("BSI/M.U2.Y.V.M20.X.1.U2.2300.Z01.E", "ecb_m2", "Euro Area M2", "monthly", "financial", "rates"),
