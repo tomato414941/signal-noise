@@ -1,0 +1,169 @@
+from __future__ import annotations
+
+import logging
+import time
+
+import pandas as pd
+import requests
+
+log = logging.getLogger(__name__)
+
+
+class SignalClient:
+    """HTTP client for the signal-noise REST API."""
+
+    def __init__(
+        self,
+        base_url: str = "http://localhost:8000",
+        timeout: int = 30,
+        retry_count: int = 2,
+        retry_backoff: float = 1.0,
+    ):
+        self._base_url = base_url.rstrip("/")
+        self._timeout = timeout
+        self._retry_count = retry_count
+        self._retry_backoff = retry_backoff
+        self._session = requests.Session()
+        self._cache: dict[str, pd.DataFrame] = {}
+        self._last_seen: dict[str, str] = {}
+
+    @property
+    def base_url(self) -> str:
+        return self._base_url
+
+    def health(self) -> bool:
+        try:
+            r = self._get("/health")
+            return r.get("status") in ("ok", "degraded")
+        except Exception:
+            return False
+
+    def health_detail(self) -> dict:
+        try:
+            return self._get("/health")
+        except Exception:
+            return {"status": "unreachable", "stale_count": -1}
+
+    def stale_signals(self) -> list[dict]:
+        try:
+            data = self._get("/health/signals")
+            return data.get("stale_signals", [])
+        except Exception:
+            return []
+
+    def get_latest(self, name: str) -> dict | None:
+        try:
+            return self._get(f"/signals/{name}/latest")
+        except requests.HTTPError as e:
+            if e.response is not None and e.response.status_code == 404:
+                return None
+            raise
+
+    def get_data(self, name: str, since: str | None = None) -> pd.DataFrame:
+        params = {}
+        if since:
+            params["since"] = since
+        elif name in self._last_seen:
+            params["since"] = self._last_seen[name]
+
+        data = self._get(f"/signals/{name}/data", params=params)
+        if not data:
+            return pd.DataFrame(columns=["timestamp", "value"])
+
+        df = pd.DataFrame(data)
+        if "date" in df.columns and "timestamp" not in df.columns:
+            df = df.rename(columns={"date": "timestamp"})
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+        if name in self._cache:
+            combined = pd.concat([self._cache[name], df])
+            combined = combined.drop_duplicates(subset=["timestamp"], keep="last")
+            self._cache[name] = combined.sort_values("timestamp").reset_index(drop=True)
+        else:
+            self._cache[name] = df.sort_values("timestamp").reset_index(drop=True)
+
+        if not df.empty:
+            self._last_seen[name] = str(df["timestamp"].max())
+
+        return self._cache[name]
+
+    def get_batch(
+        self,
+        names: list[str],
+        since: str | None = None,
+        columns: list[str] | None = None,
+    ) -> dict[str, pd.DataFrame]:
+        body: dict = {"names": names}
+        if since:
+            body["since"] = since
+        if columns:
+            body["columns"] = columns
+
+        data = self._post("/signals/batch", json=body)
+        result: dict[str, pd.DataFrame] = {}
+        for name, records in data.items():
+            if not records:
+                result[name] = pd.DataFrame(columns=["timestamp", "value"])
+                continue
+            df = pd.DataFrame(records)
+            if "date" in df.columns and "timestamp" not in df.columns:
+                df = df.rename(columns={"date": "timestamp"})
+            if "timestamp" in df.columns:
+                df["timestamp"] = pd.to_datetime(df["timestamp"])
+            result[name] = df.sort_values("timestamp").reset_index(drop=True)
+        return result
+
+    def list_signals(
+        self,
+        domain: str | None = None,
+        category: str | None = None,
+        signal_type: str | None = None,
+    ) -> list[dict]:
+        params: dict[str, str] = {}
+        if domain:
+            params["domain"] = domain
+        if category:
+            params["category"] = category
+        if signal_type:
+            params["signal_type"] = signal_type
+        return self._get("/signals", params=params)
+
+    def _get(self, path: str, params: dict | None = None) -> dict | list:
+        url = f"{self._base_url}{path}"
+        last_err: Exception | None = None
+        for attempt in range(self._retry_count):
+            try:
+                r = self._session.get(url, params=params, timeout=self._timeout)
+                r.raise_for_status()
+                return r.json()
+            except requests.HTTPError as e:
+                if e.response is not None and e.response.status_code < 500:
+                    raise
+                last_err = e
+            except Exception as e:
+                last_err = e
+            if attempt < self._retry_count - 1:
+                wait = self._retry_backoff ** attempt
+                log.warning("API request failed (%s), retry in %.1fs: %s", url, wait, last_err)
+                time.sleep(wait)
+        raise last_err  # type: ignore[misc]
+
+    def _post(self, path: str, **kwargs) -> dict | list:
+        url = f"{self._base_url}{path}"
+        last_err: Exception | None = None
+        for attempt in range(self._retry_count):
+            try:
+                r = self._session.post(url, timeout=self._timeout, **kwargs)
+                r.raise_for_status()
+                return r.json()
+            except requests.HTTPError as e:
+                if e.response is not None and e.response.status_code < 500:
+                    raise
+                last_err = e
+            except Exception as e:
+                last_err = e
+            if attempt < self._retry_count - 1:
+                wait = self._retry_backoff ** attempt
+                log.warning("API POST failed (%s), retry in %.1fs: %s", url, wait, last_err)
+                time.sleep(wait)
+        raise last_err  # type: ignore[misc]
