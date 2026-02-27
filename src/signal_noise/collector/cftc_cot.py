@@ -10,7 +10,8 @@ import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
-# (commodity_name_filter, collector_prefix, display_prefix, domain, category)
+# (contract_market_name, collector_prefix, display_prefix, domain, category)
+# Filter on contract_market_name (not commodity_name) for precise matching.
 CFTC_COMMODITIES: list[tuple[str, str, str, str, str]] = [
     # Crypto
     ("BITCOIN", "cot_btc", "COT Bitcoin", "financial", "crypto"),
@@ -18,15 +19,15 @@ CFTC_COMMODITIES: list[tuple[str, str, str, str, str]] = [
     # Metals
     ("GOLD", "cot_gold", "COT Gold", "financial", "commodity"),
     ("SILVER", "cot_silver", "COT Silver", "financial", "commodity"),
-    ("COPPER-GRADE #1", "cot_copper", "COT Copper", "financial", "commodity"),
+    ("COPPER- #1", "cot_copper", "COT Copper", "financial", "commodity"),
     ("PLATINUM", "cot_platinum", "COT Platinum", "financial", "commodity"),
     # Energy
-    ("CRUDE OIL, LIGHT SWEET", "cot_wti", "COT WTI Crude", "financial", "commodity"),
-    ("NATURAL GAS OF HENRY HUB", "cot_natgas", "COT Natural Gas", "financial", "commodity"),
+    ("WTI-PHYSICAL", "cot_wti", "COT WTI Crude", "financial", "commodity"),
+    ("NAT GAS NYME", "cot_natgas", "COT Natural Gas", "financial", "commodity"),
     ("BRENT LAST DAY", "cot_brent", "COT Brent Crude", "financial", "commodity"),
     # Agriculture
     ("CORN", "cot_corn", "COT Corn", "financial", "commodity"),
-    ("WHEAT", "cot_wheat", "COT Wheat", "financial", "commodity"),
+    ("WHEAT-SRW", "cot_wheat", "COT Wheat", "financial", "commodity"),
     ("SOYBEANS", "cot_soy", "COT Soybeans", "financial", "commodity"),
     ("COFFEE C", "cot_coffee", "COT Coffee", "financial", "commodity"),
     ("SUGAR NO. 11", "cot_sugar", "COT Sugar", "financial", "commodity"),
@@ -39,15 +40,14 @@ CFTC_COMMODITIES: list[tuple[str, str, str, str, str]] = [
     ("CANADIAN DOLLAR", "cot_cad", "COT Canadian Dollar", "financial", "forex"),
     ("AUSTRALIAN DOLLAR", "cot_aud", "COT Australian Dollar", "financial", "forex"),
     ("MEXICAN PESO", "cot_mxn", "COT Mexican Peso", "financial", "forex"),
-    ("U.S. DOLLAR INDEX", "cot_dxy", "COT US Dollar Index", "financial", "forex"),
+    ("USD INDEX", "cot_dxy", "COT US Dollar Index", "financial", "forex"),
     # Indices & Rates
-    ("S&P 500 STOCK INDEX", "cot_sp500", "COT S&P 500", "financial", "equity"),
     ("E-MINI S&P 500", "cot_es", "COT E-mini S&P 500", "financial", "equity"),
-    ("NASDAQ-100 STOCK INDEX", "cot_nq", "COT Nasdaq 100", "financial", "equity"),
+    ("NASDAQ MINI", "cot_nq", "COT Nasdaq 100", "financial", "equity"),
     ("VIX FUTURES", "cot_vix", "COT VIX", "financial", "equity"),
-    ("2-YEAR U.S. TREASURY NOTES", "cot_2y", "COT 2Y Treasury", "financial", "rates"),
-    ("10-YEAR U.S. TREASURY NOTES", "cot_10y", "COT 10Y Treasury", "financial", "rates"),
-    ("U.S. TREASURY BONDS", "cot_30y", "COT 30Y Treasury", "financial", "rates"),
+    ("UST 2Y NOTE", "cot_2y", "COT 2Y Treasury", "financial", "rates"),
+    ("UST 10Y NOTE", "cot_10y", "COT 10Y Treasury", "financial", "rates"),
+    ("UST BOND", "cot_30y", "COT 30Y Treasury", "financial", "rates"),
 ]
 
 # Three metrics per commodity
@@ -80,7 +80,7 @@ def _make_cot_collector(
 
         def fetch(self) -> pd.DataFrame:
             params = {
-                "$where": f"commodity_name='{commodity_filter}'",
+                "$where": f"contract_market_name='{commodity_filter}'",
                 "$order": "report_date_as_yyyy_mm_dd DESC",
                 "$limit": "5000",
             }

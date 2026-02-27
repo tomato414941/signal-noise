@@ -142,7 +142,7 @@ class TestCOTRegistry:
         expected = [
             "cot_btc_oi", "cot_btc_net_nc", "cot_btc_net_c",
             "cot_gold_oi", "cot_gold_net_nc",
-            "cot_wti_oi", "cot_sp500_oi",
+            "cot_wti_oi", "cot_es_oi",
             "cot_eur_net_nc", "cot_10y_oi",
         ]
         for name in expected:
