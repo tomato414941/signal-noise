@@ -62,6 +62,10 @@ def main(argv: list[str] | None = None) -> None:
 
     sub.add_parser("rebuild-manifest", help="Rebuild collector discovery manifest")
 
+    p_scheduler = sub.add_parser("scheduler", help="Run collection scheduler (long-lived)")
+    p_scheduler.add_argument("--frequency", "-f", help="Only schedule collectors of this frequency")
+    p_scheduler.add_argument("--level", "-l", help="Only schedule collectors of this collection level (e.g. L5)")
+
     p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
     p_serve.add_argument("--host", default="0.0.0.0", help="API bind host")
     p_serve.add_argument("--port", type=int, default=8000, help="API bind port")
@@ -97,6 +101,8 @@ def main(argv: list[str] | None = None) -> None:
         _cmd_coverage(args)
     elif args.command == "rebuild-manifest":
         _cmd_rebuild_manifest()
+    elif args.command == "scheduler":
+        _cmd_scheduler(args)
     elif args.command == "serve":
         _cmd_serve(args)
     else:
@@ -305,6 +311,33 @@ def _cmd_coverage(args: argparse.Namespace) -> None:
         print(f"  {cat:<20} {c:>6}  ({pct:4.1f}%)")
     if len(category_count) > 15:
         print(f"  ... and {len(category_count) - 15} more")
+
+
+def _cmd_scheduler(args: argparse.Namespace) -> None:
+    import asyncio
+
+    from signal_noise.collector import COLLECTORS
+    from signal_noise.config import DB_PATH
+    from signal_noise.scheduler.loop import run_scheduler
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = SignalStore(DB_PATH)
+    targets = None
+
+    if args.frequency or args.level:
+        targets = {}
+        for name, cls in COLLECTORS.items():
+            m = cls.meta
+            if args.frequency and m.update_frequency != args.frequency:
+                continue
+            if args.level and _classify_level(name, m) != args.level:
+                continue
+            targets[name] = cls
+        log.info("Scheduler: %d collectors selected", len(targets))
+    else:
+        log.info("Scheduler: all %d collectors", len(COLLECTORS))
+
+    asyncio.run(run_scheduler(store, collectors=targets))
 
 
 def _cmd_rebuild_manifest() -> None:
