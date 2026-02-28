@@ -1,32 +1,24 @@
 from __future__ import annotations
 
-import time
-
 import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._cache import SharedAPICache
 
-# Shared response cache: (timestamp, data) to avoid hitting rate limits.
-# All 8 CoinGecko global collectors share the same /global endpoint.
-_cg_global_cache: tuple[float, dict] | None = None
-_CG_CACHE_TTL = 60  # seconds
+_cg_cache = SharedAPICache(ttl=60)
 
 
 def _get_global_data(timeout: int = 30) -> dict:
-    global _cg_global_cache
-    now = time.monotonic()
-    if _cg_global_cache and (now - _cg_global_cache[0]) < _CG_CACHE_TTL:
-        return _cg_global_cache[1]
+    def _fetch() -> dict:
+        resp = requests.get(
+            "https://api.coingecko.com/api/v3/global",
+            timeout=timeout,
+        )
+        resp.raise_for_status()
+        return resp.json()["data"]
 
-    resp = requests.get(
-        "https://api.coingecko.com/api/v3/global",
-        timeout=timeout,
-    )
-    resp.raise_for_status()
-    data = resp.json()["data"]
-    _cg_global_cache = (now, data)
-    return data
+    return _cg_cache.get_or_fetch("global", _fetch)
 
 
 class _CoinGeckoGlobalCollector(BaseCollector):

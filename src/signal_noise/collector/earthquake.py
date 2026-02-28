@@ -4,6 +4,9 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._cache import SharedAPICache
+
+_usgs_feed_cache = SharedAPICache(ttl=120)
 
 
 class EarthquakeCountCollector(BaseCollector):
@@ -61,12 +64,15 @@ class _USGSHourlyBase(BaseCollector):
     _feed_url: str = ""
 
     def _get_features(self) -> list[dict]:
-        resp = requests.get(
-            self._feed_url,
-            timeout=self.config.request_timeout,
-        )
-        resp.raise_for_status()
-        return resp.json().get("features", [])
+        def _fetch() -> list[dict]:
+            resp = requests.get(
+                self._feed_url,
+                timeout=self.config.request_timeout,
+            )
+            resp.raise_for_status()
+            return resp.json().get("features", [])
+
+        return _usgs_feed_cache.get_or_fetch(self._feed_url, _fetch)
 
 
 class USGSQuakeCount24hCollector(_USGSHourlyBase):

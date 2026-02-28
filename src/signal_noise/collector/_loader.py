@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-_SKIP = frozenset({"base", "_loader"})
+_SKIP = frozenset({"base", "_loader", "_cache", "_manifest", "_lazy"})
 _FACTORY = re.compile(r"^get_\w+_collectors$")
 
 
@@ -39,6 +39,7 @@ def _discover() -> dict[str, type[BaseCollector]]:
                 and hasattr(obj, "meta")
                 and not obj.__name__.startswith("_")
                 and not inspect.isabstract(obj)
+                and not getattr(obj, "_skip_registration", False)
             ):
                 out[obj.meta.name] = obj
         for nm, obj in vars(mod).items():

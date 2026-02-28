@@ -10,8 +10,16 @@ from signal_noise.collector.aviation import (
     FR24TotalCollector,
     OpenSkyTotalCollector,
     OpenSkyUSCollector,
+    _opensky_cache,
 )
 from signal_noise.collector.base import CollectorMeta
+
+
+@pytest.fixture(autouse=True)
+def _clear_opensky_cache():
+    _opensky_cache.clear()
+    yield
+    _opensky_cache.clear()
 
 
 class TestOpenSkyTotal:

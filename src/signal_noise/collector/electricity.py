@@ -8,6 +8,8 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class ElectricityCollector(BaseCollector):
+    _skip_registration = True
+
     meta = CollectorMeta(
         name="electricity",
         display_name="US Electricity Price",

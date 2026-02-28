@@ -6,6 +6,9 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._cache import SharedAPICache
+
+_weather_cache = SharedAPICache(ttl=300)
 
 # (lat, lon, city_name, collector_name, display_name)
 WEATHER_CITIES: list[tuple[float, float, str, str, str]] = [
@@ -64,9 +67,14 @@ def _make_weather_collector(
                 start=start.strftime("%Y-%m-%d"),
                 end=end.strftime("%Y-%m-%d"),
             )
-            resp = requests.get(url, timeout=self.config.request_timeout)
-            resp.raise_for_status()
-            data = resp.json()
+            timeout = self.config.request_timeout
+
+            def _fetch() -> dict:
+                resp = requests.get(url, timeout=timeout)
+                resp.raise_for_status()
+                return resp.json()
+
+            data = _weather_cache.get_or_fetch(f"{lat}:{lon}", _fetch)
 
             daily = data.get("daily", {})
             times = daily.get("time", [])

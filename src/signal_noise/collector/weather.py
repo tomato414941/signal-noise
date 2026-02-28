@@ -8,6 +8,8 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class NYWeatherCollector(BaseCollector):
+    _skip_registration = True
+
     meta = CollectorMeta(
         name="ny_weather",
         display_name="NYC Weather",

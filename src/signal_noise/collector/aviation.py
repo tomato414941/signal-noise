@@ -5,6 +5,18 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._cache import SharedAPICache
+
+_opensky_cache = SharedAPICache(ttl=120)
+
+
+def _fetch_opensky_states() -> list:
+    resp = requests.get(
+        "https://opensky-network.org/api/states/all",
+        timeout=60,
+    )
+    resp.raise_for_status()
+    return resp.json().get("states", [])
 
 
 class OpenSkyTotalCollector(BaseCollector):
@@ -20,17 +32,9 @@ class OpenSkyTotalCollector(BaseCollector):
     )
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(
-            "https://opensky-network.org/api/states/all",
-            timeout=60,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        states = data.get("states", [])
-        total = len(states)
-
+        states = _opensky_cache.get_or_fetch("states_all", _fetch_opensky_states)
         ts = pd.Timestamp.now(tz="UTC").floor("h")
-        return pd.DataFrame({"timestamp": [ts], "value": [float(total)]})
+        return pd.DataFrame({"timestamp": [ts], "value": [float(len(states))]})
 
 
 class OpenSkyUSCollector(BaseCollector):
@@ -46,14 +50,8 @@ class OpenSkyUSCollector(BaseCollector):
     )
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(
-            "https://opensky-network.org/api/states/all",
-            timeout=60,
-        )
-        resp.raise_for_status()
-        states = resp.json().get("states", [])
+        states = _opensky_cache.get_or_fetch("states_all", _fetch_opensky_states)
         us_count = sum(1 for s in states if s[2] == "United States")
-
         ts = pd.Timestamp.now(tz="UTC").floor("h")
         return pd.DataFrame({"timestamp": [ts], "value": [float(us_count)]})
 
