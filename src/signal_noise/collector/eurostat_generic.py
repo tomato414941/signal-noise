@@ -1,6 +1,8 @@
-"""Eurostat collectors via JSON API.
+"""Eurostat collectors via Statistics JSON API v1.
 
 No API key required.  Docs: https://ec.europa.eu/eurostat/api/
+Uses the compact Statistics API (v1) instead of the SDMX endpoint
+for faster responses and smaller payloads.
 """
 from __future__ import annotations
 
@@ -9,22 +11,22 @@ import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
-_BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data"
+_BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 
 # (dataset_code, filter_params, collector_name, display_name, frequency, domain, category)
 EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
     # ── GDP ────────────────────────────────────────────────────
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA",
+    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA&freq=Q",
      "eu_gdp_real", "Eurostat EU GDP (Real, SA)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EA20&s_adj=SCA",
+    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EA20&s_adj=SCA&freq=Q",
      "eu_gdp_ea", "Eurostat Euro Area GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=DE&s_adj=SCA",
+    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=DE&s_adj=SCA&freq=Q",
      "eu_gdp_de", "Eurostat Germany GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=FR&s_adj=SCA",
+    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=FR&s_adj=SCA&freq=Q",
      "eu_gdp_fr", "Eurostat France GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=IT&s_adj=SCA",
+    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=IT&s_adj=SCA&freq=Q",
      "eu_gdp_it", "Eurostat Italy GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=ES&s_adj=SCA",
+    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=ES&s_adj=SCA&freq=Q",
      "eu_gdp_es", "Eurostat Spain GDP (Real)", "quarterly", "macro", "economic"),
 
     # ── HICP (Harmonized CPI) ─────────────────────────────────
@@ -67,41 +69,37 @@ EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
     ("sts_trtu_m", "nace_r2=G47&unit=I15&s_adj=SCA&geo=EA20",
      "eu_retail_ea", "Eurostat Euro Area Retail Trade", "monthly", "macro", "economic"),
 
-    # ── Trade balance ──────────────────────────────────────────
-    ("ext_lt_maineu", "partner=EXT_EU27_2020&stk_flow=BAL&sitc06=TOTAL",
-     "eu_trade_balance", "Eurostat EU Trade Balance", "monthly", "macro", "trade"),
+    # ── Trade balance (monthly, ratio) ────────────────────────
+    ("ext_st_eu27_2020sitc", "partner=EXT_EU27_2020&sitc06=TOTAL&stk_flow=BAL_RT",
+     "eu_trade_balance", "Eurostat EU Trade Balance Ratio", "monthly", "macro", "trade"),
 
     # ── Construction ───────────────────────────────────────────
     ("sts_copr_m", "nace_r2=F&unit=I15&s_adj=SCA&geo=EU27_2020",
      "eu_construction", "Eurostat EU Construction Output", "monthly", "macro", "economic"),
 
     # ── Business confidence ────────────────────────────────────
-    ("ei_bsin_m_r2", "indic=BS-ICI-BAL&s_adj=SA&geo=EU27_2020",
+    ("ei_bsin_m_r2", "indic=BS-ICI&s_adj=SA&geo=EU27_2020",
      "eu_business_conf", "Eurostat EU Business Confidence", "monthly", "sentiment", "sentiment"),
-    ("ei_bsco_m", "indic=BS-CSMCI-BAL&s_adj=SA&geo=EU27_2020",
+    ("ei_bsco_m", "indic=BS-CSMCI&s_adj=SA&geo=EU27_2020",
      "eu_consumer_conf", "Eurostat EU Consumer Confidence", "monthly", "sentiment", "sentiment"),
 
     # ── Energy ─────────────────────────────────────────────────
-    ("nrg_cb_sffm", "siec=O4000XBIO&nrg_bal=GIC&geo=EU27_2020",
-     "eu_oil_supply", "Eurostat EU Oil Supply", "monthly", "macro", "economic"),
-    ("nrg_cb_gasm", "siec=G3000&nrg_bal=GIC&geo=EU27_2020",
-     "eu_natgas_supply", "Eurostat EU Natural Gas Supply", "monthly", "macro", "economic"),
+    ("nrg_cb_oilm", "siec=O4100_TOT&nrg_bal=IMP&geo=EU27_2020",
+     "eu_oil_supply", "Eurostat EU Crude Oil Imports", "monthly", "macro", "economic"),
+    ("nrg_cb_gasm", "siec=G3000&nrg_bal=IC_OBS&unit=TJ_GCV&geo=EU27_2020",
+     "eu_natgas_supply", "Eurostat EU Natural Gas Consumption", "monthly", "macro", "economic"),
 
     # ── Government debt ────────────────────────────────────────
-    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=EU27_2020",
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=EU27_2020&freq=Q",
      "eu_govt_debt", "Eurostat EU Govt Debt/GDP", "quarterly", "macro", "fiscal"),
-    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=EA20",
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=EA20&freq=Q",
      "eu_govt_debt_ea", "Eurostat Euro Area Govt Debt/GDP", "quarterly", "macro", "fiscal"),
-    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=DE",
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=DE&freq=Q",
      "eu_govt_debt_de", "Eurostat Germany Govt Debt/GDP", "quarterly", "macro", "fiscal"),
-    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=FR",
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=FR&freq=Q",
      "eu_govt_debt_fr", "Eurostat France Govt Debt/GDP", "quarterly", "macro", "fiscal"),
-    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=IT",
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=IT&freq=Q",
      "eu_govt_debt_it", "Eurostat Italy Govt Debt/GDP", "quarterly", "macro", "fiscal"),
-
-    # ── Money supply ───────────────────────────────────────────
-    ("bsi_m_i8.m.n.a.a20t.eur.e.x.b.0000.z01.e", "DUMMY=DUMMY",
-     "eu_m3_growth", "Eurostat Euro Area M3 Growth", "monthly", "macro", "economic"),
 
     # ── Exchange rate ──────────────────────────────────────────
     ("ert_bil_eur_m", "currency=USD&statinfo=AVG",
@@ -145,7 +143,7 @@ def _make_eurostat_collector(
         )
 
         def fetch(self) -> pd.DataFrame:
-            url = f"{_BASE_URL}/{dataset}?{params}&format=JSON&lang=en"
+            url = f"{_BASE_URL}/{dataset}?{params}"
             resp = requests.get(url, timeout=self.config.request_timeout)
             resp.raise_for_status()
             data = resp.json()

@@ -88,6 +88,11 @@ class TestEurostatFactory:
         assert df["value"].iloc[0] == 108.5
         assert df["date"].is_monotonic_increasing
 
+        # Verify Statistics API v1 URL (not SDMX)
+        called_url = mock_get.call_args[0][0]
+        assert "/statistics/1.0/data/" in called_url
+        assert "format=JSON" not in called_url
+
     @patch("signal_noise.collector.eurostat_generic.requests.get")
     def test_fetch_quarterly(self, mock_get):
         mock_resp = MagicMock()
