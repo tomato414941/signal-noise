@@ -97,6 +97,7 @@ def _make_ping_collector(
             api_docs_url="",
             domain="infrastructure",
             category="internet",
+            collection_level="L5",
         )
 
         def fetch(self) -> pd.DataFrame:
@@ -121,6 +122,7 @@ def _make_dns_collector(
             api_docs_url="",
             domain="infrastructure",
             category="internet",
+            collection_level="L5",
         )
 
         def fetch(self) -> pd.DataFrame:

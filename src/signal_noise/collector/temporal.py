@@ -13,6 +13,7 @@ class DayOfWeekCollector(BaseCollector):
         api_docs_url="N/A",
         domain="computed",
         category="temporal",
+        collection_level="L4",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -28,6 +29,7 @@ class HourOfDayCollector(BaseCollector):
         api_docs_url="N/A",
         domain="computed",
         category="temporal",
+        collection_level="L4",
     )
 
     def fetch(self) -> pd.DataFrame:
