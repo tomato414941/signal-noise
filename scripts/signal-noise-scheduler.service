@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=trading
-WorkingDirectory=/home/trading/projects/signal-noise
-ExecStart=/home/trading/projects/signal-noise/.venv/bin/python -m signal_noise scheduler
+User=dev
+WorkingDirectory=/home/dev/projects/signal-noise
+ExecStart=/home/dev/projects/signal-noise/.venv/bin/python -m signal_noise scheduler
 Restart=always
 RestartSec=15
 Environment=PYTHONUNBUFFERED=1
