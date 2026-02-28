@@ -26,7 +26,10 @@ def main(argv: list[str] | None = None) -> None:
     p_backfill.add_argument("--category", "-c", help="Collector category (e.g. crypto)")
     p_backfill.add_argument("--total", "-t", type=int, default=20000, help="Total rows to fetch")
 
-    p_spectrum = sub.add_parser("spectrum", help="SVD spectral analysis of signal coverage")
+    p_analyze = sub.add_parser("analyze", help="Signal analysis tools")
+    analyze_sub = p_analyze.add_subparsers(dest="analyze_command")
+
+    p_spectrum = analyze_sub.add_parser("spectrum", help="SVD spectral analysis of signal coverage")
     p_spectrum.add_argument(
         "--min-rows", type=int, default=200,
         help="Minimum data points per signal (default: 200)",
@@ -36,6 +39,18 @@ def main(argv: list[str] | None = None) -> None:
         help="Number of principal components to show (default: 8)",
     )
     p_spectrum.add_argument(
+        "--json", action="store_true", help="Output as JSON",
+    )
+
+    p_quality = analyze_sub.add_parser("quality", help="Signal quality & health analysis")
+    p_quality.add_argument(
+        "--days", type=int, default=90,
+        help="Analysis window in days (default: 90)",
+    )
+    p_quality.add_argument(
+        "--domain", help="Filter by domain",
+    )
+    p_quality.add_argument(
         "--json", action="store_true", help="Output as JSON",
     )
 
@@ -63,8 +78,13 @@ def main(argv: list[str] | None = None) -> None:
         _cmd_list()
     elif args.command == "count":
         _cmd_count()
-    elif args.command == "spectrum":
-        _cmd_spectrum(args)
+    elif args.command == "analyze":
+        if args.analyze_command == "spectrum":
+            _cmd_spectrum(args)
+        elif args.analyze_command == "quality":
+            _cmd_quality(args)
+        else:
+            p_analyze.print_help()
     elif args.command == "serve":
         _cmd_serve(args)
     else:
@@ -208,6 +228,42 @@ def _cmd_spectrum(args: argparse.Namespace) -> None:
                 {"name": s.name, "domain": s.domain, "category": s.category,
                  "uniqueness": s.uniqueness}
                 for s in result.unique
+            ],
+        }
+        print(json_mod.dumps(data, indent=2))
+    else:
+        print(result.summary())
+
+
+def _cmd_quality(args: argparse.Namespace) -> None:
+    import json as json_mod
+
+    from signal_noise.analysis.quality import compute_quality
+    from signal_noise.config import DB_PATH
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = SignalStore(DB_PATH)
+    result = compute_quality(store, days=args.days, domain=args.domain)
+    store.close()
+
+    if args.json:
+        data = {
+            "n_signals": result.n_signals,
+            "n_healthy": result.n_healthy,
+            "n_degraded": result.n_degraded,
+            "n_poor": result.n_poor,
+            "signals": [
+                {
+                    "name": sq.name,
+                    "domain": sq.domain,
+                    "category": sq.category,
+                    "completeness": sq.completeness,
+                    "freshness": sq.freshness,
+                    "stability": sq.stability,
+                    "independence": sq.independence,
+                    "health_score": sq.health_score,
+                }
+                for sq in result.signals
             ],
         }
         print(json_mod.dumps(data, indent=2))
