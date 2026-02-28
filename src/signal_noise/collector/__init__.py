@@ -11,9 +11,17 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-from signal_noise.collector._loader import LazyCollectors  # noqa: E402
+def _build_registry():  # noqa: E302
+    from signal_noise.collector._manifest import build_manifest, load_manifest
+    from signal_noise.collector._lazy import LazyCollectorRegistry
 
-COLLECTORS = LazyCollectors()
+    manifest = load_manifest()
+    if manifest is None:
+        manifest = build_manifest()
+    return LazyCollectorRegistry(manifest["collectors"])
+
+
+COLLECTORS = _build_registry()
 
 
 

@@ -8,5 +8,6 @@ build/
 .pytest_cache/
 data/
 .env
+.collector_manifest.json
 AGENTS.override.md
 CLAUDE.local.md

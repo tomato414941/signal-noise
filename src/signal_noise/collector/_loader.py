@@ -1,5 +1,4 @@
-"""Auto-discovery and lazy loading."""
-
+"""Auto-discovery for signal-noise collectors."""
 from __future__ import annotations
 
 import importlib
@@ -7,7 +6,6 @@ import inspect
 import logging
 import pkgutil
 import re
-from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,6 +18,7 @@ _FACTORY = re.compile(r"^get_\w+_collectors$")
 
 
 def _discover() -> dict[str, type[BaseCollector]]:
+    """Scan all collector modules and return {name: class} dict."""
     from signal_noise.collector.base import BaseCollector
     import signal_noise.collector as pkg
     out: dict[str, type[BaseCollector]] = {}
@@ -49,44 +48,3 @@ def _discover() -> dict[str, type[BaseCollector]]:
                 except Exception:
                     log.warning("Factory %s.%s failed", info.name, nm, exc_info=True)
     return out
-
-
-class LazyCollectors:
-    """Dict-like object that defers discovery until first access."""
-
-    def __init__(self) -> None:
-        self._data: dict[str, type[BaseCollector]] | None = None
-
-    def _load(self) -> dict[str, type[BaseCollector]]:
-        if self._data is None:
-            self._data = _discover()
-        return self._data
-
-    def __getitem__(self, k: str) -> type[BaseCollector]:
-        return self._load()[k]
-
-    def __contains__(self, k: object) -> bool:
-        return k in self._load()
-
-    def __len__(self) -> int:
-        return len(self._load())
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._load())
-
-    def get(self, k, d=None):  # noqa: ANN001,ANN201
-        return self._load().get(k, d)
-
-    def keys(self):  # noqa: ANN201
-        return self._load().keys()
-
-    def values(self):  # noqa: ANN201
-        return self._load().values()
-
-    def items(self):  # noqa: ANN201
-        return self._load().items()
-
-    def __repr__(self) -> str:
-        if self._data is None:
-            return "LazyCollectors(<not loaded>)"
-        return f"LazyCollectors({len(self._data)} collectors)"

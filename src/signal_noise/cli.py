@@ -55,6 +55,8 @@ def main(argv: list[str] | None = None) -> None:
         "--json", action="store_true", help="Output as JSON",
     )
 
+    sub.add_parser("rebuild-manifest", help="Rebuild collector discovery manifest")
+
     p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
     p_serve.add_argument("--host", default="0.0.0.0", help="API bind host")
     p_serve.add_argument("--port", type=int, default=8000, help="API bind port")
@@ -86,6 +88,8 @@ def main(argv: list[str] | None = None) -> None:
             _cmd_quality(args)
         else:
             p_analyze.print_help()
+    elif args.command == "rebuild-manifest":
+        _cmd_rebuild_manifest()
     elif args.command == "serve":
         _cmd_serve(args)
     else:
@@ -192,6 +196,13 @@ def _cmd_count() -> None:
     from signal_noise.collector import COLLECTORS
 
     print(f"Collectors: {len(COLLECTORS)}")
+
+
+def _cmd_rebuild_manifest() -> None:
+    from signal_noise.collector._manifest import build_manifest
+
+    manifest = build_manifest()
+    print(f"Manifest rebuilt: {len(manifest['collectors'])} collectors")
 
 
 def _cmd_spectrum(args: argparse.Namespace) -> None:
