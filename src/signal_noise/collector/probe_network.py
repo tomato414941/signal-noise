@@ -146,6 +146,7 @@ class ProbeHTTPGoogleCollector(BaseCollector):
         api_docs_url="",
         domain="infrastructure",
         category="internet",
+        collection_level="L5",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -165,6 +166,7 @@ class ProbeHTTPGitHubCollector(BaseCollector):
         api_docs_url="",
         domain="infrastructure",
         category="internet",
+        collection_level="L5",
     )
 
     def fetch(self) -> pd.DataFrame:
@@ -184,6 +186,7 @@ class ProbeHTTPCloudflareCollector(BaseCollector):
         api_docs_url="",
         domain="infrastructure",
         category="internet",
+        collection_level="L5",
     )
 
     def fetch(self) -> pd.DataFrame:
