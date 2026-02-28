@@ -15,6 +15,7 @@ def main(argv: list[str] | None = None) -> None:
 
     p_collect = sub.add_parser("collect", help="Fetch data from collectors")
     p_collect.add_argument("--collector", "-s", help="Specific collector name")
+    p_collect.add_argument("--frequency", "-f", help="Filter by update frequency (hourly/daily/weekly/monthly)")
     p_collect.add_argument("--force", action="store_true", help="Ignore cache")
     p_collect.add_argument("--parquet", action="store_true", help="Use legacy Parquet storage")
 
@@ -98,7 +99,16 @@ def _cmd_collect(args: argparse.Namespace) -> None:
 
     store = None if args.parquet else SignalStore(DB_PATH)
 
-    collectors = [args.collector] if args.collector else None
+    if args.collector:
+        collectors = [args.collector]
+    elif args.frequency:
+        collectors = [
+            name for name, cls in COLLECTORS.items()
+            if cls().meta.update_frequency == args.frequency
+        ]
+        log.info("Filtered to %d %s collectors", len(collectors), args.frequency)
+    else:
+        collectors = None
     if args.force:
         for name in collectors or COLLECTORS.keys():
             cache = CACHE_DIR / f"{name}.json"
