@@ -55,6 +55,11 @@ def main(argv: list[str] | None = None) -> None:
         "--json", action="store_true", help="Output as JSON",
     )
 
+    p_coverage = sub.add_parser("coverage", help="Show signal coverage summary")
+    p_coverage.add_argument(
+        "--json", action="store_true", help="Output as JSON",
+    )
+
     sub.add_parser("rebuild-manifest", help="Rebuild collector discovery manifest")
 
     p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
@@ -88,6 +93,8 @@ def main(argv: list[str] | None = None) -> None:
             _cmd_quality(args)
         else:
             p_analyze.print_help()
+    elif args.command == "coverage":
+        _cmd_coverage(args)
     elif args.command == "rebuild-manifest":
         _cmd_rebuild_manifest()
     elif args.command == "serve":
@@ -196,6 +203,106 @@ def _cmd_count() -> None:
     from signal_noise.collector import COLLECTORS
 
     print(f"Collectors: {len(COLLECTORS)}")
+
+
+def _classify_level(name: str, meta) -> str:
+    """Classify collector into Collection Spectrum level (L1-L7)."""
+    if name.startswith("probe_"):
+        return "L5"
+    if meta.domain == "computed":
+        return "L4"
+    if meta.requires_key:
+        return "L2"
+    return "L1"
+
+
+def _cmd_coverage(args: argparse.Namespace) -> None:
+    import json as json_mod
+    from collections import Counter
+
+    from signal_noise.collector import COLLECTORS
+
+    domain_freq: Counter[tuple[str, str]] = Counter()
+    domain_count: Counter[str] = Counter()
+    category_count: Counter[str] = Counter()
+    level_count: Counter[str] = Counter()
+    freq_count: Counter[str] = Counter()
+
+    for name, cls in COLLECTORS.items():
+        m = cls.meta
+        domain_freq[(m.domain, m.update_frequency)] += 1
+        domain_count[m.domain] += 1
+        category_count[m.category] += 1
+        freq_count[m.update_frequency] += 1
+        level_count[_classify_level(name, m)] += 1
+
+    total = len(COLLECTORS)
+
+    if args.json:
+        data = {
+            "total": total,
+            "by_domain": dict(domain_count.most_common()),
+            "by_category": dict(category_count.most_common()),
+            "by_frequency": dict(freq_count.most_common()),
+            "by_level": {k: level_count[k] for k in sorted(level_count)},
+            "domain_x_frequency": {
+                f"{d}:{f}": c for (d, f), c in sorted(domain_freq.items())
+            },
+        }
+        print(json_mod.dumps(data, indent=2))
+        return
+
+    # --- Domain × Frequency matrix ---
+    domains = sorted(domain_count, key=lambda d: -domain_count[d])
+    freqs = ["hourly", "daily", "weekly", "monthly", "quarterly", "yearly"]
+    freqs = [f for f in freqs if freq_count.get(f, 0) > 0]
+
+    print(f"Signal Coverage: {total} signals\n")
+    print("── Domain × Frequency ──\n")
+
+    hdr = f"{'Domain':<16}" + "".join(f"{f:>10}" for f in freqs) + f"{'Total':>10}"
+    print(hdr)
+    print("-" * len(hdr))
+    for d in domains:
+        row = f"{d:<16}"
+        for f in freqs:
+            c = domain_freq.get((d, f), 0)
+            row += f"{c or '.':>10}"
+        row += f"{domain_count[d]:>10}"
+        print(row)
+    # totals row
+    row = f"{'Total':<16}"
+    for f in freqs:
+        row += f"{freq_count[f]:>10}"
+    row += f"{total:>10}"
+    print("-" * len(hdr))
+    print(row)
+
+    # --- Collection Level ---
+    print("\n── Collection Level ──\n")
+    level_labels = {
+        "L1": "Free API",
+        "L2": "Auth API",
+        "L3": "Scraping",
+        "L4": "Proxy/computed",
+        "L5": "Active probing",
+        "L6": "Physical sensors",
+        "L7": "Undefined",
+    }
+    for lv in ["L1", "L2", "L3", "L4", "L5", "L6", "L7"]:
+        c = level_count.get(lv, 0)
+        if c > 0:
+            pct = c * 100 / total
+            bar = "#" * int(pct / 2)
+            print(f"  {lv} {level_labels[lv]:<20} {c:>6}  ({pct:4.1f}%)  {bar}")
+
+    # --- Top categories ---
+    print("\n── Top Categories ──\n")
+    for cat, c in category_count.most_common(15):
+        pct = c * 100 / total
+        print(f"  {cat:<20} {c:>6}  ({pct:4.1f}%)")
+    if len(category_count) > 15:
+        print(f"  ... and {len(category_count) - 15} more")
 
 
 def _cmd_rebuild_manifest() -> None:
