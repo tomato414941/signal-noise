@@ -86,11 +86,15 @@ def compute_quality(
         raise ValueError("No signals found in database")
 
     now = datetime.now(timezone.utc)
-    cutoff = (now - timedelta(days=days)).strftime("%Y-%m-%d")
 
     signals: list[SignalQuality] = []
     for row in rows:
         name, sig_domain, category, interval = row["name"], row["domain"], row["category"], row["interval"]
+        interval_days = max(interval // 86400, 1)
+
+        # Expand lookback window for low-frequency signals
+        lookback = max(days, interval_days * 3)
+        cutoff = (now - timedelta(days=lookback)).strftime("%Y-%m-%d")
 
         # Fetch data within the window
         data = conn.execute(
@@ -110,21 +114,19 @@ def compute_quality(
         values = [r["value"] for r in data if r["value"] is not None]
         dates = sorted(set(r["date"] for r in data))
 
-        # Completeness: observed days / expected days
-        if interval == 86400:
-            expected = days
-        else:
-            expected = days * (86400 // max(interval, 1))
-        completeness = min(len(dates) / max(expected, 1), 1.0)
+        # Completeness: observed points / expected points within lookback
+        expected = max(lookback // interval_days, 1)
+        completeness = min(len(dates) / expected, 1.0)
 
-        # Freshness: exponential decay from latest data
+        # Freshness: exponential decay scaled by update interval
         latest_date = max(dates)
         try:
             latest_dt = datetime.strptime(latest_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             days_old = max(0, (now - latest_dt).days)
         except ValueError:
-            days_old = days
-        freshness = math.exp(-days_old / 7)
+            days_old = lookback
+        decay_scale = max(7, interval_days)
+        freshness = math.exp(-days_old / decay_scale)
 
         # Stability: KS test between first half and second half
         stability = 1.0
