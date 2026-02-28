@@ -13,7 +13,7 @@ from signal_noise.collector.defillama import (
     DeFiTotalTVLCollector,
     DeFiDEXVolumeCollector,
     DeFiTotalFeesCollector,
-    DeFiBridgeVolumeCollector,
+    DeFiOptionsVolumeCollector,
     DeFiAvgYieldCollector,
     get_defillama_collectors,
     _make_chain_tvl_collector,
@@ -75,12 +75,10 @@ BRIDGE_RESPONSE = {
     ],
 }
 
-YIELD_RESPONSE = {
-    "data": [
-        {"timestamp": "2024-01-01T00:00:00.000Z", "medianAPY": 3.5},
-        {"timestamp": "2024-01-02T00:00:00.000Z", "medianAPY": 3.7},
-    ],
-}
+YIELD_RESPONSE = [
+    {"timestamp": "2024-01-01T00:00:00.000Z", "medianAPY": 3.5},
+    {"timestamp": "2024-01-02T00:00:00.000Z", "medianAPY": 3.7},
+]
 
 
 class TestChainTVL:
@@ -180,15 +178,15 @@ class TestFees:
         assert len(df) == 2
 
 
-class TestBridge:
+class TestOptions:
     @patch("signal_noise.collector.defillama.requests.get")
     def test_fetch(self, mock_get):
         mock_resp = MagicMock()
-        mock_resp.json.return_value = BRIDGE_RESPONSE
+        mock_resp.json.return_value = DEX_VOLUME_RESPONSE
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        df = DeFiBridgeVolumeCollector().fetch()
+        df = DeFiOptionsVolumeCollector().fetch()
         assert len(df) == 2
 
 
@@ -213,7 +211,7 @@ class TestRegistration:
             "defi_sc_usdt", "defi_sc_usdc",
             "defi_dex_volume", "defi_total_fees",
             "defi_proto_lido", "defi_proto_aave",
-            "defi_bridge_volume", "defi_avg_yield",
+            "defi_options_volume", "defi_avg_yield",
         ]
         for name in expected:
             assert name in COLLECTORS, f"{name} not registered"

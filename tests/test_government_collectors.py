@@ -19,9 +19,11 @@ from signal_noise.collector.ecb_generic import (
 from signal_noise.collector.treasury_generic import (
     TREASURY_YIELD_MATURITIES,
     TREASURY_FISCAL_SERIES,
+    TREASURY_TIPS_MATURITIES,
     get_treasury_collectors,
     _make_yield_collector,
     _make_fiscal_collector,
+    _make_tips_collector,
 )
 from signal_noise.collector.imf_generic import (
     IMF_SERIES,
@@ -45,7 +47,7 @@ WB_API_RESPONSE = [
 
 class TestWorldBankFactory:
     def test_series_count(self):
-        assert len(WORLDBANK_SERIES) >= 30
+        assert len(WORLDBANK_SERIES) >= 75
 
     def test_no_duplicate_names(self):
         names = [t[2] for t in WORLDBANK_SERIES]
@@ -165,18 +167,29 @@ TREASURY_FISCAL_RESPONSE = {
 
 class TestTreasuryFactory:
     def test_yield_maturity_count(self):
-        assert len(TREASURY_YIELD_MATURITIES) >= 8
+        assert len(TREASURY_YIELD_MATURITIES) >= 12
 
     def test_fiscal_series_count(self):
         assert len(TREASURY_FISCAL_SERIES) >= 4
 
+    def test_tips_maturity_count(self):
+        assert len(TREASURY_TIPS_MATURITIES) >= 5
+
     def test_get_treasury_collectors_total(self):
         collectors = get_treasury_collectors()
-        expected = len(TREASURY_YIELD_MATURITIES) + len(TREASURY_FISCAL_SERIES)
+        expected = (
+            len(TREASURY_YIELD_MATURITIES)
+            + len(TREASURY_FISCAL_SERIES)
+            + len(TREASURY_TIPS_MATURITIES)
+        )
         assert len(collectors) == expected
 
     def test_no_duplicate_names(self):
-        names = [t[1] for t in TREASURY_YIELD_MATURITIES] + [t[2] for t in TREASURY_FISCAL_SERIES]
+        names = (
+            [t[1] for t in TREASURY_YIELD_MATURITIES]
+            + [t[2] for t in TREASURY_FISCAL_SERIES]
+            + [t[1] for t in TREASURY_TIPS_MATURITIES]
+        )
         assert len(names) == len(set(names))
 
 

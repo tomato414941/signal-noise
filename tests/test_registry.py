@@ -121,7 +121,7 @@ class TestCollectorsIntegrity:
 
     def test_collectors_count(self):
         from signal_noise.collector import COLLECTORS
-        assert len(COLLECTORS) >= 1070
+        assert len(COLLECTORS) >= 1170
 
     def test_collectors_keys_are_strings(self):
         from signal_noise.collector import COLLECTORS

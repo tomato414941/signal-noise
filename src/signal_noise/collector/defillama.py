@@ -20,9 +20,14 @@ CHAIN_TVL_SERIES: list[tuple[str, str, str]] = [
     ("Polygon", "defi_tvl_matic", "DeFi TVL: Polygon"),
     ("Avalanche", "defi_tvl_avax", "DeFi TVL: Avalanche"),
     ("Sui", "defi_tvl_sui", "DeFi TVL: Sui"),
-    ("Optimism", "defi_tvl_op", "DeFi TVL: Optimism"),
+    ("OP Mainnet", "defi_tvl_op", "DeFi TVL: OP Mainnet"),
     ("Hyperliquid L1", "defi_tvl_hyper", "DeFi TVL: Hyperliquid"),
     ("Mantle", "defi_tvl_mantle", "DeFi TVL: Mantle"),
+    ("Aptos", "defi_tvl_apt", "DeFi TVL: Aptos"),
+    ("TON", "defi_tvl_ton", "DeFi TVL: TON"),
+    ("Cronos", "defi_tvl_cro", "DeFi TVL: Cronos"),
+    ("Scroll", "defi_tvl_scroll", "DeFi TVL: Scroll"),
+    ("zkSync Era", "defi_tvl_zksync", "DeFi TVL: zkSync Era"),
 ]
 
 
@@ -191,7 +196,7 @@ PROTOCOL_TVL_SERIES: list[tuple[str, str, str]] = [
     ("eigenlayer", "defi_proto_eigen", "Protocol TVL: EigenLayer"),
     ("ether.fi-stake", "defi_proto_etherfi", "Protocol TVL: Ether.fi"),
     ("uniswap", "defi_proto_uni", "Protocol TVL: Uniswap"),
-    ("maker", "defi_proto_maker", "Protocol TVL: Maker"),
+    ("sky-lending", "defi_proto_maker", "Protocol TVL: Sky (ex-Maker)"),
     ("ethena", "defi_proto_ethena", "Protocol TVL: Ethena"),
     ("jito", "defi_proto_jito", "Protocol TVL: Jito"),
     ("rocket-pool", "defi_proto_rpl", "Protocol TVL: Rocket Pool"),
@@ -201,6 +206,8 @@ PROTOCOL_TVL_SERIES: list[tuple[str, str, str]] = [
     ("morpho", "defi_proto_morpho", "Protocol TVL: Morpho"),
     ("jupiter", "defi_proto_jup", "Protocol TVL: Jupiter"),
     ("raydium", "defi_proto_ray", "Protocol TVL: Raydium"),
+    ("sparklend", "defi_proto_spark", "Protocol TVL: SparkLend"),
+    ("kamino-lend", "defi_proto_kamino", "Protocol TVL: Kamino"),
 ]
 
 
@@ -279,12 +286,12 @@ class DeFiTotalFeesCollector(BaseCollector):
         return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
 
 
-# ── Bridge Volume ────────────────────────────────────────────
+# ── Options Volume ───────────────────────────────────────────
 
-class DeFiBridgeVolumeCollector(BaseCollector):
+class DeFiOptionsVolumeCollector(BaseCollector):
     meta = CollectorMeta(
-        name="defi_bridge_volume",
-        display_name="Bridge Volume (Daily)",
+        name="defi_options_volume",
+        display_name="DeFi Options Volume (Daily)",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
         domain="financial",
@@ -293,10 +300,10 @@ class DeFiBridgeVolumeCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         url = (
-            "https://api.llama.fi/overview/bridges"
+            "https://api.llama.fi/overview/options"
             "?excludeTotalDataChart=false"
             "&excludeTotalDataChartBreakdown=true"
-            "&dataType=dailyBridgeVolume"
+            "&dataType=dailyPremiumVolume"
         )
         resp = requests.get(url, timeout=self.config.request_timeout)
         resp.raise_for_status()
@@ -312,7 +319,44 @@ class DeFiBridgeVolumeCollector(BaseCollector):
             if r[1] is not None and float(r[1]) > 0
         ]
         if not rows:
-            raise RuntimeError("No bridge volume data")
+            raise RuntimeError("No options volume data")
+        return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+
+
+# ── Perps Volume ─────────────────────────────────────────────
+
+class DeFiPerpsVolumeCollector(BaseCollector):
+    meta = CollectorMeta(
+        name="defi_perps_volume",
+        display_name="DeFi Perps Volume (Daily)",
+        update_frequency="daily",
+        api_docs_url="https://defillama.com/docs/api",
+        domain="financial",
+        category="crypto",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        url = (
+            "https://api.llama.fi/overview/derivatives"
+            "?excludeTotalDataChart=false"
+            "&excludeTotalDataChartBreakdown=true"
+            "&dataType=dailyVolume"
+        )
+        resp = requests.get(url, timeout=self.config.request_timeout)
+        resp.raise_for_status()
+        data = resp.json()
+        chart = data.get("totalDataChart", [])
+
+        rows = [
+            {
+                "date": pd.to_datetime(int(r[0]), unit="s", utc=True),
+                "value": float(r[1]),
+            }
+            for r in chart
+            if r[1] is not None and float(r[1]) > 0
+        ]
+        if not rows:
+            raise RuntimeError("No perps volume data")
         return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
 
 
@@ -329,10 +373,11 @@ class DeFiAvgYieldCollector(BaseCollector):
     )
 
     def fetch(self) -> pd.DataFrame:
-        url = "https://yields.llama.fi/chart/median"
+        url = "https://yields.llama.fi/median"
         resp = requests.get(url, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json().get("data", [])
+        raw = resp.json()
+        data = raw if isinstance(raw, list) else raw.get("data", [])
 
         rows = [
             {
@@ -354,7 +399,8 @@ def get_defillama_collectors() -> dict[str, type[BaseCollector]]:
         "defi_tvl_total": DeFiTotalTVLCollector,
         "defi_dex_volume": DeFiDEXVolumeCollector,
         "defi_total_fees": DeFiTotalFeesCollector,
-        "defi_bridge_volume": DeFiBridgeVolumeCollector,
+        "defi_options_volume": DeFiOptionsVolumeCollector,
+        "defi_perps_volume": DeFiPerpsVolumeCollector,
         "defi_avg_yield": DeFiAvgYieldCollector,
     }
     for chain, name, display in CHAIN_TVL_SERIES:

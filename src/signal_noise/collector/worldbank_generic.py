@@ -55,6 +55,56 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("FM.LBL.BMNY.GD.ZS", "US", "wb_broad_money_us", "Broad Money % GDP: US", "financial", "rates"),
     ("FM.LBL.BMNY.GD.ZS", "CN", "wb_broad_money_cn", "Broad Money % GDP: China", "financial", "rates"),
     ("FM.LBL.BMNY.GD.ZS", "JP", "wb_broad_money_jp", "Broad Money % GDP: Japan", "financial", "rates"),
+    # ── GDP per capita PPP (current intl $) ──
+    ("NY.GDP.PCAP.PP.CD", "US", "wb_gdppc_us", "GDP per Capita PPP: US", "macro", "economic"),
+    ("NY.GDP.PCAP.PP.CD", "CN", "wb_gdppc_cn", "GDP per Capita PPP: China", "macro", "economic"),
+    ("NY.GDP.PCAP.PP.CD", "JP", "wb_gdppc_jp", "GDP per Capita PPP: Japan", "macro", "economic"),
+    ("NY.GDP.PCAP.PP.CD", "DE", "wb_gdppc_de", "GDP per Capita PPP: Germany", "macro", "economic"),
+    ("NY.GDP.PCAP.PP.CD", "IN", "wb_gdppc_in", "GDP per Capita PPP: India", "macro", "economic"),
+    # ── Gross savings (% of GDP) ──
+    ("NY.GNS.ICTR.ZS", "US", "wb_savings_us", "Gross Savings % GDP: US", "macro", "economic"),
+    ("NY.GNS.ICTR.ZS", "CN", "wb_savings_cn", "Gross Savings % GDP: China", "macro", "economic"),
+    ("NY.GNS.ICTR.ZS", "JP", "wb_savings_jp", "Gross Savings % GDP: Japan", "macro", "economic"),
+    ("NY.GNS.ICTR.ZS", "DE", "wb_savings_de", "Gross Savings % GDP: Germany", "macro", "economic"),
+    # ── FDI net inflows (% of GDP) ──
+    ("BX.KLT.DINV.WD.GD.ZS", "US", "wb_fdi_us", "FDI Inflows % GDP: US", "financial", "trade"),
+    ("BX.KLT.DINV.WD.GD.ZS", "CN", "wb_fdi_cn", "FDI Inflows % GDP: China", "financial", "trade"),
+    ("BX.KLT.DINV.WD.GD.ZS", "IN", "wb_fdi_in", "FDI Inflows % GDP: India", "financial", "trade"),
+    ("BX.KLT.DINV.WD.GD.ZS", "BR", "wb_fdi_br", "FDI Inflows % GDP: Brazil", "financial", "trade"),
+    # ── Domestic credit to private sector (% of GDP) ──
+    ("FS.AST.DOMS.GD.ZS", "US", "wb_credit_us", "Private Credit % GDP: US", "financial", "rates"),
+    ("FS.AST.DOMS.GD.ZS", "CN", "wb_credit_cn", "Private Credit % GDP: China", "financial", "rates"),
+    ("FS.AST.DOMS.GD.ZS", "JP", "wb_credit_jp", "Private Credit % GDP: Japan", "financial", "rates"),
+    ("FS.AST.DOMS.GD.ZS", "DE", "wb_credit_de", "Private Credit % GDP: Germany", "financial", "rates"),
+    # ── Stock market capitalization (% of GDP) ──
+    ("CM.MKT.LCAP.GD.ZS", "US", "wb_mktcap_us", "Market Cap % GDP: US", "financial", "equity"),
+    ("CM.MKT.LCAP.GD.ZS", "JP", "wb_mktcap_jp", "Market Cap % GDP: Japan", "financial", "equity"),
+    ("CM.MKT.LCAP.GD.ZS", "GB", "wb_mktcap_gb", "Market Cap % GDP: UK", "financial", "equity"),
+    ("CM.MKT.LCAP.GD.ZS", "KR", "wb_mktcap_kr", "Market Cap % GDP: S.Korea", "financial", "equity"),
+    # ── Government debt (% of GDP) ──
+    ("GC.DOD.TOTL.GD.ZS", "US", "wb_govdebt_us", "Govt Debt % GDP: US", "macro", "fiscal"),
+    ("GC.DOD.TOTL.GD.ZS", "JP", "wb_govdebt_jp", "Govt Debt % GDP: Japan", "macro", "fiscal"),
+    ("GC.DOD.TOTL.GD.ZS", "GB", "wb_govdebt_gb", "Govt Debt % GDP: UK", "macro", "fiscal"),
+    ("GC.DOD.TOTL.GD.ZS", "BR", "wb_govdebt_br", "Govt Debt % GDP: Brazil", "macro", "fiscal"),
+    # ── Population growth (annual %) ──
+    ("SP.POP.GROW", "US", "wb_popgrow_us", "Population Growth: US", "macro", "economic"),
+    ("SP.POP.GROW", "CN", "wb_popgrow_cn", "Population Growth: China", "macro", "economic"),
+    ("SP.POP.GROW", "IN", "wb_popgrow_in", "Population Growth: India", "macro", "economic"),
+    ("SP.POP.GROW", "JP", "wb_popgrow_jp", "Population Growth: Japan", "macro", "economic"),
+    # ── Energy use per capita (kg oil equivalent) ──
+    ("EG.USE.PCAP.KG.OE", "US", "wb_energy_us", "Energy Use per Capita: US", "macro", "economic"),
+    ("EG.USE.PCAP.KG.OE", "CN", "wb_energy_cn", "Energy Use per Capita: China", "macro", "economic"),
+    ("EG.USE.PCAP.KG.OE", "JP", "wb_energy_jp", "Energy Use per Capita: Japan", "macro", "economic"),
+    ("EG.USE.PCAP.KG.OE", "DE", "wb_energy_de", "Energy Use per Capita: Germany", "macro", "economic"),
+    # ── Internet users (% of population) ──
+    ("IT.NET.USER.ZS", "US", "wb_internet_us", "Internet Users %: US", "infrastructure", "internet"),
+    ("IT.NET.USER.ZS", "CN", "wb_internet_cn", "Internet Users %: China", "infrastructure", "internet"),
+    ("IT.NET.USER.ZS", "IN", "wb_internet_in", "Internet Users %: India", "infrastructure", "internet"),
+    ("IT.NET.USER.ZS", "BR", "wb_internet_br", "Internet Users %: Brazil", "infrastructure", "internet"),
+    # ── Life expectancy at birth ──
+    ("SP.DYN.LE00.IN", "US", "wb_lifeexp_us", "Life Expectancy: US", "health", "public_health"),
+    ("SP.DYN.LE00.IN", "CN", "wb_lifeexp_cn", "Life Expectancy: China", "health", "public_health"),
+    ("SP.DYN.LE00.IN", "JP", "wb_lifeexp_jp", "Life Expectancy: Japan", "health", "public_health"),
 ]
 
 

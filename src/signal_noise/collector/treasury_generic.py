@@ -24,6 +24,10 @@ TREASURY_YIELD_MATURITIES: list[tuple[str, str]] = [
     ("10 Yr", "tsy_yield_10y", "Treasury Yield 10-Year"),
     ("20 Yr", "tsy_yield_20y", "Treasury Yield 20-Year"),
     ("30 Yr", "tsy_yield_30y", "Treasury Yield 30-Year"),
+    ("2 Mo", "tsy_yield_2m", "Treasury Yield 2-Month"),
+    ("4 Mo", "tsy_yield_4m", "Treasury Yield 4-Month"),
+    ("3 Yr", "tsy_yield_3y", "Treasury Yield 3-Year"),
+    ("7 Yr", "tsy_yield_7y", "Treasury Yield 7-Year"),
 ]
 
 # (endpoint_path, value_field, collector_name, display_name, domain, category)
@@ -176,6 +180,78 @@ def _make_fiscal_collector(
     return _Collector
 
 
+_TREASURY_TIPS_URL = (
+    "https://home.treasury.gov/resource-center/data-chart-center/interest-rates"
+    "/daily-treasury-rates.csv/{year}/all?type=daily_treasury_real_yield_curve"
+    "&page&_format=csv"
+)
+
+TREASURY_TIPS_MATURITIES: list[tuple[str, str, str]] = [
+    ("5 YR", "tsy_tips_5y", "TIPS Real Yield 5-Year"),
+    ("7 YR", "tsy_tips_7y", "TIPS Real Yield 7-Year"),
+    ("10 YR", "tsy_tips_10y", "TIPS Real Yield 10-Year"),
+    ("20 YR", "tsy_tips_20y", "TIPS Real Yield 20-Year"),
+    ("30 YR", "tsy_tips_30y", "TIPS Real Yield 30-Year"),
+]
+
+
+def _make_tips_collector(
+    col_name: str, name: str, display_name: str
+) -> type[BaseCollector]:
+    class _Collector(BaseCollector):
+        meta = CollectorMeta(
+            name=name,
+            display_name=display_name,
+            update_frequency="daily",
+            api_docs_url="https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
+            domain="financial",
+            category="rates",
+        )
+
+        def __init__(self, total: int | None = None, **kwargs):
+            super().__init__(**kwargs)
+            if total and total > 2500:
+                self._lookback_years = 25
+            elif total and total > 1250:
+                self._lookback_years = 10
+            else:
+                self._lookback_years = 4
+
+        def fetch(self) -> pd.DataFrame:
+            from datetime import UTC, datetime
+            current_year = datetime.now(UTC).year
+            all_rows = []
+            for year in range(current_year - self._lookback_years, current_year + 1):
+                url = _TREASURY_TIPS_URL.format(year=year)
+                try:
+                    resp = requests.get(url, timeout=self.config.request_timeout)
+                    resp.raise_for_status()
+                    df = pd.read_csv(StringIO(resp.text))
+                    if "Date" not in df.columns or col_name not in df.columns:
+                        continue
+                    for _, row in df.iterrows():
+                        try:
+                            val = float(row[col_name])
+                        except (ValueError, TypeError):
+                            continue
+                        all_rows.append({
+                            "date": pd.to_datetime(row["Date"], utc=True),
+                            "value": val,
+                        })
+                except Exception:
+                    continue
+
+            if not all_rows:
+                raise RuntimeError(f"No TIPS data for {col_name}")
+
+            result = pd.DataFrame(all_rows)
+            return result.sort_values("date").reset_index(drop=True)
+
+    _Collector.__name__ = f"TSY_{name}"
+    _Collector.__qualname__ = f"TSY_{name}"
+    return _Collector
+
+
 def get_treasury_collectors() -> dict[str, type[BaseCollector]]:
     collectors: dict[str, type[BaseCollector]] = {}
     for col_name, name, display_name in TREASURY_YIELD_MATURITIES:
@@ -184,4 +260,6 @@ def get_treasury_collectors() -> dict[str, type[BaseCollector]]:
         collectors[name] = _make_fiscal_collector(
             endpoint, value_field, name, display_name, domain, category
         )
+    for col_name, name, display_name in TREASURY_TIPS_MATURITIES:
+        collectors[name] = _make_tips_collector(col_name, name, display_name)
     return collectors
