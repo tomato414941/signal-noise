@@ -8,18 +8,21 @@ import pytest
 
 from signal_noise.collector.eia_generic import (
     EIA_SERIES,
+    _eia_cache,
     _make_eia_collector,
     get_eia_collectors,
 )
 
 
-EIA_RESPONSE = {
+# Batched response with multiple series identified by facet_key field
+EIA_BATCH_RESPONSE = {
     "response": {
-        "total": 3,
+        "total": 4,
         "data": [
-            {"period": "2024-01-15", "value": "72.50"},
-            {"period": "2024-01-16", "value": "73.10"},
-            {"period": "2024-01-17", "value": "74.00"},
+            {"period": "2024-01-15", "series": "RWTC", "value": "72.50"},
+            {"period": "2024-01-16", "series": "RWTC", "value": "73.10"},
+            {"period": "2024-01-15", "series": "RBRTE", "value": "77.00"},
+            {"period": "2024-01-16", "series": "RBRTE", "value": "78.50"},
         ],
     }
 }
@@ -28,8 +31,8 @@ EIA_PAGED_RESPONSE_1 = {
     "response": {
         "total": 4,
         "data": [
-            {"period": "2024-01-15", "value": "72.50"},
-            {"period": "2024-01-16", "value": "73.10"},
+            {"period": "2024-01-15", "series": "RWTC", "value": "72.50"},
+            {"period": "2024-01-16", "series": "RWTC", "value": "73.10"},
         ],
     }
 }
@@ -38,8 +41,8 @@ EIA_PAGED_RESPONSE_2 = {
     "response": {
         "total": 4,
         "data": [
-            {"period": "2024-01-17", "value": "74.00"},
-            {"period": "2024-01-18", "value": "75.50"},
+            {"period": "2024-01-17", "series": "RWTC", "value": "74.00"},
+            {"period": "2024-01-18", "series": "RWTC", "value": "75.50"},
         ],
     }
 }
@@ -47,12 +50,20 @@ EIA_PAGED_RESPONSE_2 = {
 EIA_EMPTY = {"response": {"total": 0, "data": []}}
 
 
-class TestEIAFactory:
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    """Clear EIA cache before each test."""
+    _eia_cache.clear()
+    yield
+    _eia_cache.clear()
+
+
+class TestEIABatchFetch:
     @patch("signal_noise.collector.eia_generic._get_eia_key", return_value="test_key")
     @patch("signal_noise.collector.eia_generic.requests.get")
     def test_fetch_parses(self, mock_get, mock_key):
         mock_resp = MagicMock()
-        mock_resp.json.return_value = EIA_RESPONSE
+        mock_resp.json.return_value = EIA_BATCH_RESPONSE
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
@@ -62,9 +73,35 @@ class TestEIAFactory:
             "test_wti", "Test WTI", "financial", "commodity",
         )
         df = cls().fetch()
-        assert len(df) == 3
+        assert len(df) == 2
         assert df["value"].iloc[0] == 72.50
         assert df["date"].is_monotonic_increasing
+
+    @patch("signal_noise.collector.eia_generic._get_eia_key", return_value="test_key")
+    @patch("signal_noise.collector.eia_generic.requests.get")
+    def test_cache_prevents_duplicate_requests(self, mock_get, mock_key):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = EIA_BATCH_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        wti_cls = _make_eia_collector(
+            "petroleum/pri/spt/data", "series", "RWTC",
+            "value", "daily",
+            "test_wti", "Test WTI", "financial", "commodity",
+        )
+        brent_cls = _make_eia_collector(
+            "petroleum/pri/spt/data", "series", "RBRTE",
+            "value", "daily",
+            "test_brent", "Test Brent", "financial", "commodity",
+        )
+        wti_df = wti_cls().fetch()
+        brent_df = brent_cls().fetch()
+
+        assert len(wti_df) == 2
+        assert len(brent_df) == 2
+        # Both share the same group, so only 1 API call
+        assert mock_get.call_count == 1
 
     @patch("signal_noise.collector.eia_generic._get_eia_key", return_value="test_key")
     @patch("signal_noise.collector.eia_generic.requests.get")
@@ -102,6 +139,17 @@ class TestEIAFactory:
         )
         with pytest.raises(RuntimeError, match="No EIA data"):
             cls().fetch()
+
+    def test_no_key_raises(self):
+        cls = _make_eia_collector(
+            "petroleum/pri/spt/data", "series", "RWTC",
+            "value", "daily",
+            "test_wti", "Test WTI", "financial", "commodity",
+        )
+        with patch("signal_noise.collector.eia_generic._EIA_API_KEY", None):
+            with patch.dict("os.environ", {}, clear=True):
+                with pytest.raises(RuntimeError, match="EIA_API_KEY"):
+                    cls().fetch()
 
 
 class TestEIAMeta:

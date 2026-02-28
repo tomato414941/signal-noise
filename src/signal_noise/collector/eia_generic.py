@@ -2,18 +2,27 @@
 
 Uses EIA API v2.  Requires EIA_API_KEY environment variable.
 Free key: https://www.eia.gov/opendata/register.php
+
+Collectors sharing the same route/facet/frequency are batched into a single
+request and cached via SharedAPICache to minimize API calls.
 """
 from __future__ import annotations
 
+import logging
 import os
+from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
 import requests
 
+from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
+log = logging.getLogger(__name__)
+
 _EIA_API_KEY: str | None = None
+_eia_cache = SharedAPICache(ttl=3600)  # cache for 1 hour
 
 
 def _get_eia_key() -> str:
@@ -156,6 +165,91 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_china_oil_consumption", "EIA China Oil Consumption", "macro", "economic"),
 ]
 
+# Build group index: (route, facet_key, frequency) -> [(facet_value, data_col, name), ...]
+_GROUP_INDEX: dict[tuple[str, str, str], list[tuple[str, str, str]]] = defaultdict(list)
+for _r, _fk, _fv, _dc, _freq, _name, *_ in EIA_SERIES:
+    _GROUP_INDEX[(_r, _fk, _freq)].append((_fv, _dc, _name))
+
+# Lookup: collector_name -> (route, facet_key, facet_value, data_col, frequency)
+_SERIES_LOOKUP: dict[str, tuple[str, str, str, str, str]] = {
+    s[5]: (s[0], s[1], s[2], s[3], s[4]) for s in EIA_SERIES
+}
+
+
+def _fetch_eia_group(
+    route: str, facet_key: str, frequency: str,
+    members: list[tuple[str, str, str]],
+    timeout: int = 30,
+) -> dict[str, list[dict]]:
+    """Fetch multiple EIA series sharing the same route/facet/frequency.
+
+    Returns {(facet_value, data_col): [rows]} mapping.
+    """
+    api_key = _get_eia_key()
+    url = f"{_BASE_URL}/{route}"
+
+    facet_values = list({fv for fv, _, _ in members})
+    data_cols = list({dc for _, dc, _ in members})
+
+    params: list[tuple[str, str]] = [
+        ("api_key", api_key),
+        ("frequency", frequency),
+        ("sort[0][column]", "period"),
+        ("sort[0][direction]", "asc"),
+        ("length", "5000"),
+    ]
+    for fv in facet_values:
+        params.append((f"facets[{facet_key}][]", fv))
+    for dc in data_cols:
+        params.append(("data[]", dc))
+
+    all_rows: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    offset = 0
+    while True:
+        req_params = params + [("offset", str(offset))]
+        resp = requests.get(url, params=req_params, timeout=timeout)
+        resp.raise_for_status()
+        body = resp.json()
+        data = body.get("response", {}).get("data", [])
+        if not data:
+            break
+        for r in data:
+            period = r.get("period")
+            fv = r.get(facet_key)
+            if not period or not fv:
+                continue
+            for dc in data_cols:
+                val = r.get(dc)
+                if val is not None:
+                    try:
+                        all_rows[(fv, dc)].append({
+                            "date": pd.to_datetime(str(period), utc=True),
+                            "value": float(val),
+                        })
+                    except (ValueError, TypeError):
+                        continue
+        total = body.get("response", {}).get("total", 0)
+        offset += len(data)
+        if offset >= total:
+            break
+
+    return dict(all_rows)
+
+
+def _get_eia_group_data(
+    route: str, facet_key: str, frequency: str, timeout: int = 30,
+) -> dict[tuple[str, str], list[dict]]:
+    """Fetch an EIA group with caching."""
+    cache_key = f"{route}|{facet_key}|{frequency}"
+    members = _GROUP_INDEX[(route, facet_key, frequency)]
+
+    def _fetch() -> dict[tuple[str, str], list[dict]]:
+        result = _fetch_eia_group(route, facet_key, frequency, members, timeout)
+        log.info("EIA batch %s: fetched %d series", cache_key, len(result))
+        return result
+
+    return _eia_cache.get_or_fetch(cache_key, _fetch)
+
 
 def _make_eia_collector(
     route: str, facet_key: str, facet_value: str,
@@ -176,46 +270,14 @@ def _make_eia_collector(
         )
 
         def fetch(self) -> pd.DataFrame:
-            api_key = _get_eia_key()
-            url = f"{_BASE_URL}/{route}"
-            params = {
-                "api_key": api_key,
-                f"facets[{facet_key}][]": facet_value,
-                "frequency": frequency,
-                "data[]": data_col,
-                "sort[0][column]": "period",
-                "sort[0][direction]": "asc",
-                "length": "5000",
-            }
-            all_rows: list[dict] = []
-            offset = 0
-            while True:
-                params["offset"] = str(offset)
-                resp = requests.get(url, params=params, timeout=self.config.request_timeout)
-                resp.raise_for_status()
-                body = resp.json()
-                data = body.get("response", {}).get("data", [])
-                if not data:
-                    break
-                for r in data:
-                    period = r.get("period")
-                    val = r.get(data_col)
-                    if period and val is not None:
-                        try:
-                            all_rows.append({
-                                "date": pd.to_datetime(str(period), utc=True),
-                                "value": float(val),
-                            })
-                        except (ValueError, TypeError):
-                            continue
-                total = body.get("response", {}).get("total", 0)
-                offset += len(data)
-                if offset >= total:
-                    break
-
-            if not all_rows:
+            group_data = _get_eia_group_data(
+                route, facet_key, frequency,
+                timeout=self.config.request_timeout,
+            )
+            rows = group_data.get((facet_value, data_col), [])
+            if not rows:
                 raise RuntimeError(f"No EIA data for {name} ({facet_value})")
-            return pd.DataFrame(all_rows).sort_values("date").reset_index(drop=True)
+            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
 
     _Collector.__name__ = f"EIA_{name}"
     _Collector.__qualname__ = f"EIA_{name}"
