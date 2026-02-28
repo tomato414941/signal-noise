@@ -112,6 +112,42 @@ class TestBaseCollector:
             assert s["cache_age_hours"] is None
 
 
+class TestCollectInterval:
+    def test_default_uses_frequency(self):
+        meta = CollectorMeta(
+            name="t", display_name="T", update_frequency="hourly", api_docs_url="",
+        )
+        assert meta.interval == 3600
+
+    def test_explicit_collect_interval(self):
+        meta = CollectorMeta(
+            name="t", display_name="T", update_frequency="hourly", api_docs_url="",
+            collect_interval=900,
+        )
+        assert meta.interval == 900
+
+    def test_level_default_l5(self):
+        meta = CollectorMeta(
+            name="t", display_name="T", update_frequency="hourly", api_docs_url="",
+            collection_level="L5",
+        )
+        assert meta.interval == 300
+
+    def test_explicit_overrides_level_default(self):
+        meta = CollectorMeta(
+            name="t", display_name="T", update_frequency="hourly", api_docs_url="",
+            collection_level="L5", collect_interval=60,
+        )
+        assert meta.interval == 60
+
+    def test_unknown_level_uses_frequency(self):
+        meta = CollectorMeta(
+            name="t", display_name="T", update_frequency="daily", api_docs_url="",
+            collection_level="L1",
+        )
+        assert meta.interval == 86400
+
+
 class TestTaxonomy:
     def test_all_collectors_have_domain_and_category(self):
         from signal_noise.collector import COLLECTORS

@@ -69,6 +69,11 @@ FREQUENCY_TO_SECONDS: dict[str, int] = {
     "yearly": 31536000,
 }
 
+# Default collect intervals by collection level (seconds)
+LEVEL_DEFAULT_INTERVALS: dict[str, int] = {
+    "L5": 300,  # active probes: every 5 min
+}
+
 
 @dataclass
 class CollectorMeta:
@@ -81,9 +86,14 @@ class CollectorMeta:
     category: str = ""     # concrete classification
     signal_type: str = "scalar"  # "scalar" or "ohlcv"
     collection_level: str = ""   # L1-L7 (empty = auto-detect)
+    collect_interval: int = 0    # seconds (0 = auto from level/frequency)
 
     @property
     def interval(self) -> int:
+        if self.collect_interval > 0:
+            return self.collect_interval
+        if self.collection_level and self.collection_level in LEVEL_DEFAULT_INTERVALS:
+            return LEVEL_DEFAULT_INTERVALS[self.collection_level]
         return FREQUENCY_TO_SECONDS[self.update_frequency]
 
 
