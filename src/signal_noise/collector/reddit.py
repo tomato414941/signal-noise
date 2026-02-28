@@ -20,7 +20,8 @@ class _RedditSubredditCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         # Fetch hot posts (up to 100)
-        # Use old.reddit.com to avoid aggressive bot detection on www
+        # NOTE: Reddit aggressively blocks server IPs (403).
+        # OAuth authentication may be required for reliable access.
         url = f"https://old.reddit.com/r/{self._subreddit}/hot.json?limit=100"
         resp = requests.get(
             url,
