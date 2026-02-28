@@ -1,0 +1,15 @@
+[Unit]
+Description=signal-noise Scheduler
+After=network.target
+
+[Service]
+Type=simple
+User=trading
+WorkingDirectory=/home/trading/projects/signal-noise
+ExecStart=/home/trading/projects/signal-noise/.venv/bin/python -m signal_noise scheduler
+Restart=always
+RestartSec=15
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
