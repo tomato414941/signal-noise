@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 
 from signal_noise.collector.base import BaseCollector
@@ -9,17 +10,29 @@ from signal_noise.store.sqlite_store import SignalStore
 log = logging.getLogger(__name__)
 
 
+def _compute_jitter(name: str, interval: int, max_jitter: float = 30.0) -> float:
+    """Deterministic jitter from collector name. Same name = same offset."""
+    h = hashlib.md5(name.encode(), usedforsecurity=False).digest()
+    frac = int.from_bytes(h[:4], "little") / (2**32)
+    return frac * min(interval * 0.1, max_jitter)
+
+
 async def run_collector_loop(
     collector: BaseCollector,
     store: SignalStore,
     interval: int,
     *,
+    jitter: float = 0.0,
     max_failures: int = 5,
 ) -> None:
     """Single collector loop: fetch -> save -> sleep -> repeat.
 
     Circuit breaker: stops after max_failures consecutive failures.
     """
+    if jitter > 0:
+        log.debug("Collector %s starting in %.1fs (jitter)", collector.meta.name, jitter)
+        await asyncio.sleep(jitter)
+
     failures = 0
     while True:
         try:
@@ -70,11 +83,12 @@ async def run_scheduler(
     for name, cls in targets.items():
         collector = cls()
         interval = collector.meta.interval
+        j = _compute_jitter(name, interval)
         task = asyncio.create_task(
-            run_collector_loop(collector, store, interval),
+            run_collector_loop(collector, store, interval, jitter=j),
             name=f"collector:{name}",
         )
         tasks.append(task)
-        log.info("Scheduled %s (every %ds)", name, interval)
+        log.info("Scheduled %s (every %ds, jitter %.1fs)", name, interval, j)
 
     await asyncio.gather(*tasks)
