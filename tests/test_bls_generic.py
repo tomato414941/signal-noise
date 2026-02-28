@@ -8,90 +8,146 @@ import pytest
 
 from signal_noise.collector.bls_generic import (
     BLS_SERIES,
+    _bls_cache,
     _make_bls_collector,
+    _parse_bls_items,
     get_bls_collectors,
 )
 
 
-BLS_RESPONSE = {
+MONTHLY_ITEMS = [
+    {"year": "2024", "period": "M03", "value": "312.332"},
+    {"year": "2024", "period": "M02", "value": "310.326"},
+    {"year": "2024", "period": "M01", "value": "308.417"},
+    {"year": "2024", "period": "M13", "value": ""},  # annual avg, skip
+]
+
+QUARTERLY_ITEMS = [
+    {"year": "2024", "period": "Q01", "value": "112.5"},
+    {"year": "2023", "period": "Q04", "value": "111.8"},
+]
+
+# Batched API response with multiple series
+BATCH_RESPONSE = {
     "status": "REQUEST_SUCCEEDED",
     "Results": {
         "series": [
-            {
-                "seriesID": "CUSR0000SA0",
-                "data": [
-                    {"year": "2024", "period": "M03", "value": "312.332"},
-                    {"year": "2024", "period": "M02", "value": "310.326"},
-                    {"year": "2024", "period": "M01", "value": "308.417"},
-                    {"year": "2024", "period": "M13", "value": ""},  # annual avg, skip
-                ],
-            }
+            {"seriesID": "CUSR0000SA0", "data": MONTHLY_ITEMS},
+            {"seriesID": "PRS85006092", "data": QUARTERLY_ITEMS},
         ]
     },
 }
 
-BLS_QUARTERLY_RESPONSE = {
-    "status": "REQUEST_SUCCEEDED",
-    "Results": {
-        "series": [
-            {
-                "seriesID": "PRS85006092",
-                "data": [
-                    {"year": "2024", "period": "Q01", "value": "112.5"},
-                    {"year": "2023", "period": "Q04", "value": "111.8"},
-                ],
-            }
-        ]
-    },
-}
-
-BLS_EMPTY = {
+EMPTY_RESPONSE = {
     "status": "REQUEST_SUCCEEDED",
     "Results": {"series": []},
 }
 
-
-def _mock_bls_post(primary_response):
-    """Return primary response once, then empty for subsequent 20-year chunks."""
-    empty = MagicMock()
-    empty.json.return_value = BLS_EMPTY
-    empty.raise_for_status = MagicMock()
-
-    first = MagicMock()
-    first.json.return_value = primary_response
-    first.raise_for_status = MagicMock()
-
-    return [first] + [empty] * 5  # enough for 2000-2026 in 20-year chunks
+RATE_LIMITED_RESPONSE = {
+    "status": "REQUEST_NOT_PROCESSED",
+    "message": ["daily threshold reached"],
+    "Results": {},
+}
 
 
-class TestBLSFactory:
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    """Clear BLS cache before each test."""
+    _bls_cache.clear()
+    yield
+    _bls_cache.clear()
+
+
+class TestParseBLSItems:
+    def test_monthly(self):
+        rows = _parse_bls_items(MONTHLY_ITEMS)
+        assert len(rows) == 3  # M13 skipped
+        values = {r["value"] for r in rows}
+        assert 312.332 in values
+
+    def test_quarterly(self):
+        rows = _parse_bls_items(QUARTERLY_ITEMS)
+        assert len(rows) == 2
+        months = {r["date"].month for r in rows}
+        assert 10 in months  # Q04 -> month 10
+        assert 1 in months   # Q01 -> month 1
+
+    def test_annual(self):
+        items = [{"year": "2024", "period": "A01", "value": "100.0"}]
+        rows = _parse_bls_items(items)
+        assert len(rows) == 1
+        assert rows[0]["date"].month == 1
+
+    def test_empty_value_skipped(self):
+        items = [{"year": "2024", "period": "M01", "value": ""}]
+        rows = _parse_bls_items(items)
+        assert len(rows) == 0
+
+    def test_semiannual_skipped(self):
+        items = [{"year": "2024", "period": "S01", "value": "100.0"}]
+        rows = _parse_bls_items(items)
+        assert len(rows) == 0
+
+
+class TestBLSBatchFetch:
     @patch("signal_noise.collector.bls_generic.requests.post")
-    def test_fetch_monthly(self, mock_post):
-        mock_post.side_effect = _mock_bls_post(BLS_RESPONSE)
+    def test_batch_fetches_all_series(self, mock_post):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = BATCH_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_post.return_value = mock_resp
 
         cls = _make_bls_collector(
             "CUSR0000SA0", "test_cpi", "Test CPI",
             "monthly", "macro", "inflation",
         )
         df = cls().fetch()
-        assert len(df) == 3  # M13 is skipped
+        assert len(df) == 3
         assert df["value"].iloc[-1] == 312.332
         assert df["date"].is_monotonic_increasing
 
     @patch("signal_noise.collector.bls_generic.requests.post")
-    def test_fetch_quarterly(self, mock_post):
-        mock_post.side_effect = _mock_bls_post(BLS_QUARTERLY_RESPONSE)
+    def test_cache_prevents_duplicate_requests(self, mock_post):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = BATCH_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_post.return_value = mock_resp
 
-        cls = _make_bls_collector(
+        cpi_cls = _make_bls_collector(
+            "CUSR0000SA0", "test_cpi", "Test CPI",
+            "monthly", "macro", "inflation",
+        )
+        prod_cls = _make_bls_collector(
             "PRS85006092", "test_prod", "Test Productivity",
             "quarterly", "macro", "economic",
         )
-        df = cls().fetch()
-        assert len(df) == 2
+        cpi_cls().fetch()
+        prod_cls().fetch()
+
+        # Both fetches should share the same batched request (cached)
+        # Without key: 46 series / 25 per batch = 2 requests
+        assert mock_post.call_count == 2
 
     @patch("signal_noise.collector.bls_generic.requests.post")
-    def test_empty_raises(self, mock_post):
-        mock_post.side_effect = _mock_bls_post(BLS_EMPTY)
+    def test_rate_limit_raises(self, mock_post):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = RATE_LIMITED_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_post.return_value = mock_resp
+
+        cls = _make_bls_collector(
+            "CUSR0000SA0", "test_cpi", "Test CPI",
+            "monthly", "macro", "inflation",
+        )
+        with pytest.raises(RuntimeError, match="BLS API rejected"):
+            cls().fetch()
+
+    @patch("signal_noise.collector.bls_generic.requests.post")
+    def test_empty_series_raises(self, mock_post):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = EMPTY_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_post.return_value = mock_resp
 
         cls = _make_bls_collector(
             "CUSR0000SA0", "test_cpi", "Test CPI",
