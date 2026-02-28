@@ -7,6 +7,7 @@ import pandas as pd
 
 if TYPE_CHECKING:
     from signal_noise.collector.base import BaseCollector
+    from signal_noise.store.sqlite_store import SignalStore
 
 log = logging.getLogger(__name__)
 

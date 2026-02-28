@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 
 import requests
 import pandas as pd
@@ -43,7 +42,6 @@ def _make_gh_events_collector(
             resp.raise_for_status()
             events = resp.json()
 
-            event_counts = Counter(e.get("type", "unknown") for e in events)
             total = len(events)
 
             ts = pd.Timestamp.now(tz="UTC").floor("h")
