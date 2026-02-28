@@ -11,6 +11,114 @@ transformation — all of these belong to the consumer.
 
 > "even noise is worth collecting -- the signal hides within"
 
+## Collection Spectrum
+
+Data collection is not binary. Between "fully available via free API" and
+"physically impossible to measure" lies a gradient. signal-noise's scope
+spans this entire spectrum — including pushing things from the unobservable
+side toward the observable.
+
+```
+ Easy                                                            Hard
+──────────────────────────────────────────────────────────────────────
+ L1        L2         L3         L4         L5          L6        L7
+ Free API  Auth API   Scraping   Proxy      Active      Physical  Not yet
+                                            probing     sensors   defined
+```
+
+### L1: Free API consumption (current majority)
+
+No authentication. JSON response. Immediate implementation.
+
+Examples: Open-Meteo, CoinGecko, USGS earthquake, ISS position, NOAA alerts
+
+### L2: Authenticated API consumption
+
+Free registration for API key. Same integration pattern as L1.
+
+Examples: FRED, BLS, EIA, BEA
+
+### L3: Scraping / parsing unstructured sources
+
+Data is publicly available but not via a structured API. Requires HTML
+parsing, PDF extraction, or CSV download + transformation.
+
+Examples: government statistical releases, court filings, regulatory bulletins
+
+### L4: Proxy derivation
+
+The phenomenon of interest cannot be directly measured, but correlated
+observables exist. The proxy is explicitly labeled as such — not presented
+as the real thing.
+
+Examples: Wikipedia pageviews as attention proxy, shipping ETF prices as
+maritime activity proxy, npm downloads as tech adoption proxy
+
+### L5: Active probing
+
+signal-noise's own servers become sensors. No external API is consumed —
+the measurement originates from our infrastructure.
+
+Examples:
+- Network latency (ping/traceroute to global endpoints)
+- DNS resolution time to major services
+- HTTP response time of public APIs (meta-observability)
+- TLS certificate health monitoring
+
+### L6: Physical sensors
+
+Deploy hardware to measure the physical world where no existing data
+source covers. Even a single $20 sensor at one location creates a time
+series that previously did not exist.
+
+Examples:
+- Temperature / humidity / barometric pressure (BME280 sensor)
+- Air quality / PM2.5 (SDS011 or PMS5003 sensor)
+- Ambient noise level (microphone + dB computation)
+- RF spectrum occupancy (SDR dongle)
+- Light level / UV index (photodiode)
+
+### L7: Not yet defined
+
+Concepts that matter but lack any known measurement method. These are
+documented as open problems, not dismissed as out of scope.
+
+Examples: institutional trust, social cohesion, regulatory intent,
+innovation velocity
+
+### Guiding principles
+
+- **Every level is in scope.** signal-noise is not just an API aggregator.
+  It is an observatory that actively expands the boundary of what is
+  observable.
+- **Label the level.** Each collector should declare its collection level
+  so consumers know what they are getting (direct measurement vs proxy
+  vs active probe).
+- **Prefer lower levels.** L1 data is cheaper and more reliable. Move to
+  higher levels only when lower levels cannot cover the phenomenon.
+- **Document what is missing.** Even if we cannot collect it today,
+  recording "this is not observable yet" has value — it defines the
+  frontier.
+
+### Unreached but reachable sources (as of 2026-02-28)
+
+Verified free APIs not yet integrated:
+
+| Source | Level | Endpoint | Data | Auth |
+|--------|-------|----------|------|------|
+| NOAA CO-OPS | L1 | `api.tidesandcurrents.noaa.gov/api/prod/` | Tide, water level, water temp (US coast) | None |
+| UK Carbon Intensity | L1 | `api.carbonintensity.org.uk/intensity` | UK electricity carbon intensity | None |
+| Eurostat | L1 | `ec.europa.eu/eurostat/api/.../1.0/data/{code}` | EU economic statistics | None |
+| Bank of Canada | L1 | `bankofcanada.ca/valet/observations/{series}/json` | CAD FX, interest rates | None |
+| openFDA | L1 | `api.fda.gov/drug/event.json` | Drug adverse event reports | None |
+| CDC Socrata | L1 | `data.cdc.gov/resource/{dataset}.json` | Disease surveillance (NNDSS, ARI) | None |
+| USGS Water Services | L1 | `waterservices.usgs.gov/nwis/iv/?format=json` | Real-time streamflow | None |
+| Bank of England | L1 | `bankofengland.co.uk/boeapps/database/` | UK interest rates | None |
+| BEA | L2 | `apps.bea.gov/api/data` | US GDP/NIPA primary source | Free key |
+| Alpha Vantage | L2 | `alphavantage.co/query` | Equities, FX, crypto | Free key |
+| Finnhub | L2 | `finnhub.io/api/v1` | Equities, economic calendar | Free key |
+| BIS Statistics | L3 | `data.bis.org/bulkdownload` | DSR, credit gaps, property prices | None (CSV) |
+
 ## Project Responsibility
 
 signal-noise is a **data collection service**: collect worldwide time series and
@@ -58,7 +166,7 @@ The following modules exist today but belong to the consumer side:
 
 ### What signal-noise delivers
 
-- **Raw time series only**: ~1,067 collector outputs
+- **Raw time series only**: ~1,083 collector outputs
 - **Format**: `DataFrame[timestamp, value]` (or `[date, value]`)
 - **No derived signals**: transforms (z-score, SMA, RSI, etc.) are not applied
 - **Metadata**: name, domain, category, update frequency, last updated
@@ -361,10 +469,22 @@ priority. The list serves as a creative inventory, not a roadmap.
 
 ## Open Questions
 
-- [ ] Scheduler implementation: cron-based, APScheduler, or custom event loop?
-- [ ] Storage: keep Parquet files, or move to a time series database?
-- [ ] API framework: FastAPI, or something lighter?
+- [x] Scheduler implementation: cron-based, APScheduler, or custom event loop?
+  → asyncio self-managed loop (implemented in `scheduler/loop.py`)
+- [x] Storage: keep Parquet files, or move to a time series database?
+  → SQLite with WAL mode (implemented in `store/sqlite_store.py`)
+- [x] API framework: FastAPI, or something lighter?
+  → FastAPI (implemented in `api/app.py`)
 - [ ] Consumer project naming and repository structure
 - [ ] Specific online learning algorithm (EWA, Follow the Regularized Leader, etc.)
 - [ ] How to handle collector authentication (API keys) in service mode
 - [ ] Monitoring and alerting for collector failures
+- [ ] Domain taxonomy: current 10-domain classification has mixed axes
+  (object vs method vs actor). Revisit when collection spectrum expands
+  beyond L1/L2 — taxonomy should emerge from the data, not precede it.
+- [ ] CollectorMeta: add `collection_level` field (L1–L7) so consumers
+  can distinguish direct measurements from proxies
+- [ ] L5 active probing: design collector base class for self-originated
+  measurements (no external API, measurement from own infrastructure)
+- [ ] L6 physical sensors: evaluate Raspberry Pi + sensor HAT as first
+  physical observation point
