@@ -46,7 +46,7 @@ CATEGORIES = {
     # geophysical
     "space_weather", "seismic", "celestial",
     # infrastructure
-    "logistics", "aviation", "internet",
+    "logistics", "aviation", "internet", "space",
     # real_estate
     "real_estate",
     # developer
