@@ -22,7 +22,7 @@ class MempoolSizeCollector(BaseCollector):
         category="crypto",
     )
 
-    URL = "https://mempool.space/api/v1/mining/mempool-stats/2y"
+    URL = "https://mempool.space/api/v1/statistics/2y"
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=60)

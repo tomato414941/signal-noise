@@ -20,7 +20,8 @@ class _RedditSubredditCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         # Fetch hot posts (up to 100)
-        url = f"https://www.reddit.com/r/{self._subreddit}/hot.json?limit=100"
+        # Use old.reddit.com to avoid aggressive bot detection on www
+        url = f"https://old.reddit.com/r/{self._subreddit}/hot.json?limit=100"
         resp = requests.get(
             url,
             headers={"User-Agent": _USER_AGENT},

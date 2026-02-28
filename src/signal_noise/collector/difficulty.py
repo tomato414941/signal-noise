@@ -32,10 +32,15 @@ class DifficultyCollector(BaseCollector):
         rows = []
         for entry in data:
             try:
-                ts = pd.to_datetime(entry["timestamp"], unit="s", utc=True)
-                diff = float(entry["difficulty"])
+                # Response format: [timestamp, height, difficulty, change]
+                if isinstance(entry, list) and len(entry) >= 3:
+                    ts = pd.to_datetime(entry[0], unit="s", utc=True)
+                    diff = float(entry[2])
+                else:
+                    ts = pd.to_datetime(entry["timestamp"], unit="s", utc=True)
+                    diff = float(entry["difficulty"])
                 rows.append({"date": ts.normalize(), "value": diff})
-            except (KeyError, ValueError, TypeError):
+            except (KeyError, ValueError, TypeError, IndexError):
                 continue
 
         if not rows:
