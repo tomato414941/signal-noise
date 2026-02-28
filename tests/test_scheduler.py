@@ -79,8 +79,16 @@ class TestRunScheduler:
     @pytest.mark.asyncio
     async def test_creates_tasks_for_all(self, store: SignalStore) -> None:
         collectors = {"dummy": _DummyCollector}
+        call_count = 0
 
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=asyncio.CancelledError):
+        async def _fake_sleep(seconds: float) -> None:
+            nonlocal call_count
+            call_count += 1
+            # Allow jitter sleep (1st call), cancel on interval sleep (2nd)
+            if call_count >= 2:
+                raise asyncio.CancelledError
+
+        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
             with patch("signal_noise.collector.COLLECTORS", collectors):
                 with pytest.raises(asyncio.CancelledError):
                     await run_scheduler(store, collectors=collectors)
