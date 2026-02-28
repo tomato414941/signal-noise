@@ -26,6 +26,19 @@ def main(argv: list[str] | None = None) -> None:
     p_backfill.add_argument("--category", "-c", help="Collector category (e.g. crypto)")
     p_backfill.add_argument("--total", "-t", type=int, default=20000, help="Total rows to fetch")
 
+    p_spectrum = sub.add_parser("spectrum", help="SVD spectral analysis of signal coverage")
+    p_spectrum.add_argument(
+        "--min-rows", type=int, default=200,
+        help="Minimum data points per signal (default: 200)",
+    )
+    p_spectrum.add_argument(
+        "--components", "-k", type=int, default=8,
+        help="Number of principal components to show (default: 8)",
+    )
+    p_spectrum.add_argument(
+        "--json", action="store_true", help="Output as JSON",
+    )
+
     p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
     p_serve.add_argument("--host", default="0.0.0.0", help="API bind host")
     p_serve.add_argument("--port", type=int, default=8000, help="API bind port")
@@ -50,6 +63,8 @@ def main(argv: list[str] | None = None) -> None:
         _cmd_list()
     elif args.command == "count":
         _cmd_count()
+    elif args.command == "spectrum":
+        _cmd_spectrum(args)
     elif args.command == "serve":
         _cmd_serve(args)
     else:
@@ -147,6 +162,57 @@ def _cmd_count() -> None:
     from signal_noise.collector import COLLECTORS
 
     print(f"Collectors: {len(COLLECTORS)}")
+
+
+def _cmd_spectrum(args: argparse.Namespace) -> None:
+    import json as json_mod
+
+    from signal_noise.analysis.spectrum import compute_spectrum
+    from signal_noise.config import DB_PATH
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = SignalStore(DB_PATH)
+    result = compute_spectrum(
+        store,
+        min_rows=args.min_rows,
+        n_components=args.components,
+    )
+    store.close()
+
+    if args.json:
+        data = {
+            "n_signals": result.n_signals,
+            "n_dates": result.n_dates,
+            "effective_dims": result.effective_dims,
+            "participation_ratio": result.participation_ratio,
+            "spectral_entropy": result.spectral_entropy,
+            "spectral_entropy_normalized": result.spectral_entropy_normalized,
+            "components": [
+                {
+                    "index": pc.index,
+                    "variance_ratio": pc.variance_ratio,
+                    "cumulative_variance": pc.cumulative_variance,
+                    "top_signals": [
+                        {"name": n, "loading": v} for n, v in pc.top_signals
+                    ],
+                    "domain_composition": pc.domain_composition,
+                }
+                for pc in result.components
+            ],
+            "redundant": [
+                {"name": s.name, "domain": s.domain, "category": s.category,
+                 "uniqueness": s.uniqueness}
+                for s in result.redundant
+            ],
+            "unique": [
+                {"name": s.name, "domain": s.domain, "category": s.category,
+                 "uniqueness": s.uniqueness}
+                for s in result.unique
+            ],
+        }
+        print(json_mod.dumps(data, indent=2))
+    else:
+        print(result.summary())
 
 
 def _cmd_serve(args: argparse.Namespace) -> None:
