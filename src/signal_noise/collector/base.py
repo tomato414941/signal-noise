@@ -80,6 +80,7 @@ class CollectorMeta:
     domain: str = ""       # top-level grouping
     category: str = ""     # concrete classification
     signal_type: str = "scalar"  # "scalar" or "ohlcv"
+    collection_level: str = ""   # L1-L7 (empty = auto-detect)
 
     @property
     def interval(self) -> int:

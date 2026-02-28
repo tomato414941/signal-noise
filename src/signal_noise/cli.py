@@ -207,6 +207,8 @@ def _cmd_count() -> None:
 
 def _classify_level(name: str, meta) -> str:
     """Classify collector into Collection Spectrum level (L1-L7)."""
+    if meta.collection_level:
+        return meta.collection_level
     if name.startswith("probe_"):
         return "L5"
     if meta.domain == "computed":
