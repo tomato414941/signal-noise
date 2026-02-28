@@ -102,7 +102,7 @@ def _make_ping_collector(
 
         def fetch(self) -> pd.DataFrame:
             rtt = _ping_ms(host)
-            ts = pd.Timestamp.now(tz="UTC").floor("h")
+            ts = pd.Timestamp.now(tz="UTC").floor("5min")
             value = rtt if rtt is not None else float("nan")
             return pd.DataFrame({"timestamp": [ts], "value": [value]})
 
@@ -127,7 +127,7 @@ def _make_dns_collector(
 
         def fetch(self) -> pd.DataFrame:
             ms = _dns_resolve_ms(hostname)
-            ts = pd.Timestamp.now(tz="UTC").floor("h")
+            ts = pd.Timestamp.now(tz="UTC").floor("5min")
             value = ms if ms is not None else float("nan")
             return pd.DataFrame({"timestamp": [ts], "value": [value]})
 
@@ -150,7 +150,7 @@ class ProbeHTTPGoogleCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         ms = _http_response_ms("https://www.google.com")
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("5min")
         value = ms if ms is not None else float("nan")
         return pd.DataFrame({"timestamp": [ts], "value": [value]})
 
@@ -169,7 +169,7 @@ class ProbeHTTPGitHubCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         ms = _http_response_ms("https://github.com")
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("5min")
         value = ms if ms is not None else float("nan")
         return pd.DataFrame({"timestamp": [ts], "value": [value]})
 
@@ -188,7 +188,7 @@ class ProbeHTTPCloudflareCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         ms = _http_response_ms("https://www.cloudflare.com")
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("5min")
         value = ms if ms is not None else float("nan")
         return pd.DataFrame({"timestamp": [ts], "value": [value]})
 

@@ -24,11 +24,12 @@ class ISSLatitudeCollector(BaseCollector):
         api_docs_url="http://api.open-notify.org",
         domain="infrastructure",
         category="space",
+        collect_interval=900,
     )
 
     def fetch(self) -> pd.DataFrame:
         data = _iss_cache.get_or_fetch("position", _fetch_iss_position)
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("15min")
         return pd.DataFrame({"timestamp": [ts], "value": [data["lat"]]})
 
 
@@ -42,11 +43,12 @@ class ISSLongitudeCollector(BaseCollector):
         api_docs_url="http://api.open-notify.org",
         domain="infrastructure",
         category="space",
+        collect_interval=900,
     )
 
     def fetch(self) -> pd.DataFrame:
         data = _iss_cache.get_or_fetch("position", _fetch_iss_position)
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("15min")
         return pd.DataFrame({"timestamp": [ts], "value": [data["lon"]]})
 
 
@@ -60,11 +62,12 @@ class ISSCrewCountCollector(BaseCollector):
         api_docs_url="http://api.open-notify.org",
         domain="infrastructure",
         category="space",
+        collect_interval=900,
     )
 
     def fetch(self) -> pd.DataFrame:
         data = _iss_cache.get_or_fetch("astros", _fetch_astros)
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("15min")
         return pd.DataFrame({"timestamp": [ts], "value": [float(data)]})
 
 

@@ -37,7 +37,7 @@ class _CoinGeckoGlobalCollector(BaseCollector):
         for key in self._field_path:
             val = val[key]
 
-        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        ts = pd.Timestamp.now(tz="UTC").floor("15min")
         return pd.DataFrame({
             "timestamp": [ts],
             "value": [float(val)],
@@ -53,6 +53,7 @@ class CG_TotalMarketCapCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -65,6 +66,7 @@ class CG_TotalVolumeCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -77,6 +79,7 @@ class CG_BtcDominanceCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -89,6 +92,7 @@ class CG_EthDominanceCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -101,6 +105,7 @@ class CG_ActiveCryptosCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -113,6 +118,7 @@ class CG_OngoingICOsCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -125,6 +131,7 @@ class CG_MarketsCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
 
 
@@ -137,4 +144,5 @@ class CG_MarketCapChangePct24hCollector(_CoinGeckoGlobalCollector):
         api_docs_url="https://www.coingecko.com/en/api/documentation",
         domain="financial",
         category="crypto",
+        collect_interval=900,
     )
