@@ -22,7 +22,12 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         NaoCollector,
     )
     from signal_noise.collector.difficulty import DifficultyCollector
-    from signal_noise.collector.earthquake import EarthquakeCountCollector
+    from signal_noise.collector.earthquake import (
+        EarthquakeCountCollector,
+        USGSQuakeCount24hCollector,
+        USGSQuakeMaxMag24hCollector,
+        USGSQuakeSignificantCollector,
+    )
     from signal_noise.collector.eth_btc import EthBtcCollector
     from signal_noise.collector.events import (
         MajorSportsEventCollector,
@@ -193,6 +198,9 @@ def _get_collectors() -> dict[str, type[BaseCollector]]:
         # Nature / physical phenomena
         "moon_phase": MoonPhaseCollector,
         "earthquake_count": EarthquakeCountCollector,
+        "usgs_quake_count_24h": USGSQuakeCount24hCollector,
+        "usgs_quake_max_mag_24h": USGSQuakeMaxMag24hCollector,
+        "usgs_quake_significant": USGSQuakeSignificantCollector,
         "solar_xray": SolarXrayCollector,
         "sunspot": SunspotCollector,
         "enso": EnsoCollector,
