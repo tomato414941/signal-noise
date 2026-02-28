@@ -121,7 +121,7 @@ def compute_quality(
         latest_date = max(dates)
         try:
             latest_dt = datetime.strptime(latest_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            days_old = (now - latest_dt).days
+            days_old = max(0, (now - latest_dt).days)
         except ValueError:
             days_old = days
         freshness = math.exp(-days_old / 7)
