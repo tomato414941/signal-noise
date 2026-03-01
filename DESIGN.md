@@ -106,14 +106,14 @@ Verified free APIs not yet integrated:
 
 | Source | Level | Endpoint | Data | Auth |
 |--------|-------|----------|------|------|
-| BEA | L2 | `apps.bea.gov/api/data` | US GDP/NIPA primary source | Free key |
-| Alpha Vantage | L2 | `alphavantage.co/query` | Equities, FX, crypto | Free key |
+| Alpha Vantage | L2 | `alphavantage.co/query` | Equities, FX, crypto | Free key (25/day limit) |
 | Finnhub | L2 | `finnhub.io/api/v1` | Equities, economic calendar | Free key |
 
 Previously listed sources now implemented:
 
 | Source | Level | Collector file | Collectors |
 |--------|-------|----------------|:---:|
+| BEA | L2 | `bea_generic.py` | 12 |
 | NOAA CO-OPS | L1 | `noaa_coops.py` | 8 |
 | UK Carbon Intensity | L1 | `uk_carbon_intensity.py` | 2 |
 | Eurostat | L1 | `eurostat_generic.py` | 16 |
@@ -171,7 +171,7 @@ The following modules exist today but belong to the consumer side:
 
 ### What signal-noise delivers
 
-- **Raw time series only**: ~1,202 collector outputs
+- **Raw time series only**: ~1,214 collector outputs
 - **Format**: `DataFrame[timestamp, value]` (or `[date, value]`)
 - **No derived signals**: transforms (z-score, SMA, RSI, etc.) are not applied
 - **Metadata**: name, domain, category, update frequency, last updated
@@ -272,7 +272,7 @@ CREATE TABLE signal_meta (
 - **Range query**: WHERE clause, no full scan
 - **Concurrency**: WAL mode handles parallel scheduler writes + API reads
 - **Dependency**: Python standard library, zero external deps
-- **Data volume**: ~1,202 series × ~2,000 rows ≈ 38 MB — trivially small
+- **Data volume**: ~1,214 series × ~2,000 rows ≈ 38 MB — trivially small
 
 ### Migration
 
