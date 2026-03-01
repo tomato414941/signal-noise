@@ -137,6 +137,11 @@ async def run_scheduler(
     for name, cls in targets.items():
         collector = cls()
         interval = collector.meta.interval
+        # Pre-register so the collector appears in health checks before first fetch
+        store.save_meta(
+            name, collector.meta.domain, collector.meta.category,
+            interval, collector.meta.signal_type,
+        )
         j = _compute_jitter(name, interval)
         task = asyncio.create_task(
             run_collector_loop(
@@ -147,5 +152,6 @@ async def run_scheduler(
         )
         tasks.append(task)
         log.info("Scheduled %s (every %ds, jitter %.1fs)", name, interval, j)
+    log.info("Pre-registered %d collectors in signal_meta", len(targets))
 
     await asyncio.gather(*tasks)

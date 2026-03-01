@@ -234,6 +234,31 @@ class SignalStore:
                 stale.append(d)
         return stale
 
+    def check_health(self, threshold_factor: float = 2.0) -> dict:
+        """Classify all signals into 4 states: never_seen, fresh, stale, failing."""
+        rows = self._conn.execute("""
+            SELECT name, domain, category, signal_type, interval,
+                   last_updated, consecutive_failures,
+                   CASE WHEN last_updated IS NOT NULL THEN
+                       CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)
+                   END AS age_seconds
+            FROM signal_meta
+        """).fetchall()
+        result: dict[str, list[dict]] = {
+            "never_seen": [], "fresh": [], "stale": [], "failing": [],
+        }
+        for r in rows:
+            d = dict(r)
+            if d["consecutive_failures"] > 0:
+                result["failing"].append(d)
+            elif d["last_updated"] is None:
+                result["never_seen"].append(d)
+            elif d["age_seconds"] > d["interval"] * threshold_factor:
+                result["stale"].append(d)
+            else:
+                result["fresh"].append(d)
+        return result
+
     def check_anomalies(
         self, name: str, df: pd.DataFrame, *, z_threshold: float = 4.0,
         lookback: int = 100,

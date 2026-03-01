@@ -20,20 +20,28 @@ def get_store() -> SignalStore:
 @app.get("/health")
 def health() -> dict:
     store = get_store()
-    stale = store.check_freshness()
+    h = store.check_health()
+    status = "ok"
+    if h["failing"] or h["stale"]:
+        status = "degraded"
     return {
-        "status": "degraded" if stale else "ok",
-        "stale_count": len(stale),
+        "status": status,
+        "fresh": len(h["fresh"]),
+        "stale": len(h["stale"]),
+        "failing": len(h["failing"]),
+        "never_seen": len(h["never_seen"]),
     }
 
 
 @app.get("/health/signals")
 def health_signals() -> dict:
     store = get_store()
-    stale = store.check_freshness()
+    h = store.check_health()
     return {
-        "stale_count": len(stale),
-        "stale_signals": stale,
+        "fresh": len(h["fresh"]),
+        "stale": [{"name": s["name"], "age_seconds": s["age_seconds"], "interval": s["interval"]} for s in h["stale"]],
+        "failing": [{"name": s["name"], "consecutive_failures": s["consecutive_failures"]} for s in h["failing"]],
+        "never_seen": [s["name"] for s in h["never_seen"]],
     }
 
 

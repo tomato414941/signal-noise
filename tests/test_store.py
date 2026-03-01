@@ -420,6 +420,70 @@ class TestAnomalies:
         assert result == []
 
 
+class TestCheckHealth:
+    def test_empty_store(self, store: SignalStore) -> None:
+        h = store.check_health()
+        assert h == {"never_seen": [], "fresh": [], "stale": [], "failing": []}
+
+    def test_never_seen(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        h = store.check_health()
+        assert len(h["never_seen"]) == 1
+        assert h["never_seen"][0]["name"] == "s"
+
+    def test_fresh(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
+        store.save("s", df)
+        h = store.check_health()
+        assert len(h["fresh"]) == 1
+        assert h["fresh"][0]["name"] == "s"
+
+    def test_stale(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 's'"
+        )
+        store._conn.commit()
+        h = store.check_health()
+        assert len(h["stale"]) == 1
+
+    def test_failing_takes_priority(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 's'"
+        )
+        store._conn.commit()
+        store.increment_failures("s")
+        h = store.check_health()
+        assert len(h["failing"]) == 1
+        assert len(h["stale"]) == 0
+
+    def test_all_four_states(self, store: SignalStore) -> None:
+        # fresh
+        store.save_meta("a", "financial", "crypto", 3600)
+        store.save("a", pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]}))
+        # never_seen
+        store.save_meta("b", "earth", "weather", 86400)
+        # stale
+        store.save_meta("c", "macro", "economic", 3600)
+        store._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
+            " 'now', '-3 hours') WHERE name = 'c'"
+        )
+        store._conn.commit()
+        # failing
+        store.save_meta("d", "financial", "crypto", 3600)
+        store.increment_failures("d")
+        h = store.check_health()
+        assert [s["name"] for s in h["fresh"]] == ["a"]
+        assert [s["name"] for s in h["never_seen"]] == ["b"]
+        assert [s["name"] for s in h["stale"]] == ["c"]
+        assert [s["name"] for s in h["failing"]] == ["d"]
+
+
 class TestBatchMethods:
     def test_save_collection_result_single_commit(self, store: SignalStore) -> None:
         df = pd.DataFrame({"timestamp": ["2024-01-01", "2024-01-02"], "value": [1.0, 2.0]})
