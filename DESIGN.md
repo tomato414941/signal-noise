@@ -112,7 +112,7 @@ Previously listed sources now implemented:
 
 | Source | Level | Collector file | Collectors |
 |--------|-------|----------------|:---:|
-| Finnhub | L2 | `finnhub_generic.py` | 24 |
+| Finnhub | L2 | `finnhub_generic.py` | 42 |
 | BEA | L2 | `bea_generic.py` | 12 |
 | NOAA CO-OPS | L1 | `noaa_coops.py` | 8 |
 | UK Carbon Intensity | L1 | `uk_carbon_intensity.py` | 2 |
@@ -171,7 +171,7 @@ The following modules exist today but belong to the consumer side:
 
 ### What signal-noise delivers
 
-- **Raw time series only**: ~1,238 collector outputs
+- **Raw time series only**: ~1,256 collector outputs
 - **Format**: `DataFrame[timestamp, value]` (or `[date, value]`)
 - **No derived signals**: transforms (z-score, SMA, RSI, etc.) are not applied
 - **Metadata**: name, domain, category, update frequency, last updated

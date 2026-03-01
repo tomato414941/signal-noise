@@ -33,7 +33,7 @@ Collect worldwide time series and deliver via REST API.
 ### Scale
 
 - **Providers**: ~40 external APIs
-- **Collectors**: ~1,238 time series
+- **Collectors**: ~1,256 time series
 
 ## Architecture
 
