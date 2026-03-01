@@ -101,7 +101,7 @@ class TestEurostatFactory:
         mock_get.return_value = mock_resp
 
         cls = _make_eurostat_collector(
-            "nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA",
+            "namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA",
             "test_gdp", "Test GDP", "quarterly", "macro", "economic",
         )
         df = cls().fetch()

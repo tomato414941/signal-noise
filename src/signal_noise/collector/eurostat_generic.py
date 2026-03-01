@@ -16,17 +16,17 @@ _BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data
 # (dataset_code, filter_params, collector_name, display_name, frequency, domain, category)
 EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
     # ── GDP ────────────────────────────────────────────────────
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA&freq=Q",
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA&freq=Q",
      "eu_gdp_real", "Eurostat EU GDP (Real, SA)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EA20&s_adj=SCA&freq=Q",
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EA20&s_adj=SCA&freq=Q",
      "eu_gdp_ea", "Eurostat Euro Area GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=DE&s_adj=SCA&freq=Q",
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=DE&s_adj=SCA&freq=Q",
      "eu_gdp_de", "Eurostat Germany GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=FR&s_adj=SCA&freq=Q",
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=FR&s_adj=SCA&freq=Q",
      "eu_gdp_fr", "Eurostat France GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=IT&s_adj=SCA&freq=Q",
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=IT&s_adj=SCA&freq=Q",
      "eu_gdp_it", "Eurostat Italy GDP (Real)", "quarterly", "macro", "economic"),
-    ("nama_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=ES&s_adj=SCA&freq=Q",
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=ES&s_adj=SCA&freq=Q",
      "eu_gdp_es", "Eurostat Spain GDP (Real)", "quarterly", "macro", "economic"),
 
     # ── HICP (Harmonized CPI) ─────────────────────────────────
