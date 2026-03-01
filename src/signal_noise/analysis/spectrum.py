@@ -9,7 +9,6 @@ import logging
 from dataclasses import dataclass
 
 import numpy as np
-import pandas as pd
 
 from ..store.sqlite_store import SignalStore
 
@@ -98,24 +97,14 @@ def compute_spectrum(
     n_profiles: int = 15,
 ) -> SpectrumResult:
     """Run SVD spectral analysis on daily signals."""
-    conn = store._conn
-
-    # Load daily signals
-    daily = conn.execute(
-        "SELECT name FROM signal_meta WHERE interval = 86400"
-    ).fetchall()
-    daily_names = [r[0] for r in daily]
+    daily_meta = store.query_meta(interval=86400)
+    daily_names = [r["name"] for r in daily_meta]
     log.info("Daily signals in meta: %d", len(daily_names))
 
     if not daily_names:
         raise ValueError("No daily signals found in database")
 
-    placeholders = ",".join("?" for _ in daily_names)
-    df = pd.read_sql_query(
-        f"SELECT name, SUBSTR(timestamp, 1, 10) as date, value "
-        f"FROM signals WHERE name IN ({placeholders})",
-        conn, params=daily_names,
-    )
+    df = store.get_signal_matrix(daily_names)
 
     matrix = df.pivot_table(index="date", columns="name", values="value", aggfunc="last")
 
@@ -139,12 +128,10 @@ def compute_spectrum(
     # Load metadata
     meta: dict[str, dict[str, str]] = {}
     for name in matrix.columns:
-        row = conn.execute(
-            "SELECT domain, category FROM signal_meta WHERE name = ?", (name,)
-        ).fetchone()
+        row = store.get_meta(name)
         meta[name] = {
-            "domain": row[0] if row else "unknown",
-            "category": row[1] if row else "unknown",
+            "domain": row["domain"] if row else "unknown",
+            "category": row["category"] if row else "unknown",
         }
 
     # Z-score standardization

@@ -313,5 +313,50 @@ class SignalStore:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def query_meta(
+        self, *, interval: int | None = None, domain: str | None = None,
+    ) -> list[dict]:
+        """Query signal metadata with optional filters."""
+        where_clauses: list[str] = []
+        params: list = []
+        if interval is not None:
+            where_clauses.append("interval = ?")
+            params.append(interval)
+        if domain is not None:
+            where_clauses.append("domain = ?")
+            params.append(domain)
+
+        sql = "SELECT * FROM signal_meta"
+        if where_clauses:
+            sql += " WHERE " + " AND ".join(where_clauses)
+        sql += " ORDER BY name"
+
+        rows = self._conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]
+
+    def get_signal_matrix(self, names: list[str]) -> pd.DataFrame:
+        """Load daily date x value matrix for multiple signals (for analysis).
+
+        Returns DataFrame with columns: name, date, value.
+        """
+        if not names:
+            return pd.DataFrame(columns=["name", "date", "value"])
+        placeholders = ",".join("?" for _ in names)
+        rows = self._conn.execute(
+            f"SELECT name, SUBSTR(timestamp, 1, 10) as date, value "
+            f"FROM signals WHERE name IN ({placeholders})",
+            names,
+        ).fetchall()
+        return pd.DataFrame([dict(r) for r in rows], columns=["name", "date", "value"])
+
+    def get_values_since(self, name: str, since: str) -> list[dict]:
+        """Get date+value pairs for a signal since a cutoff date."""
+        rows = self._conn.execute(
+            "SELECT SUBSTR(timestamp, 1, 10) as date, value "
+            "FROM signals WHERE name = ? AND timestamp >= ? ORDER BY timestamp",
+            (name, since),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
     def close(self) -> None:
         self._conn.close()

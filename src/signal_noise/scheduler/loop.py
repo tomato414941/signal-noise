@@ -4,17 +4,24 @@ import asyncio
 import hashlib
 import logging
 
+import pandas as pd
+
 from signal_noise.collector.base import BaseCollector
 from signal_noise.store.sqlite_store import SignalStore
 
 log = logging.getLogger(__name__)
 
 
-def _compute_jitter(name: str, interval: int, max_jitter: float = 30.0) -> float:
-    """Deterministic jitter from collector name. Same name = same offset."""
+def _compute_jitter(name: str, interval: int) -> float:
+    """Deterministic jitter from collector name. Same name = same offset.
+
+    Spread is proportional to the collection interval (10% of interval,
+    capped at half the interval) to avoid thundering herd at startup.
+    """
     h = hashlib.md5(name.encode(), usedforsecurity=False).digest()
     frac = int.from_bytes(h[:4], "little") / (2**32)
-    return frac * min(interval * 0.1, max_jitter)
+    max_jitter = min(interval * 0.1, interval / 2)
+    return frac * max_jitter
 
 
 async def run_collector_loop(
@@ -26,6 +33,7 @@ async def run_collector_loop(
     max_failures: int = 5,
     base_cooldown: float = 300.0,
     max_cooldown: float = 3600.0,
+    fetch_semaphore: asyncio.Semaphore | None = None,
 ) -> None:
     """Single collector loop: fetch -> save -> sleep -> repeat.
 
@@ -39,11 +47,17 @@ async def run_collector_loop(
         log.debug("Collector %s starting in %.1fs (jitter)", collector.meta.name, jitter)
         await asyncio.sleep(jitter)
 
+    async def _fetch() -> pd.DataFrame:
+        if fetch_semaphore:
+            async with fetch_semaphore:
+                return await asyncio.to_thread(collector.fetch)
+        return await asyncio.to_thread(collector.fetch)
+
     failures = 0
     cooldown = base_cooldown
     while True:
         try:
-            df = await asyncio.to_thread(collector.fetch)
+            df = await _fetch()
             anomalies = store.check_anomalies(collector.meta.name, df)
             if anomalies:
                 log.warning(
@@ -82,7 +96,7 @@ async def run_collector_loop(
                 cooldown = min(cooldown * 2, max_cooldown)
                 # Half-open: try once more
                 try:
-                    df = await asyncio.to_thread(collector.fetch)
+                    df = await _fetch()
                     store.save(collector.meta.name, df)
                     store.save_meta(
                         collector.meta.name,
@@ -111,18 +125,33 @@ async def run_collector_loop(
 async def run_scheduler(
     store: SignalStore,
     collectors: dict[str, type[BaseCollector]] | None = None,
+    *,
+    max_concurrent_fetches: int = 20,
 ) -> None:
-    """Start all collector loops as concurrent tasks."""
+    """Start all collector loops as concurrent tasks.
+
+    max_concurrent_fetches limits how many collectors can call their
+    provider APIs simultaneously, preventing burst traffic.
+    """
     from signal_noise.collector import COLLECTORS
 
     targets = collectors or COLLECTORS
+    semaphore = asyncio.Semaphore(max_concurrent_fetches)
+    log.info(
+        "Starting scheduler: %d collectors, max %d concurrent fetches",
+        len(targets), max_concurrent_fetches,
+    )
+
     tasks = []
     for name, cls in targets.items():
         collector = cls()
         interval = collector.meta.interval
         j = _compute_jitter(name, interval)
         task = asyncio.create_task(
-            run_collector_loop(collector, store, interval, jitter=j),
+            run_collector_loop(
+                collector, store, interval,
+                jitter=j, fetch_semaphore=semaphore,
+            ),
             name=f"collector:{name}",
         )
         tasks.append(task)

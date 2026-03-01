@@ -69,18 +69,7 @@ def compute_quality(
     days: int = 90,
     domain: str | None = None,
 ) -> QualityResult:
-    conn = store._conn
-
-    # Load signal metadata
-    if domain:
-        rows = conn.execute(
-            "SELECT name, domain, category, interval FROM signal_meta WHERE domain = ?",
-            (domain,),
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            "SELECT name, domain, category, interval FROM signal_meta"
-        ).fetchall()
+    rows = store.query_meta(domain=domain)
 
     if not rows:
         raise ValueError("No signals found in database")
@@ -97,11 +86,7 @@ def compute_quality(
         cutoff = (now - timedelta(days=lookback)).strftime("%Y-%m-%d")
 
         # Fetch data within the window
-        data = conn.execute(
-            "SELECT SUBSTR(timestamp, 1, 10) as date, value "
-            "FROM signals WHERE name = ? AND timestamp >= ? ORDER BY timestamp",
-            (name, cutoff),
-        ).fetchall()
+        data = store.get_values_since(name, cutoff)
 
         if not data:
             signals.append(SignalQuality(
