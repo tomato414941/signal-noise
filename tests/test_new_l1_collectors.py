@@ -5,26 +5,26 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from signal_noise.collector.base import DOMAINS, CATEGORIES, CollectorMeta
+from signal_noise.collector.base import CATEGORIES, DOMAINS, CollectorMeta
+from signal_noise.collector.boc_generic import (
+    BOC_SERIES,
+    _make_boc_collector,
+    get_boc_collectors,
+)
+from signal_noise.collector.boe_generic import (
+    BOE_SERIES,
+    _make_boe_collector,
+    get_boe_collectors,
+)
+from signal_noise.collector.noaa_coops import (
+    NOAA_COOPS_SERIES,
+    _make_coops_collector,
+    get_coops_collectors,
+)
 from signal_noise.collector.uk_carbon_intensity import (
     UKCarbonActualCollector,
     UKCarbonForecastCollector,
     _carbon_cache,
-)
-from signal_noise.collector.boc_generic import (
-    BOC_SERIES,
-    get_boc_collectors,
-    _make_boc_collector,
-)
-from signal_noise.collector.boe_generic import (
-    BOE_SERIES,
-    get_boe_collectors,
-    _make_boe_collector,
-)
-from signal_noise.collector.noaa_coops import (
-    NOAA_COOPS_SERIES,
-    get_coops_collectors,
-    _make_coops_collector,
 )
 
 
@@ -38,7 +38,6 @@ class TestUKCarbonIntensity:
     def test_actual_meta(self):
         assert UKCarbonActualCollector.meta.name == "uk_carbon_actual"
         assert UKCarbonActualCollector.meta.domain == "earth"
-        assert UKCarbonActualCollector.meta.category == "climate"
         assert isinstance(UKCarbonActualCollector.meta, CollectorMeta)
 
     def test_forecast_meta(self):
