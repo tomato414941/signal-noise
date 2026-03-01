@@ -228,7 +228,7 @@ def _fetch_eia_group(
                         })
                     except (ValueError, TypeError):
                         continue
-        total = body.get("response", {}).get("total", 0)
+        total = int(body.get("response", {}).get("total", 0))
         offset += len(data)
         if offset >= total:
             break
