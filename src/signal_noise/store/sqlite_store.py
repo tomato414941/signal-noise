@@ -212,7 +212,7 @@ class SignalStore:
             return df
 
         df = df.copy()
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df["timestamp"] = pd.to_datetime(df["timestamp"], format="ISO8601")
         df = df.set_index("timestamp")
 
         agg: dict[str, str] = {}
