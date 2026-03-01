@@ -67,9 +67,9 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_propane_spot", "EIA Propane Spot", "financial", "commodity"),
 
     # ── Natural gas spot prices ────────────────────────────────
-    ("natural-gas/pri/sum/data", "series", "RNGWHHD", "value", "daily",
+    ("natural-gas/pri/fut/data", "series", "RNGWHHD", "value", "daily",
      "eia_henryhub_spot", "EIA Henry Hub Spot", "financial", "commodity"),
-    ("natural-gas/pri/sum/data", "series", "RNGC1", "value", "daily",
+    ("natural-gas/pri/fut/data", "series", "RNGC1", "value", "daily",
      "eia_natgas_futures", "EIA Natural Gas Futures (1-mo)", "financial", "commodity"),
 
     # ── Petroleum supply/demand ────────────────────────────────
@@ -97,11 +97,11 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_natgas_production", "EIA US Natural Gas Production", "macro", "economic"),
     ("natural-gas/sum/snd/data", "series", "N9140US2", "value", "monthly",
      "eia_natgas_consumption", "EIA US Natural Gas Consumption", "macro", "economic"),
-    ("natural-gas/stor/wkly/data", "series", "NGTSTSTUS1W", "value", "weekly",
+    ("natural-gas/stor/wkly/data", "series", "NW2_EPG0_SWO_R48_BCF", "value", "weekly",
      "eia_natgas_storage", "EIA US Natural Gas Storage", "financial", "commodity"),
 
     # ── Coal ───────────────────────────────────────────────────
-    ("coal/shipments/receipts/data", "coalregionid", "US-Total", "price", "quarterly",
+    ("coal/market-sales-price/data", "stateRegionId", "US", "price", "yearly",
      "eia_coal_price", "EIA US Coal Avg Price", "financial", "commodity"),
 
     # ── Electricity ────────────────────────────────────────────
@@ -135,11 +135,11 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_world_oil_production", "EIA World Oil Production", "macro", "economic"),
     ("steo/data", "seriesId", "PATC_WORLD", "value", "monthly",
      "eia_world_oil_consumption", "EIA World Oil Consumption", "macro", "economic"),
-    ("steo/data", "seriesId", "PASC_OECD", "value", "monthly",
+    ("steo/data", "seriesId", "PASC_OECD_T3", "value", "monthly",
      "eia_oecd_oil_stocks", "EIA OECD Oil Stocks", "financial", "commodity"),
     ("steo/data", "seriesId", "BREPUUS", "value", "monthly",
      "eia_steo_brent_forecast", "EIA Brent Price Forecast", "financial", "commodity"),
-    ("steo/data", "seriesId", "WTIUUS", "value", "monthly",
+    ("steo/data", "seriesId", "WTIPUUS", "value", "monthly",
      "eia_steo_wti_forecast", "EIA WTI Price Forecast", "financial", "commodity"),
     ("steo/data", "seriesId", "NGHHUUS", "value", "monthly",
      "eia_steo_henryhub_forecast", "EIA Henry Hub Price Forecast", "financial", "commodity"),
