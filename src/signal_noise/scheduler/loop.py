@@ -34,6 +34,7 @@ async def run_collector_loop(
     base_cooldown: float = 300.0,
     max_cooldown: float = 3600.0,
     fetch_semaphore: asyncio.Semaphore | None = None,
+    fetch_timeout: float = 300.0,
 ) -> None:
     """Single collector loop: fetch -> save -> sleep -> repeat.
 
@@ -57,7 +58,7 @@ async def run_collector_loop(
     cooldown = base_cooldown
     while True:
         try:
-            df = await _fetch()
+            df = await asyncio.wait_for(_fetch(), timeout=fetch_timeout)
             anomalies = store.check_anomalies(collector.meta.name, df)
             if anomalies:
                 log.warning(
@@ -90,7 +91,7 @@ async def run_collector_loop(
                 cooldown = min(cooldown * 2, max_cooldown)
                 # Half-open: try once more
                 try:
-                    df = await _fetch()
+                    df = await asyncio.wait_for(_fetch(), timeout=fetch_timeout)
                     store.save_collection_result(
                         collector.meta.name, df,
                         collector.meta.domain, collector.meta.category,

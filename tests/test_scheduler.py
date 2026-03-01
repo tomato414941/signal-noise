@@ -184,6 +184,69 @@ class TestCircuitBreakerRecovery:
         assert cooldown_sleeps[2] == 200.0
 
 
+class _SlowCollector(BaseCollector):
+    """Collector that blocks longer than the fetch timeout."""
+    meta = CollectorMeta(
+        name="slow",
+        display_name="Slow",
+        update_frequency="daily",
+        api_docs_url="",
+        domain="financial",
+        category="crypto",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        import time
+        time.sleep(10)
+        return pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
+
+
+class TestFetchTimeout:
+    @pytest.mark.asyncio
+    async def test_fetch_timeout_triggers_failure(self, store: SignalStore) -> None:
+        """A slow collector should be timed out and recorded as failed."""
+        collector = _SlowCollector()
+        call_count = 0
+
+        async def _fake_sleep(seconds: float) -> None:
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                raise asyncio.CancelledError
+
+        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
+            with pytest.raises(asyncio.CancelledError):
+                await run_collector_loop(
+                    collector, store, interval=3600,
+                    fetch_timeout=0.1,
+                )
+
+        result = store.get_data("slow")
+        assert result.empty
+
+    @pytest.mark.asyncio
+    async def test_normal_collector_within_timeout(self, store: SignalStore) -> None:
+        """A fast collector should not be affected by the timeout."""
+        collector = _DummyCollector()
+        call_count = 0
+
+        async def _fake_sleep(seconds: float) -> None:
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                raise asyncio.CancelledError
+
+        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
+            with pytest.raises(asyncio.CancelledError):
+                await run_collector_loop(
+                    collector, store, interval=3600,
+                    fetch_timeout=10.0,
+                )
+
+        result = store.get_data("dummy")
+        assert len(result) == 1
+
+
 class TestRunScheduler:
     @pytest.mark.asyncio
     async def test_creates_tasks_for_all(self, store: SignalStore) -> None:
