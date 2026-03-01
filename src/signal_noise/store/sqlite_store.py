@@ -309,10 +309,11 @@ class SignalStore:
         self, name: str, df: pd.DataFrame, *, z_threshold: float = 4.0,
         lookback: int = 100,
     ) -> list[dict]:
-        """Detect outliers in new data against recent history using z-scores.
+        """Detect outliers in new data against recent history.
 
-        Returns list of anomaly dicts with timestamp, value, z_score, mean, std.
-        Does NOT modify data — caller decides whether to save.
+        Uses robust median/MAD instead of mean/std to prevent baseline
+        contamination from prior outliers in the lookback window.
+        Returns list of anomaly dicts. Does NOT modify data.
         """
         val_col = "value" if "value" in df.columns else df.columns[-1]
         new_values = df[val_col].dropna()
@@ -329,23 +330,23 @@ class SignalStore:
             return []  # Not enough history to judge
 
         hist = pd.Series([r[0] for r in rows], dtype=float)
-        mean = hist.mean()
-        std = hist.std()
-        if std == 0 or pd.isna(std):
+        median = hist.median()
+        mad = (hist - median).abs().median() * 1.4826  # MAD → std scale
+        if mad == 0 or pd.isna(mad):
             return []
 
         ts_col = "timestamp" if "timestamp" in df.columns else "date"
         anomalies = []
         for idx, val in new_values.items():
-            z = abs((val - mean) / std)
+            z = abs((val - median) / mad)
             if z > z_threshold:
                 ts = str(df[ts_col].loc[idx]) if ts_col in df.columns else ""
                 anomalies.append({
                     "timestamp": ts,
                     "value": float(val),
                     "z_score": round(float(z), 2),
-                    "mean": round(float(mean), 4),
-                    "std": round(float(std), 4),
+                    "median": round(float(median), 4),
+                    "mad": round(float(mad), 4),
                 })
         return anomalies
 

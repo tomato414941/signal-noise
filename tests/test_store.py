@@ -414,10 +414,39 @@ class TestAnomalies:
             "value": [100.0] * 20,
         })
         store.save("s", hist)
-        # Different value but std=0 → no anomaly reported (can't compute z)
+        # Different value but MAD=0 → no anomaly reported (can't compute z)
         new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [200.0]})
         result = store.check_anomalies("s", new)
         assert result == []
+
+    def test_robust_to_outlier_contamination(self, store: SignalStore) -> None:
+        """Prior outliers in lookback should not inflate the baseline."""
+        # 18 normal values + 2 extreme outliers in history
+        values = [100.0 + i * 0.01 for i in range(18)] + [99999.0, 99999.0]
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": values,
+        })
+        store.save("outlier_test", hist)
+        # A moderately abnormal value should still be detected
+        new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [500.0]})
+        result = store.check_anomalies("outlier_test", new, z_threshold=4.0)
+        assert len(result) == 1
+        assert result[0]["median"] < 200  # median unaffected by outliers
+
+    def test_anomaly_returns_median_and_mad(self, store: SignalStore) -> None:
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i * 0.01 for i in range(20)],
+        })
+        store.save("s", hist)
+        new = pd.DataFrame({"timestamp": ["2024-02-01"], "value": [999999.0]})
+        result = store.check_anomalies("s", new)
+        assert len(result) == 1
+        assert "median" in result[0]
+        assert "mad" in result[0]
+        assert "mean" not in result[0]
+        assert "std" not in result[0]
 
 
 class TestCheckHealth:
