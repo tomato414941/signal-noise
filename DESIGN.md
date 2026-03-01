@@ -100,24 +100,29 @@ innovation velocity
   recording "this is not observable yet" has value — it defines the
   frontier.
 
-### Unreached but reachable sources (as of 2026-02-28)
+### Unreached but reachable sources (as of 2026-03-01)
 
 Verified free APIs not yet integrated:
 
 | Source | Level | Endpoint | Data | Auth |
 |--------|-------|----------|------|------|
-| NOAA CO-OPS | L1 | `api.tidesandcurrents.noaa.gov/api/prod/` | Tide, water level, water temp (US coast) | None |
-| UK Carbon Intensity | L1 | `api.carbonintensity.org.uk/intensity` | UK electricity carbon intensity | None |
-| Eurostat | L1 | `ec.europa.eu/eurostat/api/.../1.0/data/{code}` | EU economic statistics | None |
-| Bank of Canada | L1 | `bankofcanada.ca/valet/observations/{series}/json` | CAD FX, interest rates | None |
-| openFDA | L1 | `api.fda.gov/drug/event.json` | Drug adverse event reports | None |
-| CDC Socrata | L1 | `data.cdc.gov/resource/{dataset}.json` | Disease surveillance (NNDSS, ARI) | None |
-| USGS Water Services | L1 | `waterservices.usgs.gov/nwis/iv/?format=json` | Real-time streamflow | None |
-| Bank of England | L1 | `bankofengland.co.uk/boeapps/database/` | UK interest rates | None |
 | BEA | L2 | `apps.bea.gov/api/data` | US GDP/NIPA primary source | Free key |
 | Alpha Vantage | L2 | `alphavantage.co/query` | Equities, FX, crypto | Free key |
 | Finnhub | L2 | `finnhub.io/api/v1` | Equities, economic calendar | Free key |
-| BIS Statistics | L3 | `data.bis.org/bulkdownload` | DSR, credit gaps, property prices | None (CSV) |
+
+Previously listed sources now implemented:
+
+| Source | Level | Collector file | Collectors |
+|--------|-------|----------------|:---:|
+| NOAA CO-OPS | L1 | `noaa_coops.py` | 8 |
+| UK Carbon Intensity | L1 | `uk_carbon_intensity.py` | 2 |
+| Eurostat | L1 | `eurostat_generic.py` | 16 |
+| Bank of Canada | L1 | `boc_generic.py` | 10 |
+| openFDA | L1 | `openfda.py` | 3 |
+| CDC Socrata | L1 | `cdc_flu.py`, `cdc_wastewater.py` | 5 |
+| USGS Water Services | L1 | `usgs_water.py` | 8 |
+| Bank of England | L1 | `boe_generic.py` | 5 |
+| BIS Statistics | L3 | `bis_property.py` | 80 |
 
 ## Project Responsibility
 
@@ -166,7 +171,7 @@ The following modules exist today but belong to the consumer side:
 
 ### What signal-noise delivers
 
-- **Raw time series only**: ~1,083 collector outputs
+- **Raw time series only**: ~1,202 collector outputs
 - **Format**: `DataFrame[timestamp, value]` (or `[date, value]`)
 - **No derived signals**: transforms (z-score, SMA, RSI, etc.) are not applied
 - **Metadata**: name, domain, category, update frequency, last updated
@@ -267,7 +272,7 @@ CREATE TABLE signal_meta (
 - **Range query**: WHERE clause, no full scan
 - **Concurrency**: WAL mode handles parallel scheduler writes + API reads
 - **Dependency**: Python standard library, zero external deps
-- **Data volume**: ~1,067 series × ~2,000 rows ≈ 34 MB — trivially small
+- **Data volume**: ~1,202 series × ~2,000 rows ≈ 38 MB — trivially small
 
 ### Migration
 
