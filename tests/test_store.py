@@ -572,3 +572,58 @@ class TestAuditLog:
         store.log_event("btc", "collected")
         logs = store.get_audit_log("btc")
         assert "T" in logs[0]["timestamp"]
+
+
+class TestResample:
+    def test_resample_scalar_to_1h(self, store: SignalStore) -> None:
+        # 60 one-minute rows → 1 hourly row
+        timestamps = pd.date_range("2024-01-01T00:00:00Z", periods=60, freq="min")
+        df = pd.DataFrame({
+            "timestamp": [ts.isoformat() for ts in timestamps],
+            "value": range(60),
+        })
+        store.save("s", df)
+        result = store.get_data("s", resolution="1h")
+        assert len(result) == 1
+        # last value in the hour bucket
+        assert result.iloc[0]["value"] == 59
+
+    def test_resample_ohlcv_to_4h(self, store: SignalStore) -> None:
+        # 4 hourly rows → 1 four-hour row
+        timestamps = pd.date_range("2024-01-01T00:00:00Z", periods=4, freq="h")
+        df = pd.DataFrame({
+            "timestamp": [ts.isoformat() for ts in timestamps],
+            "value": [100.0, 110.0, 90.0, 105.0],
+            "open": [99.0, 109.0, 89.0, 104.0],
+            "high": [105.0, 115.0, 95.0, 110.0],
+            "low": [95.0, 105.0, 85.0, 100.0],
+            "volume": [1000.0, 2000.0, 1500.0, 1800.0],
+        })
+        store.save("btc", df)
+        result = store.get_data("btc", resolution="4h")
+        assert len(result) == 1
+        row = result.iloc[0]
+        assert row["open"] == 99.0       # first
+        assert row["high"] == 115.0      # max
+        assert row["low"] == 85.0        # min
+        assert row["volume"] == 6300.0   # sum
+        assert row["value"] == 105.0     # last
+
+    def test_resample_noop(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00", "2024-01-01T01:00:00"],
+            "value": [1.0, 2.0],
+        })
+        store.save("s", df)
+        result_none = store.get_data("s", resolution=None)
+        result_orig = store.get_data("s")
+        assert len(result_none) == len(result_orig)
+
+    def test_resample_invalid_resolution(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00"],
+            "value": [1.0],
+        })
+        store.save("s", df)
+        result = store.get_data("s", resolution="invalid")
+        assert len(result) == 1  # no resampling, returns as-is

@@ -159,9 +159,18 @@ class SignalStore:
         )
         self._conn.commit()
 
+    _RESOLUTION_MAP = {
+        "1m": "1min",
+        "5m": "5min",
+        "1h": "1h",
+        "4h": "4h",
+        "1d": "1D",
+    }
+
     def get_data(
         self, name: str, *, since: str | None = None,
         columns: list[str] | None = None,
+        resolution: str | None = None,
     ) -> pd.DataFrame:
         all_cols = ["timestamp", "value", "open", "high", "low", "volume"]
         if columns:
@@ -192,7 +201,41 @@ class SignalStore:
                 if col in df.columns and df[col].isna().all():
                     df = df.drop(columns=[col])
 
+        if resolution and not df.empty:
+            df = self._resample(df, resolution)
+
         return df
+
+    def _resample(self, df: pd.DataFrame, resolution: str) -> pd.DataFrame:
+        freq = self._RESOLUTION_MAP.get(resolution)
+        if freq is None:
+            return df
+
+        df = df.copy()
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df = df.set_index("timestamp")
+
+        agg: dict[str, str] = {}
+        if "value" in df.columns:
+            agg["value"] = "last"
+        if "open" in df.columns:
+            agg["open"] = "first"
+        if "high" in df.columns:
+            agg["high"] = "max"
+        if "low" in df.columns:
+            agg["low"] = "min"
+        if "volume" in df.columns:
+            agg["volume"] = "sum"
+
+        if not agg:
+            return df.reset_index()
+
+        resampled = df.resample(freq).agg(agg).dropna(how="all")
+        resampled = resampled.reset_index()
+        resampled["timestamp"] = resampled["timestamp"].apply(
+            lambda t: t.isoformat() if hasattr(t, "isoformat") else str(t)
+        )
+        return resampled
 
     def get_latest(self, name: str) -> dict | None:
         row = self._conn.execute(

@@ -74,13 +74,14 @@ def signal_data(
     name: str,
     since: str | None = Query(None),
     columns: str | None = Query(None),
+    resolution: str | None = Query(None, pattern="^(1m|5m|1h|4h|1d)$"),
 ) -> list[dict]:
     store = get_store()
     meta = store.get_meta(name)
     if not meta:
         raise HTTPException(404, f"Signal not found: {name}")
     col_list = columns.split(",") if columns else None
-    df = store.get_data(name, since=since, columns=col_list)
+    df = store.get_data(name, since=since, columns=col_list, resolution=resolution)
     return df.to_dict(orient="records")
 
 
@@ -119,6 +120,7 @@ class BatchRequest(BaseModel):
     names: list[str]
     since: str | None = None
     columns: list[str] | None = None
+    resolution: str | None = None
 
 
 @app.post("/signals/batch")
@@ -130,6 +132,6 @@ def signal_batch(req: BatchRequest) -> dict[str, list[dict]]:
         meta = store.get_meta(name)
         if not meta:
             continue
-        df = store.get_data(name, since=req.since, columns=col_list)
+        df = store.get_data(name, since=req.since, columns=col_list, resolution=req.resolution)
         result[name] = df.to_dict(orient="records")
     return result

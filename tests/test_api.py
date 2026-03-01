@@ -375,3 +375,47 @@ class TestAuditAPI:
         data = r.json()
         assert len(data) == 1
         assert data[0]["name"] == "btc"
+
+
+class TestResolutionAPI:
+    def test_signal_data_with_resolution(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        timestamps = pd.date_range("2024-01-01T00:00:00Z", periods=60, freq="min")
+        df = pd.DataFrame({
+            "timestamp": [ts.isoformat() for ts in timestamps],
+            "value": range(60),
+        })
+        store.save("s", df)
+        r = client.get("/signals/s/data?resolution=1h")
+        assert r.status_code == 200
+        data = r.json()
+        assert len(data) == 1
+        assert data[0]["value"] == 59
+
+    def test_signal_data_without_resolution(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00", "2024-01-01T01:00:00"],
+            "value": [1.0, 2.0],
+        })
+        store.save("s", df)
+        r = client.get("/signals/s/data")
+        assert r.status_code == 200
+        assert len(r.json()) == 2
+
+    def test_batch_with_resolution(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        timestamps = pd.date_range("2024-01-01T00:00:00Z", periods=4, freq="h")
+        df = pd.DataFrame({
+            "timestamp": [ts.isoformat() for ts in timestamps],
+            "value": [10.0, 20.0, 30.0, 40.0],
+        })
+        store.save("s", df)
+        r = client.post("/signals/batch", json={
+            "names": ["s"],
+            "resolution": "4h",
+        })
+        assert r.status_code == 200
+        data = r.json()
+        assert len(data["s"]) == 1
+        assert data["s"][0]["value"] == 40.0
