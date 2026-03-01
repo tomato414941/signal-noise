@@ -420,6 +420,64 @@ class TestAnomalies:
         assert result == []
 
 
+class TestBatchMethods:
+    def test_save_collection_result_single_commit(self, store: SignalStore) -> None:
+        df = pd.DataFrame({"timestamp": ["2024-01-01", "2024-01-02"], "value": [1.0, 2.0]})
+        rows = store.save_collection_result("s", df, "financial", "crypto", 3600)
+        assert rows == 2
+        # Data saved
+        result = store.get_data("s")
+        assert len(result) == 2
+        # Meta upserted
+        meta = store.get_meta("s")
+        assert meta is not None
+        assert meta["domain"] == "financial"
+        assert meta["category"] == "crypto"
+        assert meta["interval"] == 3600
+        assert meta["last_updated"] is not None
+        assert meta["consecutive_failures"] == 0
+        # Audit logged
+        logs = store.get_audit_log("s")
+        assert len(logs) == 1
+        assert logs[0]["event"] == "collected"
+        assert logs[0]["rows"] == 2
+
+    def test_save_collection_result_resets_failures(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        store.increment_failures("s")
+        store.increment_failures("s")
+        assert store.get_meta("s")["consecutive_failures"] == 2
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
+        store.save_collection_result("s", df, "financial", "crypto", 3600)
+        assert store.get_meta("s")["consecutive_failures"] == 0
+
+    def test_save_collection_result_empty_df(self, store: SignalStore) -> None:
+        rows = store.save_collection_result("s", pd.DataFrame(), "financial", "crypto", 3600)
+        assert rows == 0
+
+    def test_save_collection_result_custom_event(self, store: SignalStore) -> None:
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
+        store.save_collection_result("s", df, "financial", "crypto", 3600, event="half_open_recovered")
+        logs = store.get_audit_log("s")
+        assert logs[0]["event"] == "half_open_recovered"
+
+    def test_save_collection_failure_single_commit(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_collection_failure("s", "timeout error")
+        meta = store.get_meta("s")
+        assert meta["consecutive_failures"] == 1
+        logs = store.get_audit_log("s")
+        assert len(logs) == 1
+        assert logs[0]["event"] == "failed"
+        assert "timeout" in logs[0]["detail"]
+
+    def test_save_collection_failure_increments(self, store: SignalStore) -> None:
+        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_collection_failure("s", "err1")
+        store.save_collection_failure("s", "err2")
+        assert store.get_meta("s")["consecutive_failures"] == 2
+
+
 class TestAuditLog:
     def test_log_event(self, store: SignalStore) -> None:
         store.log_event("btc", "collected", rows=10)

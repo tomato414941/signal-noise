@@ -278,6 +278,82 @@ class SignalStore:
                 })
         return anomalies
 
+    def save_collection_result(
+        self, name: str, df: pd.DataFrame,
+        domain: str, category: str, interval: int,
+        signal_type: str = "scalar",
+        event: str = "collected",
+    ) -> int:
+        """Batch save: data + meta + reset failures + audit in one transaction."""
+        if df.empty:
+            return 0
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
+
+        rows = []
+        for _, row in df.iterrows():
+            ts = _normalize_ts(row[ts_col])
+            val = float(row[val_col]) if pd.notna(row[val_col]) else None
+            if has_ohlcv:
+                rows.append((
+                    name, ts, val,
+                    float(row["open"]) if pd.notna(row["open"]) else None,
+                    float(row["high"]) if pd.notna(row["high"]) else None,
+                    float(row["low"]) if pd.notna(row["low"]) else None,
+                    float(row["volume"]) if pd.notna(row["volume"]) else None,
+                ))
+            else:
+                rows.append((name, ts, val, None, None, None, None))
+
+        self._conn.executemany(
+            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?)",
+            rows,
+        )
+        self._conn.execute(
+            """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(name) DO UPDATE SET
+                   domain = excluded.domain,
+                   category = excluded.category,
+                   interval = excluded.interval,
+                   signal_type = excluded.signal_type""",
+            (name, domain, category, interval, signal_type),
+        )
+        self._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),"
+            " consecutive_failures = 0 WHERE name = ?",
+            (name,),
+        )
+        self._conn.execute(
+            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
+            (name, event, len(rows), ""),
+        )
+        self._conn.commit()
+        return len(rows)
+
+    def save_collection_failure(self, name: str, error_detail: str = "") -> None:
+        """Batch failure: increment failures + audit in one transaction."""
+        self._conn.execute(
+            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1"
+            " WHERE name = ?",
+            (name,),
+        )
+        self._conn.execute(
+            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
+            (name, "failed", 0, error_detail),
+        )
+        self._conn.commit()
+
+    def log_collection_event(self, name: str, event: str, detail: str = "") -> None:
+        """Single audit log entry (for circuit breaker events)."""
+        self._conn.execute(
+            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
+            (name, event, 0, detail),
+        )
+        self._conn.commit()
+
     def reset_failures(self, name: str) -> None:
         self._conn.execute(
             "UPDATE signal_meta SET consecutive_failures = 0 WHERE name = ?",
