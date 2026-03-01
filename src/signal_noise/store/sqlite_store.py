@@ -100,9 +100,10 @@ class SignalStore:
         )
         self._conn.commit()
 
-    def save(self, name: str, df: pd.DataFrame) -> None:
+    def save(self, name: str, df: pd.DataFrame) -> int:
+        """Save time-series data. Returns number of rows written."""
         if df.empty:
-            return
+            return 0
         ts_col = "timestamp" if "timestamp" in df.columns else "date"
         val_col = "value" if "value" in df.columns else df.columns[-1]
         has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
@@ -133,15 +134,24 @@ class SignalStore:
             (name,),
         )
         self._conn.commit()
+        return len(rows)
 
     def save_meta(
         self, name: str, domain: str, category: str, interval: int,
         signal_type: str = "scalar",
     ) -> None:
+        """Upsert signal metadata without touching last_updated.
+
+        last_updated is only set by save() when actual data is written.
+        """
         self._conn.execute(
-            """INSERT OR REPLACE INTO signal_meta
-               (name, domain, category, interval, signal_type, last_updated)
-               VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))""",
+            """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(name) DO UPDATE SET
+                   domain = excluded.domain,
+                   category = excluded.category,
+                   interval = excluded.interval,
+                   signal_type = excluded.signal_type""",
             (name, domain, category, interval, signal_type),
         )
         self._conn.commit()

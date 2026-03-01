@@ -1,12 +1,12 @@
 [Unit]
-Description=signal-noise API + Scheduler
+Description=signal-noise API
 After=network.target
 
 [Service]
 Type=simple
-User=trading
-WorkingDirectory=/home/trading/projects/signal-noise
-ExecStart=/home/trading/projects/signal-noise/.venv/bin/python -m signal_noise serve --host 127.0.0.1 --port 8000 --no-scheduler
+User=dev
+WorkingDirectory=/home/dev/projects/signal-noise
+ExecStart=/home/dev/projects/signal-noise/.venv/bin/python -m signal_noise serve --host 127.0.0.1 --port 8000 --no-scheduler
 Restart=always
 RestartSec=10
 Environment=PYTHONUNBUFFERED=1

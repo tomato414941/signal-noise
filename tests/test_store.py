@@ -253,10 +253,21 @@ class TestTimestampNormalization:
         assert row[0] == "2024-01-01T12:00:00+00:00"
         s.close()
 
-    def test_save_meta_iso_format(self, store: SignalStore) -> None:
+    def test_save_meta_does_not_set_last_updated(self, store: SignalStore) -> None:
+        """save_meta() should not touch last_updated; only save() sets it."""
         store.save_meta("btc", "financial", "crypto", 3600)
         meta = store.get_meta("btc")
         assert meta is not None
+        assert meta["last_updated"] is None
+
+    def test_save_sets_last_updated_iso_format(self, store: SignalStore) -> None:
+        """save() should set last_updated in ISO 8601 format."""
+        store.save_meta("btc", "financial", "crypto", 3600)
+        df = pd.DataFrame({"timestamp": ["2024-01-01T00:00:00+00:00"], "value": [50000.0]})
+        store.save("btc", df)
+        meta = store.get_meta("btc")
+        assert meta is not None
+        assert meta["last_updated"] is not None
         assert "T" in meta["last_updated"]
         assert meta["last_updated"].endswith("Z")
 

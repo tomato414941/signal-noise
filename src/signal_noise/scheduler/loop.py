@@ -24,16 +24,23 @@ async def run_collector_loop(
     *,
     jitter: float = 0.0,
     max_failures: int = 5,
+    base_cooldown: float = 300.0,
+    max_cooldown: float = 3600.0,
 ) -> None:
     """Single collector loop: fetch -> save -> sleep -> repeat.
 
-    Circuit breaker: stops after max_failures consecutive failures.
+    Circuit breaker with half-open recovery:
+    - After max_failures consecutive failures, enter cooldown.
+    - Wait with exponential backoff, then attempt a half-open retry.
+    - On success: reset and resume normal operation.
+    - On failure: double cooldown (capped at max_cooldown) and retry.
     """
     if jitter > 0:
         log.debug("Collector %s starting in %.1fs (jitter)", collector.meta.name, jitter)
         await asyncio.sleep(jitter)
 
     failures = 0
+    cooldown = base_cooldown
     while True:
         try:
             df = await asyncio.to_thread(collector.fetch)
@@ -55,6 +62,7 @@ async def run_collector_loop(
             store.reset_failures(collector.meta.name)
             store.log_event(collector.meta.name, "collected", rows=len(df))
             failures = 0
+            cooldown = base_cooldown
             log.info("Collected %s: %d rows", collector.meta.name, len(df))
         except Exception as exc:
             failures += 1
@@ -62,12 +70,41 @@ async def run_collector_loop(
             store.increment_failures(collector.meta.name)
             store.log_event(collector.meta.name, "failed", detail=str(exc)[:200])
             if failures >= max_failures:
-                log.error(
-                    "Circuit breaker: %s stopped after %d consecutive failures",
-                    collector.meta.name, max_failures,
+                log.warning(
+                    "Circuit breaker: %s entering half-open cooldown (%.0fs) after %d failures",
+                    collector.meta.name, cooldown, max_failures,
                 )
-                store.log_event(collector.meta.name, "circuit_break", detail=f"{max_failures} consecutive failures")
-                return
+                store.log_event(
+                    collector.meta.name, "circuit_break_cooldown",
+                    detail=f"{max_failures} failures, cooldown {cooldown:.0f}s",
+                )
+                await asyncio.sleep(cooldown)
+                cooldown = min(cooldown * 2, max_cooldown)
+                # Half-open: try once more
+                try:
+                    df = await asyncio.to_thread(collector.fetch)
+                    store.save(collector.meta.name, df)
+                    store.save_meta(
+                        collector.meta.name,
+                        collector.meta.domain,
+                        collector.meta.category,
+                        collector.meta.interval,
+                        collector.meta.signal_type,
+                    )
+                    store.reset_failures(collector.meta.name)
+                    store.log_event(collector.meta.name, "half_open_recovered", rows=len(df))
+                    failures = 0
+                    cooldown = base_cooldown
+                    log.info("Half-open recovery: %s succeeded (%d rows)", collector.meta.name, len(df))
+                except Exception as retry_exc:
+                    log.warning(
+                        "Half-open retry failed for %s: %s", collector.meta.name, retry_exc,
+                    )
+                    store.log_event(
+                        collector.meta.name, "half_open_failed",
+                        detail=str(retry_exc)[:200],
+                    )
+                    continue
         await asyncio.sleep(interval)
 
 
