@@ -59,12 +59,16 @@ class SignalClient:
                 return None
             raise
 
-    def get_data(self, name: str, since: str | None = None) -> pd.DataFrame:
+    def get_data(
+        self, name: str, since: str | None = None, resolution: str | None = None,
+    ) -> pd.DataFrame:
         params = {}
         if since:
             params["since"] = since
         elif name in self._last_seen:
             params["since"] = self._last_seen[name]
+        if resolution:
+            params["resolution"] = resolution
 
         data = self._get(f"/signals/{name}/data", params=params)
         if not data:
@@ -92,12 +96,15 @@ class SignalClient:
         names: list[str],
         since: str | None = None,
         columns: list[str] | None = None,
+        resolution: str | None = None,
     ) -> dict[str, pd.DataFrame]:
         body: dict = {"names": names}
         if since:
             body["since"] = since
         if columns:
             body["columns"] = columns
+        if resolution:
+            body["resolution"] = resolution
 
         data = self._post("/signals/batch", json=body)
         result: dict[str, pd.DataFrame] = {}
