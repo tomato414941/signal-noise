@@ -98,10 +98,10 @@ BEA_SERIES: list[tuple[str, str, str, str, str, str, str, str]] = [
     ("NIPA", "T20100", "1", "bea_personal_income", "BEA: Personal Income", "quarterly", "macro", "economic"),
     ("NIPA", "T20100", "27", "bea_disposable_income", "BEA: Disposable Personal Income", "quarterly", "macro", "economic"),
     ("NIPA", "T20100", "34", "bea_saving_rate", "BEA: Personal Saving Rate (%)", "quarterly", "macro", "economic"),
-    # ── GDI (NIPA T11700 - Income-side GDP) ──
-    ("NIPA", "T11700", "1", "bea_gdi", "BEA: Gross Domestic Income", "quarterly", "macro", "economic"),
-    # ── Corporate Profits (NIPA T12100) ──
-    ("NIPA", "T12100", "13", "bea_corporate_profits", "BEA: Corporate Profits", "quarterly", "macro", "economic"),
+    # ── GDI (NIPA T11000 - Gross Domestic Income by Type of Income) ──
+    ("NIPA", "T11000", "1", "bea_gdi", "BEA: Gross Domestic Income", "quarterly", "macro", "economic"),
+    # ── Corporate Profits (NIPA T61600D - Corporate Profits by Industry) ──
+    ("NIPA", "T61600D", "1", "bea_corporate_profits", "BEA: Corporate Profits", "quarterly", "macro", "economic"),
 ]
 
 
