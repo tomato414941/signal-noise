@@ -1,17 +1,78 @@
 from __future__ import annotations
 
+import logging
+import os
+import time
+from pathlib import Path
+
 import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
+log = logging.getLogger(__name__)
+
 _USER_AGENT = "signal-noise/0.1 (https://github.com/tomato414941/signal-noise)"
+
+_reddit_client_id: str | None = None
+_reddit_client_secret: str | None = None
+_token: str | None = None
+_token_expires: float = 0.0
+
+
+def _get_reddit_credentials() -> tuple[str, str]:
+    global _reddit_client_id, _reddit_client_secret
+    if _reddit_client_id and _reddit_client_secret:
+        return _reddit_client_id, _reddit_client_secret
+
+    cid = os.environ.get("REDDIT_CLIENT_ID")
+    secret = os.environ.get("REDDIT_CLIENT_SECRET")
+
+    if not cid or not secret:
+        secret_file = Path.home() / ".secrets" / "reddit"
+        if secret_file.exists():
+            for line in secret_file.read_text().splitlines():
+                if line.startswith("export REDDIT_CLIENT_ID="):
+                    cid = line.split("=", 1)[1].strip().strip("'\"")
+                elif line.startswith("export REDDIT_CLIENT_SECRET="):
+                    secret = line.split("=", 1)[1].strip().strip("'\"")
+
+    if not cid or not secret:
+        raise RuntimeError(
+            "REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET not set. "
+            "Create an app at https://www.reddit.com/prefs/apps"
+        )
+    _reddit_client_id = cid
+    _reddit_client_secret = secret
+    return cid, secret
+
+
+def _get_oauth_token() -> str:
+    global _token, _token_expires
+    if _token and time.time() < _token_expires:
+        return _token
+
+    cid, secret = _get_reddit_credentials()
+    resp = requests.post(
+        "https://www.reddit.com/api/v1/access_token",
+        auth=(cid, secret),
+        data={"grant_type": "client_credentials"},
+        headers={"User-Agent": _USER_AGENT},
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    _token = data["access_token"]
+    # Expire 60s early to avoid edge cases
+    _token_expires = time.time() + data.get("expires_in", 3600) - 60
+    log.info("Reddit OAuth token acquired (expires in %ds)", data.get("expires_in", 3600))
+    return _token
 
 
 class _RedditSubredditCollector(BaseCollector):
     """Base for Reddit subreddit activity.
 
-    Uses the public JSON API (no OAuth required).
+    Uses Reddit OAuth (client_credentials) to access the API.
     Fetches /hot listing and extracts aggregate activity metrics.
     Data accumulates across collection runs.
     """
@@ -19,13 +80,14 @@ class _RedditSubredditCollector(BaseCollector):
     _subreddit: str = ""
 
     def fetch(self) -> pd.DataFrame:
-        # Fetch hot posts (up to 100)
-        # NOTE: Reddit aggressively blocks server IPs (403).
-        # OAuth authentication may be required for reliable access.
-        url = f"https://old.reddit.com/r/{self._subreddit}/hot.json?limit=100"
+        token = _get_oauth_token()
+        url = f"https://oauth.reddit.com/r/{self._subreddit}/hot?limit=100"
         resp = requests.get(
             url,
-            headers={"User-Agent": _USER_AGENT},
+            headers={
+                "User-Agent": _USER_AGENT,
+                "Authorization": f"Bearer {token}",
+            },
             timeout=self.config.request_timeout,
         )
         resp.raise_for_status()
@@ -43,7 +105,6 @@ class _RedditSubredditCollector(BaseCollector):
             total_comments += d.get("num_comments", 0)
 
         ts = pd.Timestamp.now(tz="UTC").floor("h")
-        # Activity index = total score + comments across top 100 hot posts
         activity = float(total_score + total_comments)
 
         return pd.DataFrame({"timestamp": [ts], "value": [activity]})
@@ -56,6 +117,7 @@ class RedditCryptoCollector(_RedditSubredditCollector):
         display_name="Reddit r/cryptocurrency Activity",
         update_frequency="hourly",
         api_docs_url="https://www.reddit.com/dev/api/",
+        requires_key=True,
         domain="sentiment",
         category="attention",
     )
@@ -68,6 +130,7 @@ class RedditWsbCollector(_RedditSubredditCollector):
         display_name="Reddit r/wallstreetbets Activity",
         update_frequency="hourly",
         api_docs_url="https://www.reddit.com/dev/api/",
+        requires_key=True,
         domain="sentiment",
         category="attention",
     )
@@ -80,6 +143,7 @@ class RedditBitcoinCollector(_RedditSubredditCollector):
         display_name="Reddit r/Bitcoin Activity",
         update_frequency="hourly",
         api_docs_url="https://www.reddit.com/dev/api/",
+        requires_key=True,
         domain="sentiment",
         category="attention",
     )

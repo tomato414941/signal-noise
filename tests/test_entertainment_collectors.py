@@ -72,8 +72,9 @@ REDDIT_RESPONSE = {
 
 
 class TestRedditCrypto:
+    @patch("signal_noise.collector.reddit._get_oauth_token", return_value="fake-token")
     @patch("signal_noise.collector.reddit.requests.get")
-    def test_fetch_activity(self, mock_get):
+    def test_fetch_activity(self, mock_get, _mock_token):
         mock_resp = MagicMock()
         mock_resp.json.return_value = REDDIT_RESPONSE
         mock_resp.raise_for_status = MagicMock()
@@ -84,15 +85,20 @@ class TestRedditCrypto:
         assert "timestamp" in df.columns
         # 500+120 + 300+80 + 100+30 = 1130
         assert df["value"].iloc[0] == 1130.0
+        # Verify OAuth endpoint is used
+        call_url = mock_get.call_args[0][0]
+        assert "oauth.reddit.com" in call_url
 
     def test_meta(self):
         assert RedditCryptoCollector.meta.name == "reddit_crypto"
         assert RedditCryptoCollector.meta.category == "attention"
+        assert RedditCryptoCollector.meta.requires_key is True
 
 
 class TestRedditWsb:
+    @patch("signal_noise.collector.reddit._get_oauth_token", return_value="fake-token")
     @patch("signal_noise.collector.reddit.requests.get")
-    def test_fetch_activity(self, mock_get):
+    def test_fetch_activity(self, mock_get, _mock_token):
         mock_resp = MagicMock()
         mock_resp.json.return_value = REDDIT_RESPONSE
         mock_resp.raise_for_status = MagicMock()
@@ -104,11 +110,13 @@ class TestRedditWsb:
 
     def test_meta(self):
         assert RedditWsbCollector.meta.name == "reddit_wsb"
+        assert RedditWsbCollector.meta.requires_key is True
 
 
 class TestRedditBitcoin:
     def test_meta(self):
         assert RedditBitcoinCollector.meta.name == "reddit_bitcoin"
+        assert RedditBitcoinCollector.meta.requires_key is True
 
 
 # ── Wikipedia entertainment pages ───────────────────────────
