@@ -47,8 +47,10 @@ def _make_pool_hashrate_collector(
             resp.raise_for_status()
             data = resp.json()
 
+            # API returns direct list (not {"hashrates": [...]})
+            items = data if isinstance(data, list) else data.get("hashrates", [])
             rows = []
-            for r in data.get("hashrates", []):
+            for r in items:
                 ts = r.get("timestamp")
                 hr = r.get("avgHashrate")
                 if ts and hr is not None:
@@ -84,7 +86,7 @@ class MempoolBlocksMinedCollector(BaseCollector):
         data = resp.json()
         rows = []
         for r in data.get("difficulty", []):
-            ts = r.get("timestamp")
+            ts = r.get("time") or r.get("timestamp")
             val = r.get("difficulty")
             if ts and val is not None:
                 rows.append({

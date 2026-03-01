@@ -69,7 +69,7 @@ FRED_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("BOPGSTB", "fred_trade_balance", "US Trade Balance", "monthly", "macro", "trade"),
     # ── Commodities (via FRED) ──
     ("DCOILWTICO", "fred_wti_daily", "WTI Crude Oil (FRED daily)", "daily", "financial", "commodity"),
-    ("GOLDAMGBD228NLBM", "fred_gold_daily", "Gold Price London Fix", "daily", "financial", "commodity"),
+    # GOLDAMGBD228NLBM discontinued by FRED (May 2025)
     # ── Transportation / logistics ──
     ("TSIFRGHT", "fred_freight_index", "Transportation Services Index: Freight", "monthly", "infrastructure", "logistics"),
     # ── Housing / real estate (expanded) ──
@@ -125,7 +125,7 @@ FRED_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── Labor market (additional) ──
     ("JTSJOL", "fred_jolts_openings", "JOLTS Job Openings", "monthly", "macro", "labor"),
     ("JTSQUR", "fred_jolts_quits_rate", "JOLTS Quits Rate", "monthly", "macro", "labor"),
-    ("LNS12300000", "fred_employment_pop_ratio", "Employment-Population Ratio", "monthly", "macro", "labor"),
+    ("EMRATIO", "fred_employment_pop_ratio", "Employment-Population Ratio", "monthly", "macro", "labor"),
     ("U6RATE", "fred_u6_rate", "U-6 Unemployment Rate", "monthly", "macro", "labor"),
     ("CES0500000003", "fred_avg_hourly_earnings", "Avg Hourly Earnings (Private)", "monthly", "macro", "labor"),
     # ── Financial conditions ──
@@ -134,7 +134,7 @@ FRED_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("VIXCLS", "fred_vix", "CBOE VIX (FRED)", "daily", "financial", "equity"),
     ("SP500", "fred_sp500", "S&P 500 (FRED)", "daily", "financial", "equity"),
     ("NASDAQCOM", "fred_nasdaq", "NASDAQ Composite (FRED)", "daily", "financial", "equity"),
-    ("WILL5000INDFC", "fred_wilshire5000", "Wilshire 5000 Total Market", "daily", "financial", "equity"),
+    # WILL5000INDFC discontinued by FRED
 ]
 
 

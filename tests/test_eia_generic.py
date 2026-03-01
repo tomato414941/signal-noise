@@ -189,7 +189,7 @@ class TestEIARegistry:
         expected = [
             "eia_wti_spot", "eia_brent_spot", "eia_henryhub_spot",
             "eia_crude_stocks", "eia_gasoline_retail",
-            "eia_total_consumption", "eia_opec_production",
+            "eia_total_consumption",
         ]
         for name in expected:
             assert name in COLLECTORS, f"{name} not registered"

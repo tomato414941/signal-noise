@@ -59,11 +59,11 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_gasoline_spot", "EIA Gasoline Spot (Gulf)", "financial", "commodity"),
     ("petroleum/pri/spt/data", "series", "EER_EPD2DXL0_PF4_RGC_DPG", "value", "daily",
      "eia_diesel_spot", "EIA Diesel Spot (Gulf)", "financial", "commodity"),
-    ("petroleum/pri/spt/data", "series", "EER_EPD2F_PF4_RGC_DPG", "value", "daily",
-     "eia_heating_oil_spot", "EIA Heating Oil Spot", "financial", "commodity"),
+    ("petroleum/pri/spt/data", "series", "EER_EPD2F_PF4_Y35NY_DPG", "value", "daily",
+     "eia_heating_oil_spot", "EIA Heating Oil Spot NY Harbor", "financial", "commodity"),
     ("petroleum/pri/spt/data", "series", "EER_EPJK_PF4_RGC_DPG", "value", "daily",
      "eia_jet_fuel_spot", "EIA Jet Fuel Spot", "financial", "commodity"),
-    ("petroleum/pri/spt/data", "series", "EER_EPLLPA_PF4_RGC_DPG", "value", "daily",
+    ("petroleum/pri/spt/data", "series", "EER_EPLLPA_PF4_Y44MB_DPG", "value", "daily",
      "eia_propane_spot", "EIA Propane Spot", "financial", "commodity"),
 
     # ── Natural gas spot prices ────────────────────────────────
@@ -153,16 +153,13 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_diesel_retail", "EIA US Diesel Retail Price", "financial", "commodity"),
 
     # ── International petroleum ────────────────────────────────
-    ("international/data", "seriesId", "INTL.57-1-OPEC-TBPD.M", "value", "monthly",
-     "eia_opec_production", "EIA OPEC Crude Production", "macro", "economic"),
-    ("international/data", "seriesId", "INTL.57-1-RUS-TBPD.M", "value", "monthly",
-     "eia_russia_oil_prod", "EIA Russia Oil Production", "macro", "economic"),
-    ("international/data", "seriesId", "INTL.57-1-SAU-TBPD.M", "value", "monthly",
-     "eia_saudi_oil_prod", "EIA Saudi Arabia Oil Production", "macro", "economic"),
-    ("international/data", "seriesId", "INTL.57-1-CHN-TBPD.M", "value", "monthly",
-     "eia_china_oil_prod", "EIA China Oil Production", "macro", "economic"),
-    ("international/data", "seriesId", "INTL.57-3-CHN-TBPD.M", "value", "monthly",
-     "eia_china_oil_consumption", "EIA China Oil Consumption", "macro", "economic"),
+    # TODO: international/data uses productId/activityId/countryRegionId facets,
+    # not seriesId. Needs dedicated fetch logic (not batch-compatible).
+    # ("international/data", ..., "eia_opec_production", ...),
+    # ("international/data", ..., "eia_russia_oil_prod", ...),
+    # ("international/data", ..., "eia_saudi_oil_prod", ...),
+    # ("international/data", ..., "eia_china_oil_prod", ...),
+    # ("international/data", ..., "eia_china_oil_consumption", ...),
 ]
 
 # Build group index: (route, facet_key, frequency) -> [(facet_value, data_col, name), ...]

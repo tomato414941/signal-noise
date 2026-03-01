@@ -58,6 +58,7 @@ def _make_boe_collector(
             }
             resp = requests.get(
                 _BOE_URL, params=params, timeout=60,
+                headers={"User-Agent": "signal-noise/1.0"},
             )
             resp.raise_for_status()
 
