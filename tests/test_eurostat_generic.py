@@ -64,6 +64,11 @@ class TestParsePeriod:
         assert _parse_period("2024Q1") == "2024-01-01"
         assert _parse_period("2024Q3") == "2024-07-01"
 
+    def test_quarterly_hyphenated(self):
+        assert _parse_period("2024-Q1") == "2024-01-01"
+        assert _parse_period("2024-Q3") == "2024-07-01"
+        assert _parse_period("1975-Q4") == "1975-10-01"
+
     def test_annual(self):
         assert _parse_period("2024") == "2024-01-01"
 

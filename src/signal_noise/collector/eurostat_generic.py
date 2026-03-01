@@ -115,12 +115,19 @@ EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
 
 def _parse_period(period: str) -> str | None:
     """Convert Eurostat period string to ISO date."""
-    if len(period) == 7 and period[4] == "-":
+    # Monthly: "2024-01"
+    if len(period) == 7 and period[4] == "-" and period[5:].isdigit():
         return f"{period}-01"
+    # Quarterly: "2024Q1" or "2024-Q1"
     if len(period) == 6 and period[4] == "Q":
         q = int(period[5])
         m = (q - 1) * 3 + 1
         return f"{period[:4]}-{m:02d}-01"
+    if len(period) == 7 and period[4:6] == "-Q":
+        q = int(period[6])
+        m = (q - 1) * 3 + 1
+        return f"{period[:4]}-{m:02d}-01"
+    # Annual: "2024"
     if len(period) == 4:
         return f"{period}-01-01"
     return None
