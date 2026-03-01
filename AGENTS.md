@@ -60,38 +60,61 @@ Scheduler ──→ Collector ──→ SQLite Store ──→ REST API ──�
 ## CLI
 
 ```bash
-python -m signal_noise collect              # Fetch all collectors (SQLite)
-python -m signal_noise collect -s fear_greed # Fetch specific collector
-python -m signal_noise collect --parquet    # Use legacy Parquet storage
-python -m signal_noise list                 # List collectors with status
-python -m signal_noise count                # Show collector count
-python -m signal_noise serve                # Start scheduler + REST API
-python -m signal_noise serve --migrate      # Import Parquet data first
-python -m signal_noise serve --no-scheduler # API only
+python -m signal_noise collect                # Fetch all collectors (SQLite)
+python -m signal_noise collect -s fear_greed  # Fetch specific collector
+python -m signal_noise collect -f daily       # Filter by frequency
+python -m signal_noise collect --force        # Ignore cache
+python -m signal_noise list                   # List collectors with status
+python -m signal_noise count                  # Show collector count
+python -m signal_noise serve                  # Start scheduler + REST API
+python -m signal_noise serve --no-scheduler   # API only
+python -m signal_noise analyze spectrum       # SVD spectral analysis
+python -m signal_noise analyze quality        # Signal health scoring
+python -m signal_noise coverage               # Domain/category coverage matrix
+python -m signal_noise rebuild-manifest       # Rebuild collector discovery cache
+python -m signal_noise backfill               # Fetch extended historical data
 ```
 
 ## REST API
 
 ```
-GET /health                        # Service health check
-GET /signals                       # List all signals (name, domain, category, ...)
-GET /signals/{name}                # Signal metadata
-GET /signals/{name}/data?since=... # Time series data (timestamp, value)
-GET /signals/{name}/latest         # Latest value + timestamp
+GET /health                           # Service health check
+GET /health/signals                   # List stale signals
+GET /signals                          # List all signals (name, domain, category, ...)
+GET /signals/{name}                   # Signal metadata
+GET /signals/{name}/data?since=...    # Time series data (timestamp, value)
+GET /signals/{name}/latest            # Latest value + timestamp
+GET /signals/{name}/anomalies         # Anomaly detection (z-score)
+POST /signals/batch                   # Batch query multiple signals
+GET /audit                            # Audit log of data changes
 ```
+
+## API Keys (L2 collectors)
+
+L2 collectors require API keys stored in `~/.secrets/`:
+
+| Provider | Env var | Secret file | Collectors |
+|----------|---------|-------------|:----------:|
+| FRED | `FRED_API_KEY` | `~/.secrets/fred` | 81 |
+| EIA | `EIA_API_KEY` | `~/.secrets/eia` | 42 |
+| BEA | `BEA_API_KEY` | `~/.secrets/bea` | 12 |
+| Finnhub | `FINNHUB_API_KEY` | `~/.secrets/finnhub` | 42 |
+
+Secret file format: `export KEY_NAME=value`
 
 ## Adding a New Collector
 
 1. Create `src/signal_noise/collector/<name>.py`
 2. Subclass `BaseCollector`, define `meta: CollectorMeta` with correct `domain` and `category`
 3. Implement `fetch()` → return `DataFrame` with `[timestamp|date, value]` columns
-4. Register in `collector/__init__.py` (`COLLECTORS` dict or via factory function)
+4. Auto-discovered via `get_<name>_collectors()` factory or direct `BaseCollector` subclass
 5. Add tests in `tests/`
 
 ## Development
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v
+pytest tests/ -v                      # 504 tests
 ruff check src/ tests/
+python -m signal_noise count          # Show collector count
 ```
