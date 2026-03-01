@@ -36,7 +36,7 @@ DOMAINS = {
 # category: concrete data classification
 CATEGORIES = {
     # financial
-    "equity", "crypto", "forex", "rates", "commodity",
+    "equity", "crypto", "crypto_derivatives", "forex", "rates", "commodity",
     # macro
     "economic", "labor", "inflation", "trade", "fiscal",
     # sentiment
