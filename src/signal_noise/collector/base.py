@@ -58,7 +58,7 @@ CATEGORIES = {
 }
 
 # update_frequency: allowed values
-FREQUENCIES = {"hourly", "daily", "weekly", "monthly", "quarterly", "yearly"}
+FREQUENCIES = {"hourly", "daily", "weekly", "monthly", "quarterly", "yearly", "annual"}
 
 FREQUENCY_TO_SECONDS: dict[str, int] = {
     "hourly": 3600,
@@ -67,6 +67,7 @@ FREQUENCY_TO_SECONDS: dict[str, int] = {
     "monthly": 2592000,
     "quarterly": 7776000,
     "yearly": 31536000,
+    "annual": 31536000,
 }
 
 # Default collect intervals by collection level (seconds)

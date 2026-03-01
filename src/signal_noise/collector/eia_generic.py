@@ -101,7 +101,7 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_natgas_storage", "EIA US Natural Gas Storage", "financial", "commodity"),
 
     # ── Coal ───────────────────────────────────────────────────
-    ("coal/market-sales-price/data", "stateRegionId", "US", "price", "yearly",
+    ("coal/market-sales-price/data", "stateRegionId", "US", "price", "annual",
      "eia_coal_price", "EIA US Coal Avg Price", "financial", "commodity"),
 
     # ── Electricity ────────────────────────────────────────────
