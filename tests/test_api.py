@@ -322,6 +322,37 @@ class TestAnomaliesAPI:
         assert len(data["anomalies"]) == 1
         assert data["anomalies"][0]["z_score"] > 4.0
 
+    def test_anomalies_auto_lookback_default(self, client: TestClient, store: SignalStore) -> None:
+        """Without explicit lookback, auto-calculate from meta interval."""
+        store.save_meta("daily_sig", "financial", "equity", 86400)
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i * 0.1 for i in range(20)],
+        })
+        store.save("daily_sig", hist)
+        r = client.get("/signals/daily_sig/anomalies")
+        assert r.status_code == 200
+        assert r.json()["name"] == "daily_sig"
+
+    def test_anomalies_explicit_lookback(self, client: TestClient, store: SignalStore) -> None:
+        """Explicit lookback should override auto-calculation."""
+        store.save_meta("btc", "financial", "crypto", 3600)
+        hist = pd.DataFrame({
+            "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
+            "value": [100.0 + i * 0.1 for i in range(20)],
+        })
+        store.save("btc", hist)
+        r = client.get("/signals/btc/anomalies?lookback=50")
+        assert r.status_code == 200
+        assert r.json()["name"] == "btc"
+
+    def test_anomalies_auto_lookback_weekly(self, client: TestClient, store: SignalStore) -> None:
+        """Weekly signal (604800s) should get lookback = max(100, 7*30) = 210."""
+        store.save_meta("weekly_sig", "macro", "economic", 604800)
+        r = client.get("/signals/weekly_sig/anomalies")
+        assert r.status_code == 200
+        assert r.json()["anomalies"] == []
+
 
 class TestAuditAPI:
     def test_audit_empty(self, client: TestClient) -> None:

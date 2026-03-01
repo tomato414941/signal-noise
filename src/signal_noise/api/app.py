@@ -93,11 +93,14 @@ def signal_latest(name: str) -> dict:
 
 
 @app.get("/signals/{name}/anomalies")
-def signal_anomalies(name: str, lookback: int = Query(100)) -> dict:
+def signal_anomalies(name: str, lookback: int | None = Query(None)) -> dict:
     store = get_store()
     meta = store.get_meta(name)
     if not meta:
         raise HTTPException(404, f"Signal not found: {name}")
+    if lookback is None:
+        interval_days = max(meta["interval"] // 86400, 1)
+        lookback = max(100, interval_days * 30)
     # Check most recent data point against history
     df = store.get_data(name)
     if df.empty:

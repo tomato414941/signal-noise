@@ -262,8 +262,8 @@ class TestRunScheduler:
 
         with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
             with patch("signal_noise.collector.COLLECTORS", collectors):
-                with pytest.raises(asyncio.CancelledError):
-                    await run_scheduler(store, collectors=collectors)
+                # return_exceptions=True means gather returns exceptions instead of raising
+                await run_scheduler(store, collectors=collectors)
 
         result = store.get_data("dummy")
         assert len(result) == 1

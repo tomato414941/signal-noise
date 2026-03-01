@@ -114,6 +114,9 @@ class LazyCollectorRegistry(Mapping[str, type["BaseCollector"]]):
         self._load_all()
         return self._loaded.values()
 
+    def get_manifest_entry(self, name: str) -> dict | None:
+        return self._manifest.get(name)
+
     def __repr__(self) -> str:
         loaded = len(self._loaded)
         total = len(self._manifest)

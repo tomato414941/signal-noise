@@ -100,28 +100,31 @@ class SignalStore:
         )
         self._conn.commit()
 
+    def _build_rows(self, name: str, df: pd.DataFrame) -> list[tuple]:
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
+        rows = []
+        for row in df.itertuples(index=False):
+            ts = _normalize_ts(getattr(row, ts_col))
+            val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
+            if has_ohlcv:
+                rows.append((
+                    name, ts, val,
+                    float(row.open) if pd.notna(row.open) else None,
+                    float(row.high) if pd.notna(row.high) else None,
+                    float(row.low) if pd.notna(row.low) else None,
+                    float(row.volume) if pd.notna(row.volume) else None,
+                ))
+            else:
+                rows.append((name, ts, val, None, None, None, None))
+        return rows
+
     def save(self, name: str, df: pd.DataFrame) -> int:
         """Save time-series data. Returns number of rows written."""
         if df.empty:
             return 0
-        ts_col = "timestamp" if "timestamp" in df.columns else "date"
-        val_col = "value" if "value" in df.columns else df.columns[-1]
-        has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
-
-        rows = []
-        for _, row in df.iterrows():
-            ts = _normalize_ts(row[ts_col])
-            val = float(row[val_col]) if pd.notna(row[val_col]) else None
-            if has_ohlcv:
-                rows.append((
-                    name, ts, val,
-                    float(row["open"]) if pd.notna(row["open"]) else None,
-                    float(row["high"]) if pd.notna(row["high"]) else None,
-                    float(row["low"]) if pd.notna(row["low"]) else None,
-                    float(row["volume"]) if pd.notna(row["volume"]) else None,
-                ))
-            else:
-                rows.append((name, ts, val, None, None, None, None))
+        rows = self._build_rows(name, df)
 
         self._conn.executemany(
             "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
@@ -312,24 +315,7 @@ class SignalStore:
         """Batch save: data + meta + reset failures + audit in one transaction."""
         if df.empty:
             return 0
-        ts_col = "timestamp" if "timestamp" in df.columns else "date"
-        val_col = "value" if "value" in df.columns else df.columns[-1]
-        has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
-
-        rows = []
-        for _, row in df.iterrows():
-            ts = _normalize_ts(row[ts_col])
-            val = float(row[val_col]) if pd.notna(row[val_col]) else None
-            if has_ohlcv:
-                rows.append((
-                    name, ts, val,
-                    float(row["open"]) if pd.notna(row["open"]) else None,
-                    float(row["high"]) if pd.notna(row["high"]) else None,
-                    float(row["low"]) if pd.notna(row["low"]) else None,
-                    float(row["volume"]) if pd.notna(row["volume"]) else None,
-                ))
-            else:
-                rows.append((name, ts, val, None, None, None, None))
+        rows = self._build_rows(name, df)
 
         self._conn.executemany(
             "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"

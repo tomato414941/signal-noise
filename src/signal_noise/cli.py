@@ -120,8 +120,8 @@ def _cmd_collect(args: argparse.Namespace) -> None:
         collectors = [args.collector]
     elif args.frequency:
         collectors = [
-            name for name, cls in COLLECTORS.items()
-            if cls().meta.update_frequency == args.frequency
+            name for name in COLLECTORS.keys()
+            if (COLLECTORS.get_manifest_entry(name) or {}).get("meta", {}).get("update_frequency") == args.frequency
         ]
         log.info("Filtered to %d %s collectors", len(collectors), args.frequency)
     else:
@@ -151,8 +151,9 @@ def _cmd_backfill(args: argparse.Namespace) -> None:
     if args.collector:
         targets = [args.collector]
     elif args.category:
-        for name, cls in COLLECTORS.items():
-            if cls().meta.category == args.category:
+        for name in COLLECTORS.keys():
+            entry = COLLECTORS.get_manifest_entry(name)
+            if entry and entry.get("meta", {}).get("category") == args.category:
                 targets.append(name)
     else:
         targets = list(COLLECTORS.keys())
@@ -227,6 +228,7 @@ def _classify_level(name: str, meta) -> str:
 def _cmd_coverage(args: argparse.Namespace) -> None:
     import json as json_mod
     from collections import Counter
+    from types import SimpleNamespace
 
     from signal_noise.collector import COLLECTORS
 
@@ -236,8 +238,11 @@ def _cmd_coverage(args: argparse.Namespace) -> None:
     level_count: Counter[str] = Counter()
     freq_count: Counter[str] = Counter()
 
-    for name, cls in COLLECTORS.items():
-        m = cls.meta
+    for name in COLLECTORS.keys():
+        entry = COLLECTORS.get_manifest_entry(name)
+        if not entry:
+            continue
+        m = SimpleNamespace(**entry.get("meta", {}))
         domain_freq[(m.domain, m.update_frequency)] += 1
         domain_count[m.domain] += 1
         category_count[m.category] += 1

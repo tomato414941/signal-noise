@@ -32,9 +32,19 @@ def build_manifest() -> dict:
     entries: dict[str, dict] = {}
 
     for name, cls in collectors.items():
+        m = cls.meta
         entries[name] = {
             "module": cls.__module__,
             "class": cls.__qualname__,
+            "meta": {
+                "domain": m.domain,
+                "category": m.category,
+                "update_frequency": m.update_frequency,
+                "requires_key": m.requires_key,
+                "signal_type": m.signal_type,
+                "collection_level": m.collection_level,
+                "interval": m.interval,
+            },
         }
 
     manifest = {

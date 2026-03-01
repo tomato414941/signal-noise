@@ -154,4 +154,4 @@ async def run_scheduler(
         log.info("Scheduled %s (every %ds, jitter %.1fs)", name, interval, j)
     log.info("Pre-registered %d collectors in signal_meta", len(targets))
 
-    await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks, return_exceptions=True)
