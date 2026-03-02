@@ -1,9 +1,32 @@
 from __future__ import annotations
 
-import requests
+import xml.etree.ElementTree as ET
+
 import pandas as pd
+import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+
+_URL = "https://nasstatus.faa.gov/api/airport-status-information"
+
+
+def _parse_faa_xml(text: str) -> tuple[int, int]:
+    """Parse FAA NAS Status XML and return (delay_count, ground_stop_count)."""
+    root = ET.fromstring(text)
+    delay_count = 0
+    ground_stop_count = 0
+    for delay_type in root.iter("Delay_type"):
+        name_el = delay_type.find("Name")
+        if name_el is None:
+            continue
+        name = (name_el.text or "").strip()
+        if name == "Ground Delay Programs":
+            delay_count += len(delay_type.findall(".//Ground_Delay"))
+        elif name == "Ground Stop Programs":
+            ground_stop_count += len(delay_type.findall(".//Program"))
+        elif "Arrival" in name or "Departure" in name:
+            delay_count += len(delay_type.findall(".//Delay"))
+    return delay_count, ground_stop_count
 
 
 class FAADelayCountCollector(BaseCollector):
@@ -22,32 +45,12 @@ class FAADelayCountCollector(BaseCollector):
         category="aviation",
     )
 
-    URL = "https://nasstatus.faa.gov/api/airport-status-information"
-
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.URL, timeout=self.config.request_timeout)
+        resp = requests.get(_URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
-        delay_count = 0
-        ground_stop_count = 0
-
-        if isinstance(data, list):
-            for airport in data:
-                if airport.get("delay", False):
-                    delay_count += 1
-                if airport.get("groundStop", {}).get("isActive", False):
-                    ground_stop_count += 1
-        elif isinstance(data, dict):
-            for key, airport in data.items():
-                if isinstance(airport, dict):
-                    if airport.get("delay", False):
-                        delay_count += 1
-
+        delay_count, _ = _parse_faa_xml(resp.text)
         ts = pd.Timestamp.now(tz="UTC").floor("h")
-        return pd.DataFrame([{
-            "timestamp": ts,
-            "value": float(delay_count),
-        }])
+        return pd.DataFrame([{"timestamp": ts, "value": float(delay_count)}])
 
 
 class FAAGroundStopCollector(BaseCollector):
@@ -66,20 +69,9 @@ class FAAGroundStopCollector(BaseCollector):
         category="aviation",
     )
 
-    URL = "https://nasstatus.faa.gov/api/airport-status-information"
-
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.URL, timeout=self.config.request_timeout)
+        resp = requests.get(_URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
-        count = 0
-        if isinstance(data, list):
-            for airport in data:
-                gs = airport.get("groundStop", {})
-                if isinstance(gs, dict) and gs.get("isActive", False):
-                    count += 1
-                elif isinstance(gs, bool) and gs:
-                    count += 1
-
+        _, ground_stop_count = _parse_faa_xml(resp.text)
         ts = pd.Timestamp.now(tz="UTC").floor("h")
-        return pd.DataFrame([{"timestamp": ts, "value": float(count)}])
+        return pd.DataFrame([{"timestamp": ts, "value": float(ground_stop_count)}])

@@ -75,9 +75,15 @@ def _fetch_index_price(currency: str) -> float:
 
 def _fetch_dvol(currency: str) -> list[dict]:
     def _fetch() -> list[dict]:
+        now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
         r = requests.get(
             f"{_BASE}/get_volatility_index_data",
-            params={"currency": currency, "resolution": "3600"},
+            params={
+                "currency": currency,
+                "resolution": "3600",
+                "start_timestamp": str(now_ms - 86_400_000),
+                "end_timestamp": str(now_ms),
+            },
             timeout=30,
         )
         r.raise_for_status()

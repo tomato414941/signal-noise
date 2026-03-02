@@ -72,8 +72,8 @@ def _make_sonitus_collector(
                 "start": start.strftime("%Y-%m-%dT%H:%M:%S"),
                 "end": end.strftime("%Y-%m-%dT%H:%M:%S"),
             }
-            resp = requests.get(
-                url, params=params,
+            resp = requests.post(
+                url, json=params,
                 auth=_get_sonitus_auth(),
                 timeout=self.config.request_timeout,
             )
