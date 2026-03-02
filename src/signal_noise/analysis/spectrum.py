@@ -158,8 +158,9 @@ def compute_spectrum(
             d = meta[name]["domain"]
             domains[d] = domains.get(d, 0) + 1
 
-        # Extend domain count to top 20 for more representative composition
-        for idx in order[n_top_signals:20]:
+        # Extend domain count beyond top signals for more representative composition
+        n_domain_sample = max(20, n_top_signals * 3)
+        for idx in order[n_top_signals:min(n_domain_sample, len(order))]:
             d = meta[matrix.columns[idx]]["domain"]
             domains[d] = domains.get(d, 0) + 1
 

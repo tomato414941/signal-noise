@@ -326,11 +326,13 @@ class SignalStore:
         if new_values.empty:
             return []
 
-        # Fetch recent history for comparison
+        # Fetch recent history for comparison, skipping the newest values
+        # to prevent the values being tested from contaminating the baseline.
+        skip = len(new_values)
         rows = self._conn.execute(
             "SELECT value FROM signals WHERE name = ? AND value IS NOT NULL"
-            " ORDER BY timestamp DESC LIMIT ?",
-            (name, lookback),
+            " ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+            (name, lookback, skip),
         ).fetchall()
         if len(rows) < 10:
             return []  # Not enough history to judge

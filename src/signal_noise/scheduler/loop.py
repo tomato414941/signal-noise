@@ -236,7 +236,11 @@ async def run_scheduler(
 
     tasks = []
     n_streaming = 0
-    for name, cls in targets.items():
+    for name in targets:
+        cls = targets[name]
+        if cls is None:
+            log.warning("Skipping %s: failed to load", name)
+            continue
         collector = cls()
         interval = collector.meta.interval
         store.save_meta(
