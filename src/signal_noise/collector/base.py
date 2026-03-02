@@ -31,6 +31,13 @@ DOMAINS = {
     "developer",     # GitHub, npm, StackOverflow, tech trends
     "health",        # epidemiology, public health, disease surveillance
     "computed",      # calculated features (temporal, etc.)
+    "mortality",     # excess deaths, cause-of-death, life expectancy
+    "conflict",      # armed conflict events, displacement, arms
+    "animal",        # wildlife, biodiversity, migration
+    "food",          # food prices, agriculture, dining trends
+    "prediction",    # prediction markets, forecasting
+    "urban",         # city-level data, transportation, complaints
+    "creativity",    # patents, trademarks, academic output
 }
 
 # category: concrete data classification
@@ -55,6 +62,20 @@ CATEGORIES = {
     "epidemiology", "public_health",
     # market microstructure
     "microstructure",
+    # mortality
+    "excess_deaths", "cause_of_death",
+    # conflict
+    "armed_conflict", "displacement",
+    # animal
+    "wildlife", "biodiversity",
+    # food
+    "food_price", "agriculture",
+    # prediction
+    "prediction_market",
+    # urban
+    "city_stats", "transportation",
+    # creativity
+    "patents", "academic",
     # misc
     "temporal",
 }
