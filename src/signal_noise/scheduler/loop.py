@@ -342,7 +342,8 @@ async def _worker(
 
         except Exception as exc:
             log.exception("Worker-%d: %s failed", worker_id, entry.name)
-            store.save_collection_failure(entry.name, str(exc)[:200])
+            detail = str(exc) or type(exc).__name__
+            store.save_collection_failure(entry.name, detail[:200])
 
             tripped = breaker.record_failure(max_failures, base_cooldown, max_cooldown)
 
