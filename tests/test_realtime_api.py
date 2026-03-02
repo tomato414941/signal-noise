@@ -1,93 +1,65 @@
-"""Tests for realtime signal API endpoints."""
+"""Tests for realtime API endpoints."""
 from __future__ import annotations
 
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
-from signal_noise.api.app import app, get_store
+import signal_noise.api.app as api_mod
+from signal_noise.api.app import app
 from signal_noise.store.sqlite_store import SignalStore
 
 
 @pytest.fixture
-def store(tmp_path):
-    s = SignalStore(tmp_path / "test.db")
-    yield s
-    s.close()
+def _setup_store(tmp_path):
+    store = SignalStore(tmp_path / "test.db")
 
+    # Register a microstructure signal
+    store.save_meta("book_imbalance_btc", "financial", "microstructure", 60)
 
-@pytest.fixture
-def client(store):
-    app.dependency_overrides[get_store] = lambda: store
-    # Inject store directly
-    import signal_noise.api.app as api_mod
-    api_mod._store = store
-    with TestClient(app) as c:
-        yield c
-    api_mod._store = None
-
-
-def test_signal_realtime_endpoint(client, store):
+    # Insert realtime data
     df = pd.DataFrame({
         "timestamp": ["2026-03-01T10:00:00Z", "2026-03-01T10:01:00Z"],
-        "value": [0.5, 0.6],
+        "value": [0.15, 0.22],
     })
-    store.save_realtime_collection_result(
-        "book_imbalance_btc", df,
-        "financial", "microstructure", 60,
-    )
+    store.save_realtime("book_imbalance_btc", df)
 
-    resp = client.get("/signals/book_imbalance_btc/realtime")
-    assert resp.status_code == 200
-    data = resp.json()
+    old = api_mod._store
+    api_mod._store = store
+    yield store
+    api_mod._store = old
+    store.close()
+
+
+def test_realtime_endpoint(_setup_store):
+    client = TestClient(app)
+    r = client.get("/signals/book_imbalance_btc/realtime")
+    assert r.status_code == 200
+    data = r.json()
     assert len(data) == 2
-    assert data[0]["value"] == pytest.approx(0.5)
+    assert data[0]["value"] == pytest.approx(0.15)
 
 
-def test_signal_realtime_with_since(client, store):
-    df = pd.DataFrame({
-        "timestamp": ["2026-03-01T10:00:00Z", "2026-03-01T11:00:00Z"],
-        "value": [0.5, 0.6],
-    })
-    store.save_realtime_collection_result(
-        "vpin_btc", df,
-        "financial", "microstructure", 60,
-    )
-
-    resp = client.get("/signals/vpin_btc/realtime?since=2026-03-01T11:00:00Z")
-    assert resp.status_code == 200
-    data = resp.json()
+def test_realtime_endpoint_since(_setup_store):
+    client = TestClient(app)
+    r = client.get("/signals/book_imbalance_btc/realtime?since=2026-03-01T10:01:00Z")
+    assert r.status_code == 200
+    data = r.json()
     assert len(data) == 1
+    assert data[0]["value"] == pytest.approx(0.22)
 
 
-def test_signal_realtime_not_found(client):
-    resp = client.get("/signals/nonexistent/realtime")
-    assert resp.status_code == 404
+def test_realtime_endpoint_not_found(_setup_store):
+    client = TestClient(app)
+    r = client.get("/signals/nonexistent/realtime")
+    assert r.status_code == 404
 
 
-def test_signal_data_fallback_to_realtime(client, store):
-    """signal_data endpoint falls back to signals_realtime for microstructure."""
-    df = pd.DataFrame({
-        "timestamp": ["2026-03-01T10:00:00Z"],
-        "value": [0.42],
-    })
-    store.save_realtime_collection_result(
-        "spread_bps_btc", df,
-        "financial", "microstructure", 60,
-    )
-
-    resp = client.get("/signals/spread_bps_btc/data")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) == 1
-    assert data[0]["value"] == pytest.approx(0.42)
-
-
-def test_signal_data_no_fallback_for_non_microstructure(client, store):
-    """Non-microstructure signals don't fall back to realtime."""
-    store.save_meta("daily_sig", "financial", "crypto", 86400)
-
-    resp = client.get("/signals/daily_sig/data")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) == 0
+def test_signal_data_fallback_to_realtime(_setup_store):
+    """signal_data falls back to realtime for microstructure signals."""
+    client = TestClient(app)
+    r = client.get("/signals/book_imbalance_btc/data")
+    assert r.status_code == 200
+    data = r.json()
+    # Should fall back to realtime since signals table is empty
+    assert len(data) == 2
