@@ -4,7 +4,7 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,307+ signals** across **10 domains** and **30 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**1,476+ signals** across **17 domains** and **48 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
@@ -104,9 +104,16 @@ signal-noise is a **data collection service**. It collects and delivers raw time
 | geophysical | Solar, seismic, celestial | space_weather, seismic, celestial |
 | infrastructure | Logistics, aviation, internet | logistics, aviation, internet |
 | real_estate | Housing, property prices | real_estate |
-| developer | GitHub, npm, StackOverflow | developer |
+| developer | GitHub, npm, StackOverflow | developer, academic, patents |
 | health | Epidemiology, disease surveillance | epidemiology, public_health |
 | computed | Calculated features | temporal |
+| creativity | Creative industries, media | — |
+| food | Food prices, agriculture | food_price, agriculture |
+| conflict | Armed conflict, displacement | armed_conflict, displacement |
+| urban | City statistics | city_stats |
+| animal | Biodiversity, wildlife | biodiversity, wildlife |
+| mortality | Cause of death | cause_of_death |
+| prediction | Prediction markets | prediction_market |
 
 ## Development
 

@@ -12,32 +12,38 @@ Collect worldwide time series and deliver via REST API.
 | **Collector** | Class that fetches one time series | `BtcOhlcvCollector`, `FearGreedCollector` |
 | **CollectorMeta** | Collector metadata (name, domain, category, interval) | `CollectorMeta(name="fear_greed", ...)` |
 | **Signal** | A raw time series delivered via API | `fear_greed`, `btc_ohlcv` |
-| **Domain** | Stable top-level grouping (10 types) | financial, earth, macro |
-| **Category** | Concrete classification (~29 types) | equity, weather, labor |
+| **Domain** | Stable top-level grouping (17 types) | financial, earth, macro |
+| **Category** | Concrete classification (~48 types) | equity, weather, labor |
 
 ### Domain List
 
 | Domain | Description | Categories |
 |--------|-----------|------------|
-| financial | Equities, FX, bonds, commodities, crypto | equity, crypto, forex, rates, commodity |
+| financial | Equities, FX, bonds, commodities, crypto | equity, crypto, crypto_derivatives, forex, rates, commodity, microstructure |
 | macro | GDP, employment, inflation, trade, fiscal | economic, labor, inflation, trade, fiscal |
 | sentiment | Sentiment indices, social media, attention | sentiment, attention |
 | earth | Weather, climate, ocean, air quality, hydrology | weather, climate, marine, air_quality, hydrology, satellite |
-| geophysical | Solar, geomagnetic, seismic, lunar | space_weather, seismic, celestial |
-| infrastructure | Logistics, aviation, internet | logistics, aviation, internet |
+| geophysical | Solar, geomagnetic, seismic, lunar | space_weather, seismic, celestial, space |
+| infrastructure | Logistics, aviation, internet | logistics, aviation, internet, transportation |
 | real_estate | Housing, property prices | real_estate |
-| developer | GitHub, npm, StackOverflow, package registries | developer |
-| health | Epidemiology, public health, disease surveillance | epidemiology, public_health |
+| developer | GitHub, npm, StackOverflow, package registries | developer, academic, patents |
+| health | Epidemiology, public health, disease surveillance | epidemiology, public_health, excess_deaths |
 | computed | Calculated features (temporal, etc.) | temporal |
+| creativity | Creative industries, media | — |
+| food | Food prices, agriculture | food_price, agriculture |
+| conflict | Armed conflict, displacement | armed_conflict, displacement |
+| urban | City statistics, transportation | city_stats |
+| animal | Biodiversity, wildlife | biodiversity, wildlife |
+| mortality | Cause of death, excess mortality | cause_of_death |
+| prediction | Prediction markets | prediction_market |
 
-### Categories (30 types)
-
-financial: equity, crypto, crypto_derivatives, forex, rates, commodity, **microstructure**
+### Categories (48 types)
 
 ### Scale
 
-- **Providers**: ~40 external APIs
-- **Collectors**: ~1,307 time series
+- **Domains**: 17
+- **Categories**: 48
+- **Collectors**: ~1,476 time series
 
 ## Architecture
 
