@@ -56,6 +56,12 @@ class SignalStore:
                 signal_type  TEXT NOT NULL DEFAULT 'scalar',
                 last_updated TEXT
             );
+            CREATE TABLE IF NOT EXISTS signals_realtime (
+                name      TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                value     REAL,
+                PRIMARY KEY (name, timestamp)
+            );
             CREATE TABLE IF NOT EXISTS audit_log (
                 id        INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
@@ -488,6 +494,127 @@ class SignalStore:
             (name, since),
         ).fetchall()
         return [dict(r) for r in rows]
+
+    # ---- Realtime (1-min) signals ----
+
+    def save_realtime(self, name: str, df: pd.DataFrame) -> int:
+        """Save scalar time-series to signals_realtime. Returns rows written."""
+        if df.empty:
+            return 0
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        rows = []
+        for row in df.itertuples(index=False):
+            ts = _normalize_ts(getattr(row, ts_col))
+            val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
+            rows.append((name, ts, val))
+        self._conn.executemany(
+            "INSERT OR REPLACE INTO signals_realtime (name, timestamp, value)"
+            " VALUES (?, ?, ?)",
+            rows,
+        )
+        self._conn.commit()
+        return len(rows)
+
+    def save_realtime_collection_result(
+        self, name: str, df: pd.DataFrame,
+        domain: str, category: str, interval: int,
+        signal_type: str = "scalar",
+        event: str = "collected",
+    ) -> int:
+        """Batch save to signals_realtime + meta + audit."""
+        if df.empty:
+            return 0
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        rows = []
+        for row in df.itertuples(index=False):
+            ts = _normalize_ts(getattr(row, ts_col))
+            val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
+            rows.append((name, ts, val))
+        self._conn.executemany(
+            "INSERT OR REPLACE INTO signals_realtime (name, timestamp, value)"
+            " VALUES (?, ?, ?)",
+            rows,
+        )
+        self._conn.execute(
+            """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(name) DO UPDATE SET
+                   domain = excluded.domain,
+                   category = excluded.category,
+                   interval = excluded.interval,
+                   signal_type = excluded.signal_type""",
+            (name, domain, category, interval, signal_type),
+        )
+        self._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),"
+            " consecutive_failures = 0 WHERE name = ?",
+            (name,),
+        )
+        self._conn.execute(
+            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
+            (name, event, len(rows), ""),
+        )
+        self._conn.commit()
+        return len(rows)
+
+    def get_realtime_data(
+        self, name: str, *, since: str | None = None,
+    ) -> pd.DataFrame:
+        """Query from signals_realtime."""
+        params: list[str] = [name]
+        where = "name = ?"
+        if since:
+            where += " AND timestamp >= ?"
+            params.append(_normalize_ts(since))
+        rows = self._conn.execute(
+            f"SELECT timestamp, value FROM signals_realtime"
+            f" WHERE {where} ORDER BY timestamp",
+            params,
+        ).fetchall()
+        if not rows:
+            return pd.DataFrame(columns=["timestamp", "value"])
+        return pd.DataFrame([dict(r) for r in rows])
+
+    def get_realtime_latest(self, name: str) -> dict | None:
+        """Most recent value from signals_realtime."""
+        row = self._conn.execute(
+            "SELECT timestamp, value FROM signals_realtime"
+            " WHERE name = ? ORDER BY timestamp DESC LIMIT 1",
+            (name,),
+        ).fetchone()
+        return dict(row) if row else None
+
+    def rollup_daily(self, name: str, agg: str = "mean") -> int:
+        """Aggregate signals_realtime into daily values in the signals table."""
+        agg_fn = {"mean": "AVG", "last": "MAX", "min": "MIN", "max": "MAX"}.get(agg, "AVG")
+        rows = self._conn.execute(
+            f"SELECT SUBSTR(timestamp, 1, 10) || 'T00:00:00+00:00' AS timestamp,"
+            f" {agg_fn}(value) AS value"
+            f" FROM signals_realtime WHERE name = ?"
+            f" GROUP BY SUBSTR(timestamp, 1, 10)",
+            (name,),
+        ).fetchall()
+        if not rows:
+            return 0
+        self._conn.executemany(
+            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
+            " VALUES (?, ?, ?, NULL, NULL, NULL, NULL)",
+            [(name, r["timestamp"], r["value"]) for r in rows],
+        )
+        self._conn.commit()
+        return len(rows)
+
+    def purge_realtime(self, days: int = 30) -> int:
+        """Delete signals_realtime rows older than N days."""
+        cursor = self._conn.execute(
+            "DELETE FROM signals_realtime"
+            " WHERE timestamp < strftime('%Y-%m-%dT%H:%M:%SZ', 'now', ?)",
+            (f"-{days} days",),
+        )
+        self._conn.commit()
+        return cursor.rowcount
 
     def close(self) -> None:
         self._conn.close()
