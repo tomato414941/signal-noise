@@ -4,7 +4,7 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,629+ signals** across **6 domains** and **54 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**1,629+ signals** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
@@ -97,12 +97,12 @@ signal-noise is a **data collection service**. It collects and delivers raw time
 
 | Domain | Description | Example categories |
 |--------|-------------|-------------------|
-| markets | Equities, FX, bonds, crypto, derivatives | equity, crypto, forex, rates, commodity |
-| economy | GDP, employment, inflation, housing, agriculture | economic, labor, inflation, real_estate, energy |
-| environment | Weather, climate, ocean, geology, biodiversity | weather, climate, seismic, space_weather, wildlife |
-| technology | Software ecosystems, internet, logistics, R&D | developer, internet, logistics, aviation, academic |
-| sentiment | Opinions, attention, prediction markets | sentiment, attention, prediction_market |
-| society | Health, mortality, conflict, demographics | public_health, epidemiology, armed_conflict, city_stats |
+| markets | Equities, FX, bonds, crypto, derivatives | equity, crypto, forex, rates, commodity, microstructure |
+| economy | GDP, employment, inflation, housing, energy, inequality | economic, labor, inflation, energy, manufacturing, inequality |
+| environment | Weather, climate, ocean, geology, biodiversity, noise | weather, climate, hydrology, cryosphere, noise, satellite |
+| technology | Software ecosystems, internet, logistics, aviation, R&D | developer, internet, aviation, logistics, academic |
+| sentiment | Opinions, attention, prediction markets, gaming | sentiment, attention, prediction_market, gaming |
+| society | Health, mortality, conflict, demographics, governance | public_health, crime, governance, legislation, food_security |
 
 ## Development
 

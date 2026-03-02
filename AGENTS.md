@@ -13,25 +13,25 @@ Collect worldwide time series and deliver via REST API.
 | **CollectorMeta** | Collector metadata (name, domain, category, interval) | `CollectorMeta(name="fear_greed", ...)` |
 | **Signal** | A raw time series delivered via API | `fear_greed`, `btc_ohlcv` |
 | **Domain** | Stable top-level grouping (6 types) | markets, economy, environment |
-| **Category** | Concrete classification (~48 types) | equity, weather, labor |
+| **Category** | Concrete classification (~61 types) | equity, weather, labor |
 
 ### Domain List
 
 | Domain | Description | Categories |
 |--------|-----------|------------|
 | markets | Equities, FX, bonds, commodities, crypto, derivatives | equity, crypto, crypto_derivatives, forex, rates, commodity, microstructure, regulatory |
-| economy | GDP, employment, inflation, housing, agriculture, energy | economic, labor, inflation, trade, fiscal, real_estate, food_price, agriculture, energy |
-| environment | Weather, climate, ocean, geology, space weather, biodiversity | weather, climate, marine, air_quality, hydrology, satellite, space_weather, seismic, celestial, wildlife, biodiversity |
+| economy | GDP, employment, inflation, housing, agriculture, energy, inequality | economic, labor, inflation, trade, fiscal, real_estate, food_price, agriculture, energy, inequality, tourism, manufacturing, retail |
+| environment | Weather, climate, ocean, geology, space weather, biodiversity, noise | weather, climate, marine, air_quality, hydrology, satellite, space_weather, seismic, celestial, wildlife, biodiversity, noise, cryosphere |
 | technology | Software ecosystems, internet, logistics, aviation, R&D | developer, academic, patents, logistics, aviation, internet, space, transportation, safety |
-| sentiment | Opinions, attention, expectations, prediction markets | sentiment, attention, prediction_market, temporal |
-| society | Health, mortality, conflict, demographics | epidemiology, public_health, excess_deaths, cause_of_death, armed_conflict, displacement, city_stats |
+| sentiment | Opinions, attention, expectations, prediction markets, gaming | sentiment, attention, prediction_market, temporal, gaming |
+| society | Health, mortality, conflict, demographics, governance, legislation | epidemiology, public_health, excess_deaths, cause_of_death, armed_conflict, displacement, city_stats, crime, governance, demographics, education, legislation, food_security |
 
-### Categories (54 types)
+### Categories (61 types)
 
 ### Scale
 
 - **Domains**: 6
-- **Categories**: 54
+- **Categories**: 61
 - **Collectors**: ~1,629 time series
 
 ## Architecture
