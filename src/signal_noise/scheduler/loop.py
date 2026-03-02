@@ -7,6 +7,7 @@ import logging
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector
+from signal_noise.collector.streaming import StreamingCollector
 from signal_noise.store.event_bus import EventBus, SignalEvent
 from signal_noise.store.sqlite_store import SignalStore
 
@@ -187,7 +188,6 @@ async def run_scheduler(
     Streaming collectors are launched via run_streaming_collector.
     """
     from signal_noise.collector import COLLECTORS
-    from signal_noise.collector.streaming import StreamingCollector
 
     targets = collectors or COLLECTORS
     semaphore = asyncio.Semaphore(max_concurrent_fetches)
