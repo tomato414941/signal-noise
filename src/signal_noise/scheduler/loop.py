@@ -148,6 +148,31 @@ async def _publish_events(
         ))
 
 
+async def run_streaming_collector(
+    collector: StreamingCollector,
+    store: SignalStore,
+    *,
+    event_bus: EventBus | None = None,
+) -> None:
+    """Run a streaming collector as a long-lived task."""
+    log.info("Starting stream: %s", collector.meta.name)
+    async for df in collector.connect_with_retry():
+        if df.empty:
+            continue
+        try:
+            anomalies = store.check_anomalies(collector.meta.name, df)
+            rows = store.save_collection_result(
+                collector.meta.name, df,
+                collector.meta.domain, collector.meta.category,
+                collector.meta.interval, collector.meta.signal_type,
+            )
+            log.info("Stream %s: saved %d rows", collector.meta.name, rows)
+            if event_bus is not None:
+                await _publish_events(event_bus, collector.meta.name, df, anomalies)
+        except Exception:
+            log.exception("Failed to save stream data for %s", collector.meta.name)
+
+
 async def run_scheduler(
     store: SignalStore,
     collectors: dict[str, type[BaseCollector]] | None = None,
@@ -159,8 +184,10 @@ async def run_scheduler(
 
     max_concurrent_fetches limits how many collectors can call their
     provider APIs simultaneously, preventing burst traffic.
+    Streaming collectors are launched via run_streaming_collector.
     """
     from signal_noise.collector import COLLECTORS
+    from signal_noise.collector.streaming import StreamingCollector
 
     targets = collectors or COLLECTORS
     semaphore = asyncio.Semaphore(max_concurrent_fetches)
@@ -170,25 +197,36 @@ async def run_scheduler(
     )
 
     tasks = []
+    n_streaming = 0
     for name, cls in targets.items():
         collector = cls()
         interval = collector.meta.interval
-        # Pre-register so the collector appears in health checks before first fetch
         store.save_meta(
             name, collector.meta.domain, collector.meta.category,
             interval, collector.meta.signal_type,
         )
-        j = _compute_jitter(name, interval)
-        task = asyncio.create_task(
-            run_collector_loop(
-                collector, store, interval,
-                jitter=j, fetch_semaphore=semaphore,
-                event_bus=event_bus,
-            ),
-            name=f"collector:{name}",
-        )
+        if isinstance(collector, StreamingCollector):
+            task = asyncio.create_task(
+                run_streaming_collector(collector, store, event_bus=event_bus),
+                name=f"stream:{name}",
+            )
+            n_streaming += 1
+            log.info("Scheduled stream %s", name)
+        else:
+            j = _compute_jitter(name, interval)
+            task = asyncio.create_task(
+                run_collector_loop(
+                    collector, store, interval,
+                    jitter=j, fetch_semaphore=semaphore,
+                    event_bus=event_bus,
+                ),
+                name=f"collector:{name}",
+            )
+            log.info("Scheduled %s (every %ds, jitter %.1fs)", name, interval, j)
         tasks.append(task)
-        log.info("Scheduled %s (every %ds, jitter %.1fs)", name, interval, j)
-    log.info("Pre-registered %d collectors in signal_meta", len(targets))
+    log.info(
+        "Pre-registered %d collectors (%d polling, %d streaming)",
+        len(targets), len(targets) - n_streaming, n_streaming,
+    )
 
     await asyncio.gather(*tasks, return_exceptions=True)
