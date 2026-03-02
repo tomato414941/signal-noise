@@ -52,7 +52,7 @@ CATEGORIES = {
     # society
     "epidemiology", "public_health", "excess_deaths", "cause_of_death",
     "armed_conflict", "displacement", "city_stats",
-    "crime", "governance", "demographics", "education",
+    "crime", "governance", "demographics", "education", "legislation",
 }
 
 # update_frequency: allowed values
