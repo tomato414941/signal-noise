@@ -82,3 +82,60 @@ class HNNewCollector(_HNListCollector):
         domain="sentiment",
         category="attention",
     )
+
+
+class _HNTopicCollector(BaseCollector):
+    """Count keyword mentions in top 30 HN stories."""
+
+    _keywords: set[str] = set()
+
+    def fetch(self) -> pd.DataFrame:
+        resp = requests.get(
+            f"{_HN_BASE}/topstories.json",
+            timeout=self.config.request_timeout,
+        )
+        resp.raise_for_status()
+        story_ids = resp.json()[:30]
+
+        count = 0
+        for sid in story_ids:
+            try:
+                r = requests.get(
+                    f"{_HN_BASE}/item/{sid}.json",
+                    timeout=self.config.request_timeout,
+                )
+                r.raise_for_status()
+                title = (r.json().get("title") or "").lower()
+                if any(kw in title for kw in self._keywords):
+                    count += 1
+            except Exception:
+                continue
+
+        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        return pd.DataFrame([{"timestamp": ts, "value": float(count)}])
+
+
+class HNAIMentionsCollector(_HNTopicCollector):
+    _keywords = {"ai", "llm", "gpt", "claude", "openai", "anthropic",
+                 "machine learning", "deep learning", "neural", "transformer"}
+    meta = CollectorMeta(
+        name="hn_ai_mentions",
+        display_name="HN Top 30 AI Mentions",
+        update_frequency="hourly",
+        api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
+    )
+
+
+class HNCryptoMentionsCollector(_HNTopicCollector):
+    _keywords = {"bitcoin", "btc", "ethereum", "eth", "crypto", "blockchain",
+                 "web3", "defi", "nft", "solana"}
+    meta = CollectorMeta(
+        name="hn_crypto_mentions",
+        display_name="HN Top 30 Crypto Mentions",
+        update_frequency="hourly",
+        api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
+    )

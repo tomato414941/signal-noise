@@ -5,45 +5,68 @@ import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
+# (pypi_package, collector_name, display_name)
+PYPI_PACKAGES: list[tuple[str, str, str]] = [
+    ("numpy", "pypi_numpy_downloads", "PyPI: numpy"),
+    ("pandas", "pypi_pandas_downloads", "PyPI: pandas"),
+    ("scipy", "pypi_scipy_downloads", "PyPI: scipy"),
+    ("scikit-learn", "pypi_sklearn_downloads", "PyPI: scikit-learn"),
+    ("tensorflow", "pypi_tensorflow_downloads", "PyPI: tensorflow"),
+    ("torch", "pypi_torch_downloads", "PyPI: torch"),
+    ("flask", "pypi_flask_downloads", "PyPI: flask"),
+    ("django", "pypi_django_downloads", "PyPI: django"),
+    ("fastapi", "pypi_fastapi_downloads", "PyPI: fastapi"),
+    ("requests", "pypi_requests_downloads", "PyPI: requests"),
+    ("boto3", "pypi_boto3_downloads", "PyPI: boto3"),
+    ("transformers", "pypi_transformers_downloads", "PyPI: transformers"),
+    ("langchain-core", "pypi_langchain_downloads", "PyPI: langchain-core"),
+    ("anthropic", "pypi_anthropic_downloads", "PyPI: anthropic"),
+    ("openai", "pypi_openai_downloads", "PyPI: openai"),
+]
 
-class PyPIDownloadsCollector(BaseCollector):
-    """PyPI daily download count for numpy (proxy for Python ecosystem activity).
 
-    Uses the pypistats.org API which provides recent daily
-    download statistics aggregated across mirrors.
-    """
-
-    meta = CollectorMeta(
-        name="pypi_numpy_downloads",
-        display_name="PyPI numpy Daily Downloads",
-        update_frequency="daily",
-        api_docs_url="https://pypistats.org/api/",
-        domain="developer",
-        category="developer",
-    )
-
-    URL = "https://pypistats.org/api/packages/numpy/overall?mirrors=true"
-
-    def fetch(self) -> pd.DataFrame:
-        headers = {"User-Agent": "signal-noise/0.1"}
-        resp = requests.get(
-            self.URL, headers=headers, timeout=self.config.request_timeout,
+def _make_pypi_collector(
+    package: str, name: str, display_name: str,
+) -> type[BaseCollector]:
+    class _Collector(BaseCollector):
+        meta = CollectorMeta(
+            name=name,
+            display_name=display_name,
+            update_frequency="daily",
+            api_docs_url="https://pypistats.org/api/",
+            domain="developer",
+            category="developer",
         )
-        resp.raise_for_status()
-        items = resp.json().get("data", [])
-        rows = []
-        for item in items:
-            if item.get("category") == "without_mirrors":
-                continue
-            try:
-                rows.append({
-                    "date": pd.Timestamp(item["date"], tz="UTC"),
-                    "value": float(item["downloads"]),
-                })
-            except (KeyError, ValueError, TypeError):
-                continue
-        if not rows:
-            raise RuntimeError("No PyPI download data")
-        df = pd.DataFrame(rows)
-        daily = df.groupby("date")["value"].sum().reset_index()
-        return daily.sort_values("date").reset_index(drop=True)
+
+        def fetch(self) -> pd.DataFrame:
+            url = f"https://pypistats.org/api/packages/{package}/overall?mirrors=true"
+            headers = {"User-Agent": "signal-noise/0.1"}
+            resp = requests.get(
+                url, headers=headers, timeout=self.config.request_timeout,
+            )
+            resp.raise_for_status()
+            items = resp.json().get("data", [])
+            rows = []
+            for item in items:
+                if item.get("category") == "without_mirrors":
+                    continue
+                try:
+                    rows.append({
+                        "date": pd.Timestamp(item["date"], tz="UTC"),
+                        "value": float(item["downloads"]),
+                    })
+                except (KeyError, ValueError, TypeError):
+                    continue
+            if not rows:
+                raise RuntimeError(f"No PyPI download data for {package}")
+            df = pd.DataFrame(rows)
+            daily = df.groupby("date")["value"].sum().reset_index()
+            return daily.sort_values("date").reset_index(drop=True)
+
+    _Collector.__name__ = f"PyPI_{name}"
+    _Collector.__qualname__ = f"PyPI_{name}"
+    return _Collector
+
+
+def get_pypi_collectors() -> dict[str, type[BaseCollector]]:
+    return {t[1]: _make_pypi_collector(*t) for t in PYPI_PACKAGES}

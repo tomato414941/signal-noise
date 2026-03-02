@@ -76,6 +76,8 @@ CATEGORIES = {
     "city_stats", "transportation",
     # creativity
     "patents", "academic",
+    # energy
+    "energy",
     # misc
     "temporal",
 }
