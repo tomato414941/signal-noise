@@ -20,9 +20,9 @@ PORTWATCH_CHOKEPOINTS: list[tuple[str, str, str]] = [
     ("Suez Canal", "portwatch_suez", "PortWatch: Suez Canal"),
     ("Panama Canal", "portwatch_panama", "PortWatch: Panama Canal"),
     ("Strait of Hormuz", "portwatch_hormuz", "PortWatch: Strait of Hormuz"),
-    ("Strait of Malacca", "portwatch_malacca", "PortWatch: Strait of Malacca"),
-    ("Bab el-Mandeb", "portwatch_mandeb", "PortWatch: Bab el-Mandeb"),
-    ("Strait of Gibraltar", "portwatch_gibraltar", "PortWatch: Strait of Gibraltar"),
+    ("Malacca Strait", "portwatch_malacca", "PortWatch: Malacca Strait"),
+    ("Bab el-Mandeb Strait", "portwatch_mandeb", "PortWatch: Bab el-Mandeb Strait"),
+    ("Gibraltar Strait", "portwatch_gibraltar", "PortWatch: Gibraltar Strait"),
 ]
 
 
@@ -42,7 +42,7 @@ def _make_portwatch_collector(
 
         def fetch(self) -> pd.DataFrame:
             params = {
-                "where": f"chokepoint='{chokepoint}'",
+                "where": f"portname='{chokepoint}'",
                 "outFields": "date,n_total",
                 "orderByFields": "date ASC",
                 "resultRecordCount": 2000,
