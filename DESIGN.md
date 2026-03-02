@@ -1,7 +1,7 @@
 # signal-noise: Design Document
 
-> This document captures architectural decisions from a design discussion (2026-02-23).
-> It defines the future direction of signal-noise and its relationship with consumer projects.
+> Architectural decisions and design philosophy for signal-noise.
+> Originally drafted 2026-02-23. Last updated 2026-03-02.
 
 ## Core Principle
 
@@ -139,61 +139,80 @@ deliver them in a unified format via API.
 | Evaluation            |              | ○        |
 | Prediction / Strategy |              | ○        |
 
-### What to remove from signal-noise
+### Implementation history
 
-The following modules exist today but belong to the consumer side:
+Consumer-side modules that were removed (evaluation, reporting, and
+transforms belong to consumer projects):
 
-- `evaluator/` — evaluation is purpose-dependent
-- `reporter/` — reporting is purpose-dependent
-- `transforms.py` — transforms are purpose-dependent
+- ~~`evaluator/`~~ — removed
+- ~~`reporter/`~~ — removed
+- ~~`transforms.py`~~ — removed
 
-### What to add to signal-noise
+Modules added to complete the service architecture:
 
 - `scheduler/` — per-collector scheduling based on natural update frequency
-- `api/` — REST API for data delivery
-- `store/` — storage abstraction (currently raw Parquet files)
+- `api/` — REST API + WebSocket for data delivery
+- `store/` — SQLite storage + EventBus for realtime pub/sub
+- `analysis/` — signal health scoring + spectral redundancy analysis
 
-## Architecture (Future)
+## Architecture
 
 ```
-┌─ signal-noise service ─────────────────────────────┐
-│                                                     │
-│  Scheduler ──→ Collector ──→ Store ──→ REST API     │
-│  (per-collector   (API        (SQLite)   (delivery  │
-│   frequency)       fetch)                 to        │
-│                                           consumers)│
-└─────────────────────────────────────────────────────┘
+┌─ signal-noise service ──────────────────────────────────────────────┐
+│                                                                      │
+│  Scheduler ──→ Polling Collector ──→ Store (signals) ──→ REST API    │
+│  (per-collector   (BaseCollector)      (SQLite WAL)       (FastAPI)  │
+│   jitter +                                │                  │       │
+│   circuit breaker)                        │              WebSocket   │
+│                                           │              /ws/signals │
+│               Streaming Collector ──→ Store (signals_realtime)  │    │
+│                (StreamingCollector)    1-min buckets ──→ daily   │    │
+│                (Binance WS, ...)      rollup (00:05 UTC)        │    │
+│                        │                                        │    │
+│                        └─→ EventBus ────────────────────────────┘    │
+│                            (pub/sub, fnmatch patterns)               │
+│                                                                      │
+│  Analysis ── quality scoring, spectral redundancy (SVD)              │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
          ↓
-    Consumer projects (purpose-dependent)
+    Consumer projects (e.g. signal-noise-trader)
 ```
 
 ## Data Contract
 
 ### What signal-noise delivers
 
-- **Raw time series only**: ~1,256 collector outputs
-- **Format**: `DataFrame[timestamp, value]` (or `[date, value]`)
+- **Raw time series**: 1,629 collector outputs across 6 domains and 61 categories
+- **Format**: `DataFrame[timestamp, value]` for scalar signals,
+  `DataFrame[timestamp, value, open, high, low, volume]` for OHLCV signals
 - **No derived signals**: transforms (z-score, SMA, RSI, etc.) are not applied
-- **Metadata**: name, domain, category, update frequency, last updated
+- **Metadata**: name, display_name, domain, category, signal_type, update frequency,
+  collection_level, last_updated
 
-### REST API (Draft)
-
-Consumer pulls data via polling. Push notification is not needed — the fastest
-collector updates hourly, so polling intervals of minutes are sufficient.
+### REST API
 
 ```
-GET /signals                           # List all signals (name, domain, category, ...)
-GET /signals/{name}                    # Signal metadata (domain, category, frequency, last_updated)
-GET /signals/{name}/data?since=...     # Time series data (timestamp, value)
-GET /signals/{name}/latest             # Latest value + timestamp
-GET /health                            # Service health check
+GET  /health                           # Service health (fresh/stale/failing/never_seen counts)
+GET  /health/signals                   # Per-signal health details
+GET  /health/events                    # EventBus status and subscriber count
+GET  /signals                          # List signals (filter: domain, category, signal_type)
+GET  /signals/{name}                   # Signal metadata
+GET  /signals/{name}/data?since=...    # Time series (auto-fallback to realtime for microstructure)
+GET  /signals/{name}/latest            # Latest value + timestamp
+GET  /signals/{name}/realtime?since=.. # 1-minute resolution data (streaming signals)
+GET  /signals/{name}/anomalies         # Z-score outlier detection
+GET  /audit?name=...&limit=...         # Collection event log
+POST /signals/batch                    # Multi-signal query (names, since, columns, resolution)
+WS   /ws/signals?names=pattern         # EventBus streaming (fnmatch patterns, e.g. "liq_*,funding_*")
 ```
 
 Consumer workflow:
 1. On startup: `GET /signals` to discover available signals
 2. For each signal: `GET /signals/{name}/data?since=<last_seen>` to backfill
 3. Periodically: poll `/signals/{name}/latest` or `/data?since=...` for updates
-4. Handle 404 / empty response gracefully (signal temporarily unavailable)
+4. For realtime signals: subscribe via `WS /ws/signals?names=...` for push updates
+5. Handle 404 / empty response gracefully (signal temporarily unavailable)
 
 ## Collector Scheduling
 
@@ -213,58 +232,95 @@ signal-noise runs as a long-lived service, scheduling each collector independent
 ### Implementation: asyncio self-managed loop
 
 No external scheduler dependency (APScheduler, Celery). Each collector runs as
-an independent `asyncio` task with its own interval.
+an independent `asyncio` task with its own interval (`scheduler/loop.py`).
 
-```python
-async def run_collector(collector, store, interval_seconds):
-    while True:
-        try:
-            data = await asyncio.to_thread(collector.fetch)
-            store.save(collector.meta.name, data)
-        except Exception:
-            log.error("Collector %s failed", collector.meta.name)
-        await asyncio.sleep(interval_seconds)
-```
+Two collector types:
+- **Polling** (`BaseCollector`): periodic fetch → save → sleep cycle
+- **Streaming** (`StreamingCollector`): long-lived WebSocket connection yielding DataFrames
 
-`CollectorMeta` gains an `interval` field:
+Production features:
+- **Circuit breaker**: after 5 consecutive failures → exponential cooldown (300s–3600s) with half-open recovery
+- **Deterministic jitter**: MD5-based offset (10% of interval) prevents thundering herd at startup
+- **Fetch semaphore**: limits concurrent API calls (default 20) to avoid burst traffic
+- **Fetch timeout**: 300s per collection attempt
+- **Anomaly detection**: z-score check on each incoming DataFrame
+- **EventBus integration**: publishes `update`, `anomaly`, `circuit_break` events
+- **Failure tracking**: `consecutive_failures` persisted in `signal_meta` for health monitoring
+- **Daily rollup**: realtime (1-min) data aggregated to daily at 00:05 UTC, 30-day purge
 
 ```python
 @dataclass
 class CollectorMeta:
     name: str
-    domain: str
-    category: str
-    interval: int  # seconds between fetches (3600=hourly, 86400=daily)
+    display_name: str
+    update_frequency: str       # "hourly" | "daily" | "weekly" | "monthly" | ...
+    api_docs_url: str
+    requires_key: bool = False
+    domain: str = ""            # markets | economy | environment | technology | sentiment | society
+    category: str = ""          # 61 concrete categories
+    signal_type: str = "scalar" # "scalar" or "ohlcv"
+    collection_level: str = ""  # L1-L7 (empty = auto-detect)
+    collect_interval: int = 0   # seconds override (0 = auto from level/frequency)
 ```
 
 Properties:
 - Zero external dependencies
 - One collector failure does not affect others
 - On service restart, all collectors run once immediately, then resume their interval
+- Streaming collectors auto-reconnect with exponential backoff (5s–300s)
 
 ## Storage: SQLite
 
-Parquet (current) is batch-oriented — append requires read-modify-write, range queries
-require full file scan. SQLite fits the service access pattern naturally.
+SQLite with WAL mode (`store/sqlite_store.py`). Replaced the original
+Parquet-based storage which required read-modify-write for appends.
 
 ### Schema
 
 ```sql
 CREATE TABLE signals (
-    name       TEXT NOT NULL,
-    timestamp  TEXT NOT NULL,
-    value      REAL,
+    name      TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
+    value     REAL,
+    open      REAL,           -- OHLCV support for financial instruments
+    high      REAL,
+    low       REAL,
+    volume    REAL,
     PRIMARY KEY (name, timestamp)
 );
 
 CREATE TABLE signal_meta (
-    name         TEXT PRIMARY KEY,
-    domain       TEXT NOT NULL,
-    category     TEXT NOT NULL,
-    interval     INTEGER NOT NULL,
-    last_updated TEXT
+    name                 TEXT PRIMARY KEY,
+    domain               TEXT NOT NULL DEFAULT '',
+    category             TEXT NOT NULL DEFAULT '',
+    interval             INTEGER NOT NULL DEFAULT 86400,
+    signal_type          TEXT NOT NULL DEFAULT 'scalar',  -- "scalar" or "ohlcv"
+    last_updated         TEXT,
+    consecutive_failures INTEGER NOT NULL DEFAULT 0       -- health tracking
+);
+
+CREATE TABLE signals_realtime (
+    name      TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
+    value     REAL,
+    PRIMARY KEY (name, timestamp)
+);
+
+CREATE TABLE audit_log (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    name      TEXT NOT NULL,
+    event     TEXT NOT NULL,      -- "collected", "circuit_break_cooldown", etc.
+    rows      INTEGER,
+    detail    TEXT
 );
 ```
+
+Four tables:
+
+- **signals** — primary daily/periodic storage with optional OHLCV columns
+- **signal_meta** — collector metadata + health tracking (consecutive failures)
+- **signals_realtime** — 1-minute granularity for streaming signals (30-day retention)
+- **audit_log** — collection event trail for debugging and monitoring
 
 ### Why SQLite
 
@@ -272,12 +328,87 @@ CREATE TABLE signal_meta (
 - **Range query**: WHERE clause, no full scan
 - **Concurrency**: WAL mode handles parallel scheduler writes + API reads
 - **Dependency**: Python standard library, zero external deps
-- **Data volume**: ~1,238 series × ~2,000 rows ≈ 38 MB — trivially small
+- **Data volume**: ~1,629 series — trivially small for SQLite
 
 ### Migration
 
 Existing Parquet files are imported once into SQLite on first service startup.
-After migration, Parquet files are no longer the source of truth.
+After migration, Parquet files are no longer the source of truth. Schema
+migrations (e.g. adding OHLCV columns) are applied automatically on startup.
+
+## EventBus & Realtime Streaming
+
+The EventBus (`store/event_bus.py`) provides in-process pub/sub for signal
+updates. It powers the WebSocket API endpoint and enables realtime event
+delivery to consumers.
+
+```python
+@dataclass
+class SignalEvent:
+    name: str
+    timestamp: str
+    value: float | None
+    event_type: str  # "update" | "anomaly" | "circuit_break"
+    detail: str = ""
+```
+
+- **Pattern matching**: subscribers use fnmatch globs (e.g. `"funding_rate_*"`,
+  `"liq_*,funding_*"`) to filter events
+- **Per-subscriber queue**: each subscriber gets an independent asyncio.Queue
+  (max 1,000 events, overflow drops oldest)
+- **Event sources**: scheduler publishes on every successful collection,
+  anomaly detection, and circuit breaker state change
+
+## Streaming Collectors
+
+For data sources that push events rather than respond to polling,
+`StreamingCollector` (`collector/streaming.py`) extends `BaseCollector` with
+a long-lived `stream()` method:
+
+```python
+class StreamingCollector(BaseCollector):
+    reconnect_delay: float = 5.0         # initial backoff
+    max_reconnect_delay: float = 300.0   # max backoff
+    use_realtime_store: bool = False      # route to signals_realtime table
+
+    async def stream(self) -> AsyncIterator[pd.DataFrame]:
+        ...  # yield DataFrames as data arrives
+
+    async def connect_with_retry(self) -> AsyncIterator[pd.DataFrame]:
+        ...  # auto-reconnect with exponential backoff
+```
+
+Current streaming collectors:
+- **Binance WebSocket** (`collector/binance_ws.py`): liquidation events,
+  funding rates, aggregated into 1-minute buckets and stored in `signals_realtime`
+
+Data flow: WebSocket → 1-min buckets → `signals_realtime` table → daily rollup
+(00:05 UTC) → `signals` table. Realtime data is purged after 30 days.
+
+## Analysis
+
+Two analysis tools evaluate collection health and coverage:
+
+### Signal quality (`analysis/quality.py`)
+
+Computes a health score (0–1) per signal from four metrics:
+
+| Metric | Weight | Measures |
+|--------|--------|----------|
+| Completeness | 35% | Data point density vs expected frequency |
+| Freshness | 30% | Time since last successful collection |
+| Stability | 20% | Distribution consistency (KS test) |
+| Independence | 15% | Correlation with other signals in same domain |
+
+Classification: healthy (≥0.7), degraded (0.4–0.7), poor (<0.4).
+
+### Spectral redundancy (`analysis/spectrum.py`)
+
+SVD decomposition of the signal matrix to measure:
+- **Effective dimensionality** at various variance thresholds (50%, 80%, 90%, 95%, 99%)
+- **Participation ratio** and **spectral entropy** — how evenly information is distributed
+- **Principal components** with domain composition — what each axis represents
+- **Signal uniqueness** — residual variance after removing top-k components
 
 ## Consumer Design
 
@@ -475,21 +606,28 @@ priority. The list serves as a creative inventory, not a roadmap.
 ## Open Questions
 
 - [x] Scheduler implementation: cron-based, APScheduler, or custom event loop?
-  → asyncio self-managed loop (implemented in `scheduler/loop.py`)
+  → asyncio self-managed loop (`scheduler/loop.py`)
 - [x] Storage: keep Parquet files, or move to a time series database?
-  → SQLite with WAL mode (implemented in `store/sqlite_store.py`)
+  → SQLite with WAL mode (`store/sqlite_store.py`)
 - [x] API framework: FastAPI, or something lighter?
-  → FastAPI (implemented in `api/app.py`)
-- [ ] Consumer project naming and repository structure
+  → FastAPI (`api/app.py`)
+- [x] Consumer project naming and repository structure
+  → `signal-noise-trader` as first consumer project
 - [ ] Specific online learning algorithm (EWA, Follow the Regularized Leader, etc.)
-- [ ] How to handle collector authentication (API keys) in service mode
-- [ ] Monitoring and alerting for collector failures
+  — consumer-side decision, not yet selected
+- [x] How to handle collector authentication (API keys) in service mode
+  → environment variables per provider (e.g. `FRED_API_KEY`), secrets in `~/.secrets/`
+- [x] Monitoring and alerting for collector failures
+  → `consecutive_failures` in signal_meta, circuit breaker in scheduler,
+  `/health` and `/health/signals` endpoints for status inspection
 - [x] Domain taxonomy: consolidated from 17 ad-hoc domains to 6 subject-matter
   domains (markets, economy, environment, technology, sentiment, society)
   based on UN CSA 2.0 classification principles.
-- [ ] CollectorMeta: add `collection_level` field (L1–L7) so consumers
+- [x] CollectorMeta: add `collection_level` field (L1–L7) so consumers
   can distinguish direct measurements from proxies
-- [ ] L5 active probing: design collector base class for self-originated
+  → implemented in `CollectorMeta.collection_level`
+- [x] L5 active probing: design collector base class for self-originated
   measurements (no external API, measurement from own infrastructure)
+  → proof of concept in `collector/probe_network.py` (ping, DNS, HTTP latency)
 - [ ] L6 physical sensors: evaluate Raspberry Pi + sensor HAT as first
   physical observation point
