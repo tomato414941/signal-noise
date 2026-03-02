@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections import deque
 from datetime import datetime, timezone
 from typing import AsyncIterator
 
@@ -185,3 +186,121 @@ def _compute_orderbook_signals(
         {"timestamp": ts_str, "value": depth_ratio, "name": "book_depth_ratio_btc"},
         {"timestamp": ts_str, "value": spread_bps, "name": "spread_bps_btc"},
     ]
+
+
+class VPINCalculator:
+    """Volume-synchronized Probability of Informed Trading.
+
+    Reference: Easley, López de Prado, O'Hara (2012).
+    Fills fixed-size volume buckets and computes order imbalance
+    across the last N completed buckets.
+    """
+
+    def __init__(self, bucket_size: float = 1.0, n_buckets: int = 50):
+        self._bucket_size = bucket_size
+        self._n_buckets = n_buckets
+        self._buckets: deque[tuple[float, float]] = deque(maxlen=n_buckets)
+        self._current_buy = 0.0
+        self._current_sell = 0.0
+        self._current_volume = 0.0
+
+    def update(self, qty: float, is_buy: bool) -> None:
+        """Add a trade. May complete one or more buckets."""
+        remaining = qty
+        while remaining > 1e-12:
+            space = self._bucket_size - self._current_volume
+            fill = min(remaining, space)
+            if is_buy:
+                self._current_buy += fill
+            else:
+                self._current_sell += fill
+            self._current_volume += fill
+            remaining -= fill
+            if self._current_volume >= self._bucket_size - 1e-10:
+                self._buckets.append((self._current_buy, self._current_sell))
+                self._current_buy = 0.0
+                self._current_sell = 0.0
+                self._current_volume = 0.0
+
+    @property
+    def value(self) -> float | None:
+        """VPIN value, or None if fewer than n_buckets completed."""
+        if len(self._buckets) < self._n_buckets:
+            return None
+        total = sum(
+            abs(b - s) / self._bucket_size
+            for b, s in self._buckets
+        )
+        return total / len(self._buckets)
+
+
+class BinanceTradeFlowCollector(StreamingCollector):
+    """BTC trade flow from Binance Futures aggTrade WebSocket.
+
+    Aggregates trades into 1-minute buckets, yielding:
+    - trade_flow_btc: net taker buy volume
+    - large_trade_count_btc: trades > $100k
+    - vpin_btc: VPIN (once 50 volume buckets are filled)
+    """
+
+    meta = CollectorMeta(
+        name="trade_flow_btc",
+        display_name="BTC Trade Flow",
+        update_frequency="hourly",
+        api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#aggregate-trade-streams",
+        domain="financial",
+        category="microstructure",
+        signal_type="scalar",
+        collect_interval=60,
+    )
+    use_realtime_store = True
+
+    _LARGE_TRADE_USD = 100_000.0
+
+    async def stream(self) -> AsyncIterator[pd.DataFrame]:
+        url = f"{_WS_BASE}/btcusdt@aggTrade"
+        vpin_calc = VPINCalculator(bucket_size=1.0, n_buckets=50)
+
+        async with websockets.connect(url, ping_interval=20) as ws:
+            bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+            buy_vol = 0.0
+            sell_vol = 0.0
+            large_count = 0
+
+            async for msg in ws:
+                data = json.loads(msg)
+                qty = float(data["q"])
+                price = float(data["p"])
+                # m=True means maker is buyer → taker is seller
+                is_buy = not data["m"]
+
+                if is_buy:
+                    buy_vol += qty
+                else:
+                    sell_vol += qty
+
+                if price * qty >= self._LARGE_TRADE_USD:
+                    large_count += 1
+
+                vpin_calc.update(qty, is_buy)
+
+                now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                if now > bucket_ts:
+                    ts_str = bucket_ts.isoformat()
+                    rows: list[dict] = [
+                        {"timestamp": ts_str, "value": buy_vol - sell_vol,
+                         "name": "trade_flow_btc"},
+                        {"timestamp": ts_str, "value": large_count,
+                         "name": "large_trade_count_btc"},
+                    ]
+                    vpin_val = vpin_calc.value
+                    if vpin_val is not None:
+                        rows.append({
+                            "timestamp": ts_str, "value": vpin_val,
+                            "name": "vpin_btc",
+                        })
+                    yield pd.DataFrame(rows)
+                    buy_vol = 0.0
+                    sell_vol = 0.0
+                    large_count = 0
+                    bucket_ts = now
