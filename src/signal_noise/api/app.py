@@ -88,6 +88,9 @@ def signal_data(
         raise HTTPException(404, f"Signal not found: {name}")
     col_list = columns.split(",") if columns else None
     df = store.get_data(name, since=since, columns=col_list, resolution=resolution)
+    # Fallback to realtime table for microstructure signals
+    if df.empty and meta.get("category") == "microstructure":
+        df = store.get_realtime_data(name, since=since)
     return df.to_dict(orient="records")
 
 
@@ -97,6 +100,19 @@ def signal_latest(name: str) -> dict:
     if not latest:
         raise HTTPException(404, f"Signal not found: {name}")
     return latest
+
+
+@app.get("/signals/{name}/realtime")
+def signal_realtime(
+    name: str,
+    since: str | None = Query(None),
+) -> list[dict]:
+    store = get_store()
+    meta = store.get_meta(name)
+    if not meta:
+        raise HTTPException(404, f"Signal not found: {name}")
+    df = store.get_realtime_data(name, since=since)
+    return df.to_dict(orient="records")
 
 
 @app.get("/signals/{name}/anomalies")

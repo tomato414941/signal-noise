@@ -66,6 +66,9 @@ def main(argv: list[str] | None = None) -> None:
     p_scheduler.add_argument("--frequency", "-f", help="Only schedule collectors of this frequency")
     p_scheduler.add_argument("--level", "-l", help="Only schedule collectors of this collection level (e.g. L5)")
 
+    p_rollup = sub.add_parser("rollup-realtime", help="Roll up realtime signals to daily + purge")
+    p_rollup.add_argument("--days", type=int, default=30, help="Retention days for realtime data")
+
     p_serve = sub.add_parser("serve", help="Start scheduler + REST API")
     p_serve.add_argument("--host", default="0.0.0.0", help="API bind host")
     p_serve.add_argument("--port", type=int, default=8000, help="API bind port")
@@ -103,6 +106,8 @@ def main(argv: list[str] | None = None) -> None:
         _cmd_rebuild_manifest()
     elif args.command == "scheduler":
         _cmd_scheduler(args)
+    elif args.command == "rollup-realtime":
+        _cmd_rollup_realtime(args)
     elif args.command == "serve":
         _cmd_serve(args)
     else:
@@ -437,6 +442,30 @@ def _cmd_quality(args: argparse.Namespace) -> None:
         print(json_mod.dumps(data, indent=2))
     else:
         print(result.summary())
+
+
+def _cmd_rollup_realtime(args: argparse.Namespace) -> None:
+    from signal_noise.config import DB_PATH
+    from signal_noise.store.sqlite_store import SignalStore
+
+    store = SignalStore(DB_PATH)
+    metas = store.query_meta(interval=60)
+    if not metas:
+        print("No realtime signals found (interval=60).")
+        store.close()
+        return
+
+    total_rolled = 0
+    for m in metas:
+        n = store.rollup_daily(m["name"])
+        if n > 0:
+            print(f"  {m['name']}: {n} daily rows")
+            total_rolled += n
+
+    deleted = store.purge_realtime(days=args.days)
+    print(f"Rolled up {total_rolled} daily rows from {len(metas)} signals.")
+    print(f"Purged {deleted} realtime rows older than {args.days} days.")
+    store.close()
 
 
 def _cmd_serve(args: argparse.Namespace) -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -266,4 +267,31 @@ async def run_scheduler(
         len(targets), len(targets) - n_streaming, n_streaming,
     )
 
+    # Daily rollup task for realtime signals
+    if n_streaming > 0:
+        tasks.append(asyncio.create_task(
+            _daily_rollup(store), name="daily-rollup",
+        ))
+
     await asyncio.gather(*tasks, return_exceptions=True)
+
+
+async def _daily_rollup(store: SignalStore) -> None:
+    """Run daily at ~00:05 UTC: rollup realtime signals + purge old data."""
+    while True:
+        now = datetime.now(timezone.utc)
+        next_run = now.replace(hour=0, minute=5, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
+        wait_secs = (next_run - now).total_seconds()
+        log.info("Next realtime rollup in %.0f seconds", wait_secs)
+        await asyncio.sleep(wait_secs)
+        try:
+            metas = store.query_meta(interval=60)
+            rolled = 0
+            for m in metas:
+                rolled += store.rollup_daily(m["name"])
+            purged = store.purge_realtime(days=30)
+            log.info("Daily rollup: %d rows rolled, %d purged", rolled, purged)
+        except Exception:
+            log.exception("Daily rollup failed")
