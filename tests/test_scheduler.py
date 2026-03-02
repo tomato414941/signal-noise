@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -8,7 +9,16 @@ import pandas as pd
 import pytest
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
-from signal_noise.scheduler.loop import run_collector_loop, run_scheduler
+from signal_noise.scheduler.loop import (
+    _dispatcher,
+    _worker,
+    run_scheduler,
+)
+from signal_noise.scheduler.state import (
+    CircuitBreakerState,
+    ScheduleEntry,
+    ScheduleQueue,
+)
 from signal_noise.store.sqlite_store import SignalStore
 
 
@@ -26,79 +36,7 @@ class _DummyCollector(BaseCollector):
         return pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
 
 
-@pytest.fixture
-def store(tmp_path: Path) -> SignalStore:
-    s = SignalStore(tmp_path / "test.db")
-    yield s
-    s.close()
-
-
-class TestRunCollectorLoop:
-    @pytest.mark.asyncio
-    async def test_fetches_and_saves(self, store: SignalStore) -> None:
-        collector = _DummyCollector()
-        call_count = 0
-
-        original_sleep = asyncio.sleep
-
-        async def _fake_sleep(seconds: float) -> None:
-            nonlocal call_count
-            call_count += 1
-            if call_count >= 2:
-                raise asyncio.CancelledError
-            await original_sleep(0)
-
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(collector, store, interval=3600)
-
-        result = store.get_data("dummy")
-        assert len(result) == 1
-
-    @pytest.mark.asyncio
-    async def test_continues_on_error(self, store: SignalStore) -> None:
-        collector = _DummyCollector()
-        collector.fetch = MagicMock(side_effect=[Exception("boom"), pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})])
-        call_count = 0
-
-        async def _fake_sleep(seconds: float) -> None:
-            nonlocal call_count
-            call_count += 1
-            if call_count >= 2:
-                raise asyncio.CancelledError
-
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(collector, store, interval=3600)
-
-        result = store.get_data("dummy")
-        assert len(result) == 1
-
-
-class _FailThenSucceedCollector(BaseCollector):
-    """Collector that fails N times then succeeds."""
-    meta = CollectorMeta(
-        name="flaky",
-        display_name="Flaky",
-        update_frequency="daily",
-        api_docs_url="",
-        domain="markets",
-        category="crypto",
-    )
-
-    def __init__(self, fail_count: int = 5, **kwargs):
-        super().__init__(**kwargs)
-        self._fail_count = fail_count
-        self._call_count = 0
-
-    def fetch(self) -> pd.DataFrame:
-        self._call_count += 1
-        if self._call_count <= self._fail_count:
-            raise RuntimeError(f"fail #{self._call_count}")
-        return pd.DataFrame({"timestamp": ["2024-01-01"], "value": [42.0]})
-
-
-class _AlwaysFailCollector(BaseCollector):
+class _FailCollector(BaseCollector):
     meta = CollectorMeta(
         name="broken",
         display_name="Broken",
@@ -112,158 +50,287 @@ class _AlwaysFailCollector(BaseCollector):
         raise RuntimeError("always fail")
 
 
-class TestCircuitBreakerRecovery:
+@pytest.fixture
+def store(tmp_path: Path) -> SignalStore:
+    s = SignalStore(tmp_path / "test.db")
+    yield s
+    s.close()
+
+
+# ── ScheduleQueue tests ──
+
+
+class TestScheduleQueue:
+    def test_push_and_pop_due(self) -> None:
+        q = ScheduleQueue()
+        entry = ScheduleEntry(
+            next_run=time.monotonic() - 1,
+            name="test",
+            interval=3600,
+            meta_dict={"domain": "markets", "category": "crypto"},
+        )
+        q.push(entry)
+        assert len(q) == 1
+        popped = q.pop_due()
+        assert popped is not None
+        assert popped.name == "test"
+        assert len(q) == 0
+
+    def test_pop_due_returns_none_when_not_due(self) -> None:
+        q = ScheduleQueue()
+        entry = ScheduleEntry(
+            next_run=time.monotonic() + 9999,
+            name="future",
+            interval=3600,
+            meta_dict={},
+        )
+        q.push(entry)
+        assert q.pop_due() is None
+
+    def test_reschedule(self) -> None:
+        q = ScheduleQueue()
+        entry = ScheduleEntry(
+            next_run=time.monotonic() - 1,
+            name="test",
+            interval=10,
+            meta_dict={},
+        )
+        q.push(entry)
+        popped = q.pop_due()
+        assert popped is not None
+        q.reschedule(popped)
+        assert len(q) == 1
+        assert q.pop_due() is None  # not due yet (10s in the future)
+
+    def test_peek_delay(self) -> None:
+        q = ScheduleQueue()
+        entry = ScheduleEntry(
+            next_run=time.monotonic() + 5.0,
+            name="test",
+            interval=3600,
+            meta_dict={},
+        )
+        q.push(entry)
+        assert 4.0 < q.peek_delay() <= 5.0
+
+    def test_ordering(self) -> None:
+        q = ScheduleQueue()
+        now = time.monotonic()
+        q.push(ScheduleEntry(next_run=now + 10, name="later", interval=60, meta_dict={}))
+        q.push(ScheduleEntry(next_run=now - 2, name="first", interval=60, meta_dict={}))
+        q.push(ScheduleEntry(next_run=now - 1, name="second", interval=60, meta_dict={}))
+        assert q.pop_due().name == "first"
+        assert q.pop_due().name == "second"
+
+
+# ── CircuitBreakerState tests ──
+
+
+class TestCircuitBreakerState:
+    def test_record_failure_below_threshold(self) -> None:
+        cb = CircuitBreakerState()
+        tripped = cb.record_failure(max_failures=5, base_cooldown=300.0, max_cooldown=3600.0)
+        assert not tripped
+        assert cb.consecutive_failures == 1
+
+    def test_record_failure_trips_at_threshold(self) -> None:
+        cb = CircuitBreakerState()
+        for _ in range(4):
+            cb.record_failure(5, 300.0, 3600.0)
+        tripped = cb.record_failure(5, 300.0, 3600.0)
+        assert tripped
+        assert cb.is_in_cooldown
+
+    def test_record_success_resets(self) -> None:
+        cb = CircuitBreakerState()
+        for _ in range(5):
+            cb.record_failure(5, 300.0, 3600.0)
+        assert cb.is_in_cooldown
+        cb.record_success(300.0)
+        assert cb.consecutive_failures == 0
+        assert not cb.is_in_cooldown
+
+    def test_cooldown_doubles(self) -> None:
+        cb = CircuitBreakerState(cooldown=100.0)
+        cb.record_failure(1, 100.0, 400.0)  # trips immediately
+        assert cb.cooldown == 200.0
+        cb.consecutive_failures = 0
+        cb.in_cooldown_until = 0.0
+        cb.record_failure(1, 100.0, 400.0)
+        assert cb.cooldown == 400.0  # capped
+        cb.consecutive_failures = 0
+        cb.in_cooldown_until = 0.0
+        cb.record_failure(1, 100.0, 400.0)
+        assert cb.cooldown == 400.0  # stays at max
+
+    def test_get_breaker_creates_on_demand(self) -> None:
+        q = ScheduleQueue()
+        b1 = q.get_breaker("foo")
+        b2 = q.get_breaker("foo")
+        assert b1 is b2
+        assert b1.consecutive_failures == 0
+
+
+# ── Worker tests ──
+
+
+class TestWorker:
     @pytest.mark.asyncio
-    async def test_half_open_recovery_on_success(self, store: SignalStore) -> None:
-        """After max_failures, cooldown then half-open retry succeeds."""
-        collector = _FailThenSucceedCollector(fail_count=5)
-        sleep_calls: list[float] = []
+    async def test_worker_fetches_and_saves(self, store: SignalStore) -> None:
+        schedule = ScheduleQueue()
+        registry = {"dummy": _DummyCollector}
+        semaphore = asyncio.Semaphore(5)
+        work_queue: asyncio.Queue[ScheduleEntry] = asyncio.Queue()
 
-        async def _fake_sleep(seconds: float) -> None:
-            sleep_calls.append(seconds)
-            if len(sleep_calls) >= 7:
-                raise asyncio.CancelledError
+        entry = ScheduleEntry(
+            next_run=0, name="dummy", interval=3600,
+            meta_dict={"domain": "markets", "category": "crypto",
+                        "interval": 3600, "signal_type": "scalar"},
+        )
+        await work_queue.put(entry)
 
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(
-                    collector, store, interval=60,
-                    max_failures=5, base_cooldown=10.0,
-                )
-
-        result = store.get_data("flaky")
-        assert len(result) == 1
-        assert 10.0 in sleep_calls
-
-    @pytest.mark.asyncio
-    async def test_half_open_retry_fails_doubles_cooldown(self, store: SignalStore) -> None:
-        """After half-open retry fails, cooldown doubles."""
-        collector = _AlwaysFailCollector()
-        sleep_calls: list[float] = []
-
-        async def _fake_sleep(seconds: float) -> None:
-            sleep_calls.append(seconds)
-            if any(s == 20.0 for s in sleep_calls):
-                raise asyncio.CancelledError
-
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(
-                    collector, store, interval=60,
-                    max_failures=5, base_cooldown=10.0,
-                )
-
-        assert 10.0 in sleep_calls
-        assert 20.0 in sleep_calls
-
-    @pytest.mark.asyncio
-    async def test_cooldown_capped_at_max(self, store: SignalStore) -> None:
-        """Cooldown should not exceed max_cooldown."""
-        collector = _AlwaysFailCollector()
-        sleep_calls: list[float] = []
-        cooldown_count = 0
-
-        async def _fake_sleep(seconds: float) -> None:
-            nonlocal cooldown_count
-            sleep_calls.append(seconds)
-            if seconds > 60:
-                cooldown_count += 1
-            if cooldown_count >= 3:
-                raise asyncio.CancelledError
-
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(
-                    collector, store, interval=60,
-                    max_failures=5, base_cooldown=100.0, max_cooldown=200.0,
-                )
-
-        cooldown_sleeps = [s for s in sleep_calls if s > 60]
-        assert cooldown_sleeps[0] == 100.0
-        assert cooldown_sleeps[1] == 200.0
-        assert cooldown_sleeps[2] == 200.0
-
-
-class _SlowCollector(BaseCollector):
-    """Collector that blocks longer than the fetch timeout."""
-    meta = CollectorMeta(
-        name="slow",
-        display_name="Slow",
-        update_frequency="daily",
-        api_docs_url="",
-        domain="markets",
-        category="crypto",
-    )
-
-    def fetch(self) -> pd.DataFrame:
-        import time
-        time.sleep(10)
-        return pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
-
-
-class TestFetchTimeout:
-    @pytest.mark.asyncio
-    async def test_fetch_timeout_triggers_failure(self, store: SignalStore) -> None:
-        """A slow collector should be timed out and recorded as failed."""
-        collector = _SlowCollector()
-        call_count = 0
-
-        async def _fake_sleep(seconds: float) -> None:
-            nonlocal call_count
-            call_count += 1
-            if call_count >= 2:
-                raise asyncio.CancelledError
-
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(
-                    collector, store, interval=3600,
-                    fetch_timeout=0.1,
-                )
-
-        result = store.get_data("slow")
-        assert result.empty
-
-    @pytest.mark.asyncio
-    async def test_normal_collector_within_timeout(self, store: SignalStore) -> None:
-        """A fast collector should not be affected by the timeout."""
-        collector = _DummyCollector()
-        call_count = 0
-
-        async def _fake_sleep(seconds: float) -> None:
-            nonlocal call_count
-            call_count += 1
-            if call_count >= 2:
-                raise asyncio.CancelledError
-
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with pytest.raises(asyncio.CancelledError):
-                await run_collector_loop(
-                    collector, store, interval=3600,
-                    fetch_timeout=10.0,
-                )
+        task = asyncio.create_task(
+            _worker(0, work_queue, schedule, registry, store, semaphore,
+                    fetch_timeout=10.0),
+        )
+        await asyncio.sleep(0.5)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
         result = store.get_data("dummy")
         assert len(result) == 1
+        assert len(schedule) == 1  # rescheduled
+
+    @pytest.mark.asyncio
+    async def test_worker_handles_failure(self, store: SignalStore) -> None:
+        schedule = ScheduleQueue()
+        registry = {"broken": _FailCollector}
+        semaphore = asyncio.Semaphore(5)
+        work_queue: asyncio.Queue[ScheduleEntry] = asyncio.Queue()
+
+        entry = ScheduleEntry(
+            next_run=0, name="broken", interval=3600,
+            meta_dict={"domain": "markets", "category": "crypto",
+                        "interval": 3600, "signal_type": "scalar"},
+        )
+        await work_queue.put(entry)
+
+        task = asyncio.create_task(
+            _worker(0, work_queue, schedule, registry, store, semaphore,
+                    fetch_timeout=10.0, max_failures=5),
+        )
+        await asyncio.sleep(0.5)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+        result = store.get_data("broken")
+        assert result.empty
+        breaker = schedule.get_breaker("broken")
+        assert breaker.consecutive_failures == 1
+        assert len(schedule) == 1  # rescheduled
+
+
+# ── Dispatcher tests ──
+
+
+class TestDispatcher:
+    @pytest.mark.asyncio
+    async def test_dispatches_due_entries(self) -> None:
+        schedule = ScheduleQueue()
+        work_queue: asyncio.Queue[ScheduleEntry] = asyncio.Queue()
+
+        schedule.push(ScheduleEntry(
+            next_run=time.monotonic() - 1, name="due_now",
+            interval=3600, meta_dict={},
+        ))
+
+        task = asyncio.create_task(_dispatcher(schedule, work_queue))
+        entry = await asyncio.wait_for(work_queue.get(), timeout=2.0)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+        assert entry.name == "due_now"
+
+    @pytest.mark.asyncio
+    async def test_skips_cooldown_entries(self) -> None:
+        schedule = ScheduleQueue()
+        work_queue: asyncio.Queue[ScheduleEntry] = asyncio.Queue()
+
+        entry = ScheduleEntry(
+            next_run=time.monotonic() - 1, name="cooldown_test",
+            interval=3600, meta_dict={},
+        )
+        schedule.push(entry)
+
+        breaker = schedule.get_breaker("cooldown_test")
+        breaker.in_cooldown_until = time.monotonic() + 9999
+
+        task = asyncio.create_task(_dispatcher(schedule, work_queue))
+        await asyncio.sleep(0.5)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+        assert work_queue.empty()
+        assert len(schedule) == 1  # re-queued with cooldown delay
+
+
+# ── Integration: run_scheduler ──
+
+
+class _QuickCollector(BaseCollector):
+    meta = CollectorMeta(
+        name="quick",
+        display_name="Quick",
+        update_frequency="hourly",
+        api_docs_url="",
+        domain="markets",
+        category="crypto",
+        collect_interval=1,  # 1 second → jitter ~0.1s
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        return pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
 
 
 class TestRunScheduler:
     @pytest.mark.asyncio
-    async def test_creates_tasks_for_all(self, store: SignalStore) -> None:
-        collectors = {"dummy": _DummyCollector}
-        call_count = 0
+    async def test_schedules_and_collects(self, store: SignalStore) -> None:
+        collectors = {"quick": _QuickCollector}
 
-        async def _fake_sleep(seconds: float) -> None:
-            nonlocal call_count
-            call_count += 1
-            # Allow jitter sleep (1st call), cancel on interval sleep (2nd)
-            if call_count >= 2:
-                raise asyncio.CancelledError
+        async def _stop_after_collection() -> None:
+            for _ in range(50):
+                await asyncio.sleep(0.1)
+                result = store.get_data("quick")
+                if len(result) >= 1:
+                    return
+            pytest.fail("Collector did not run within timeout")
 
-        with patch("signal_noise.scheduler.loop.asyncio.sleep", side_effect=_fake_sleep):
-            with patch("signal_noise.collector.COLLECTORS", collectors):
-                # return_exceptions=True means gather returns exceptions instead of raising
-                await run_scheduler(store, collectors=collectors)
+        stop_task = asyncio.create_task(_stop_after_collection())
 
-        result = store.get_data("dummy")
+        async def _run_with_timeout() -> None:
+            task = asyncio.create_task(
+                run_scheduler(store, collectors=collectors, n_workers=2, fetch_timeout=5.0),
+            )
+            await stop_task
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+
+        await _run_with_timeout()
+
+        result = store.get_data("quick")
         assert len(result) == 1

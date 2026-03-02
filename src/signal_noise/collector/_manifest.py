@@ -27,6 +27,7 @@ def _compute_package_hash() -> str:
 def build_manifest() -> dict:
     """Run full auto-discovery and save manifest to disk."""
     from signal_noise.collector._loader import _discover
+    from signal_noise.collector.streaming import StreamingCollector
 
     collectors = _discover()
     entries: dict[str, dict] = {}
@@ -36,6 +37,7 @@ def build_manifest() -> dict:
         entries[name] = {
             "module": cls.__module__,
             "class": cls.__qualname__,
+            "is_streaming": issubclass(cls, StreamingCollector),
             "meta": {
                 "domain": m.domain,
                 "category": m.category,
