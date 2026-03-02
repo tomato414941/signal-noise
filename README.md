@@ -2,17 +2,20 @@
 
 > "even noise is worth collecting -- the signal hides within"
 
-Collect worldwide time series and deliver via REST API.
+Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,256+ signals** across **10 domains** and **29 categories** — from stock prices and GDP to earthquake magnitudes and solar wind speed.
+**1,307+ signals** across **10 domains** and **30 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
 - **Broad coverage** — financial, macro, sentiment, earth, geophysical, infrastructure, real estate, developer, health, computed
 - **Collection Spectrum** — L1 (free APIs) through L6 (physical sensors). See [DESIGN.md](DESIGN.md) for the full spectrum
 - **REST API** — FastAPI with signal discovery, time series data, anomaly detection, and batch queries
+- **WebSocket** — Real-time signal event streaming (`/ws/signals`)
+- **Streaming collectors** — Binance WebSocket for orderbook depth, trade flow, VPIN, liquidations, funding rate
+- **EventBus** — In-process pub/sub for signal update propagation
 - **Smart scheduling** — asyncio-based per-collector intervals with jitter and circuit breakers
-- **SQLite storage** — WAL mode, append-efficient, range-queryable, no external database
+- **Dual storage** — `signals` (daily) + `signals_realtime` (1-min, 30-day retention with daily rollup)
 - **Quality analysis** — health scoring, anomaly detection (z-score), spectral redundancy analysis (SVD)
 
 ## Quick Start
@@ -41,6 +44,7 @@ python -m signal_noise analyze spectrum       # SVD spectral analysis
 python -m signal_noise analyze quality        # Signal health scoring
 python -m signal_noise coverage               # Domain/category coverage matrix
 python -m signal_noise rebuild-manifest       # Rebuild collector discovery cache
+python -m signal_noise rollup-realtime        # Rollup 1-min data to daily + purge old data
 ```
 
 ## REST API
@@ -64,18 +68,27 @@ curl http://localhost:8000/signals/fear_greed/latest
 # Anomaly detection
 curl http://localhost:8000/signals/fear_greed/anomalies
 
+# Realtime data (1-min microstructure signals)
+curl http://localhost:8000/signals/vpin_btc/realtime?since=2026-03-01
+
 # Batch query
 curl -X POST http://localhost:8000/signals/batch \
   -H "Content-Type: application/json" \
   -d '{"names": ["fear_greed", "btc_ohlcv"], "since": "2025-01-01"}'
+
+# WebSocket (real-time signal events)
+wscat -c "ws://localhost:8000/ws/signals?names=vpin_btc,book_imbalance_btc"
 ```
 
 ## Architecture
 
 ```
-Scheduler ──→ Collector ──→ SQLite Store ──→ REST API ──→ Consumer
-(per-collector   (API        (WAL mode)      (FastAPI)
- frequency)       fetch)
+Polling Collectors ──→ SQLite Store ──→ REST API ──→ Consumer
+(per-collector          (WAL mode)      (FastAPI)
+ frequency)                  ↑
+                             │
+Streaming Collectors ──→ signals_realtime ──→ EventBus ──→ WebSocket
+(Binance WS)           (1-min, 30d retain)   (pub/sub)   (/ws/signals)
 ```
 
 signal-noise is a **data collection service**. It collects and delivers raw time series — consumers handle transforms, evaluation, and prediction.
