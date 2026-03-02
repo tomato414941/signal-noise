@@ -155,23 +155,60 @@ async def run_streaming_collector(
     *,
     event_bus: EventBus | None = None,
 ) -> None:
-    """Run a streaming collector as a long-lived task."""
-    log.info("Starting stream: %s", collector.meta.name)
+    """Run a streaming collector as a long-lived task.
+
+    Supports multi-signal DataFrames (with a ``name`` column) and
+    realtime store routing (when ``collector.use_realtime_store`` is True).
+    """
+    use_rt = getattr(collector, "use_realtime_store", False)
+    log.info("Starting stream: %s (realtime=%s)", collector.meta.name, use_rt)
     async for df in collector.connect_with_retry():
         if df.empty:
             continue
         try:
-            anomalies = store.check_anomalies(collector.meta.name, df)
-            rows = store.save_collection_result(
-                collector.meta.name, df,
-                collector.meta.domain, collector.meta.category,
-                collector.meta.interval, collector.meta.signal_type,
-            )
-            log.info("Stream %s: saved %d rows", collector.meta.name, rows)
-            if event_bus is not None:
-                await _publish_events(event_bus, collector.meta.name, df, anomalies)
+            if "name" in df.columns:
+                # Multi-signal: group by name and save each separately
+                for sig_name, group in df.groupby("name"):
+                    _save_stream_data(
+                        store, str(sig_name), group, collector, use_rt,
+                    )
+                    if event_bus is not None:
+                        await _publish_events(event_bus, str(sig_name), group, [])
+            else:
+                anomalies = store.check_anomalies(collector.meta.name, df)
+                _save_stream_data(
+                    store, collector.meta.name, df, collector, use_rt,
+                )
+                if event_bus is not None:
+                    await _publish_events(
+                        event_bus, collector.meta.name, df, anomalies,
+                    )
         except Exception:
             log.exception("Failed to save stream data for %s", collector.meta.name)
+
+
+def _save_stream_data(
+    store: SignalStore,
+    name: str,
+    df: pd.DataFrame,
+    collector: StreamingCollector,
+    use_realtime: bool,
+) -> int:
+    """Route stream data to the appropriate store table."""
+    if use_realtime:
+        rows = store.save_realtime_collection_result(
+            name, df,
+            collector.meta.domain, collector.meta.category,
+            collector.meta.interval, collector.meta.signal_type,
+        )
+    else:
+        rows = store.save_collection_result(
+            name, df,
+            collector.meta.domain, collector.meta.category,
+            collector.meta.interval, collector.meta.signal_type,
+        )
+    log.info("Stream %s: saved %d rows", name, rows)
+    return rows
 
 
 async def run_scheduler(

@@ -1,7 +1,7 @@
 """Binance Futures WebSocket streaming collectors.
 
-Real-time liquidation and funding rate data via WebSocket.
-Data is aggregated into 1-minute buckets before yielding.
+Real-time liquidation, funding rate, orderbook, and trade flow data
+via WebSocket. Data is aggregated into 1-minute buckets before yielding.
 """
 
 from __future__ import annotations
@@ -109,3 +109,79 @@ class BinanceFundingRateStreamCollector(StreamingCollector):
                     "timestamp": minute.isoformat(),
                     "value": float(data["r"]),
                 }])
+
+
+class BinanceOrderbookCollector(StreamingCollector):
+    """BTC orderbook depth from Binance Futures WebSocket.
+
+    Aggregates 100ms snapshots into 1-minute buckets, yielding three
+    derived signals: book_imbalance, book_depth_ratio, spread_bps.
+    """
+
+    meta = CollectorMeta(
+        name="orderbook_btc",
+        display_name="BTC Orderbook Depth",
+        update_frequency="hourly",
+        api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#partial-book-depth-streams",
+        domain="financial",
+        category="microstructure",
+        signal_type="scalar",
+        collect_interval=60,
+    )
+    use_realtime_store = True
+
+    async def stream(self) -> AsyncIterator[pd.DataFrame]:
+        url = f"{_WS_BASE}/btcusdt@depth20@100ms"
+        async with websockets.connect(url, ping_interval=20) as ws:
+            bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+            last_snapshot: dict | None = None
+
+            async for msg in ws:
+                data = json.loads(msg)
+                last_snapshot = data
+
+                now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                if now > bucket_ts and last_snapshot is not None:
+                    rows = _compute_orderbook_signals(bucket_ts, last_snapshot)
+                    if rows:
+                        yield pd.DataFrame(rows)
+                    last_snapshot = None
+                    bucket_ts = now
+
+
+def _compute_orderbook_signals(
+    ts: datetime, snapshot: dict,
+) -> list[dict]:
+    """Compute derived signals from an orderbook snapshot."""
+    bids = snapshot.get("b") or snapshot.get("bids", [])
+    asks = snapshot.get("a") or snapshot.get("asks", [])
+    if not bids or not asks:
+        return []
+
+    bid_qtys = [float(b[1]) for b in bids]
+    ask_qtys = [float(a[1]) for a in asks]
+    total_bid = sum(bid_qtys)
+    total_ask = sum(ask_qtys)
+    total = total_bid + total_ask
+
+    ts_str = ts.isoformat()
+
+    # book_imbalance: (bid_vol - ask_vol) / total across all levels
+    imbalance = (total_bid - total_ask) / total if total > 0 else 0.0
+
+    # book_depth_ratio: top 5 bid depth / top 5 ask depth
+    top5_bid = sum(bid_qtys[:5])
+    top5_ask = sum(ask_qtys[:5])
+    depth_ratio = top5_bid / top5_ask if top5_ask > 0 else 1.0
+
+    # spread_bps: (best_ask - best_bid) / mid * 10000
+    best_bid = float(bids[0][0])
+    best_ask = float(asks[0][0])
+    mid = (best_bid + best_ask) / 2
+    spread_bps = (best_ask - best_bid) / mid * 10_000 if mid > 0 else 0.0
+
+    return [
+        {"timestamp": ts_str, "value": imbalance, "name": "book_imbalance_btc"},
+        {"timestamp": ts_str, "value": depth_ratio, "name": "book_depth_ratio_btc"},
+        {"timestamp": ts_str, "value": spread_bps, "name": "spread_bps_btc"},
+    ]

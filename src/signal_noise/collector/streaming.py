@@ -22,6 +22,7 @@ class StreamingCollector(BaseCollector):
 
     reconnect_delay: float = 5.0
     max_reconnect_delay: float = 300.0
+    use_realtime_store: bool = False
 
     def fetch(self) -> pd.DataFrame:
         """Not used for streaming collectors."""
