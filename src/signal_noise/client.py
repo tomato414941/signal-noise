@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 import time
+from typing import AsyncIterator
 
 import pandas as pd
 import requests
@@ -134,6 +137,45 @@ class SignalClient:
         if signal_type:
             params["signal_type"] = signal_type
         return self._get("/signals", params=params)
+
+    async def subscribe(
+        self, pattern: str, *, reconnect: bool = True,
+    ) -> AsyncIterator[dict]:
+        """Subscribe to real-time signal updates via WebSocket.
+
+        Args:
+            pattern: Comma-separated signal name patterns (fnmatch glob).
+            reconnect: Auto-reconnect on disconnect (default True).
+
+        Yields:
+            dict with keys: name, timestamp, value, event_type, detail.
+        """
+        import websockets
+
+        ws_url = self._base_url.replace("http://", "ws://").replace("https://", "wss://")
+        url = f"{ws_url}/ws/signals?names={pattern}"
+
+        delay = 1.0
+        max_delay = 60.0
+
+        while True:
+            try:
+                async with websockets.connect(url, ping_interval=20) as ws:
+                    delay = 1.0
+                    log.info("WebSocket connected: %s", url)
+                    async for msg in ws:
+                        data = json.loads(msg)
+                        yield data
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                if not reconnect:
+                    raise
+                log.warning(
+                    "WebSocket disconnected: %s. Reconnecting in %.0fs", exc, delay,
+                )
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, max_delay)
 
     def _get(self, path: str, params: dict | None = None) -> dict | list:
         url = f"{self._base_url}{path}"
