@@ -106,6 +106,10 @@ FRED_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── ISM / PMI / business surveys ──
     ("MANEMP", "fred_mfg_employment", "Manufacturing Employment", "monthly", "economy", "labor"),
     ("INDPRO", "fred_industrial_production", "Industrial Production Index", "monthly", "economy", "economic"),
+    ("IPMAN", "fred_mfg_production", "Manufacturing Production Index", "monthly", "economy", "manufacturing"),
+    ("DGORDER", "fred_durable_goods_orders", "Durable Goods New Orders", "monthly", "economy", "manufacturing"),
+    ("AMTMNO", "fred_mfg_new_orders", "Manufacturers New Orders: Total", "monthly", "economy", "manufacturing"),
+    ("AWHMAN", "fred_mfg_weekly_hours", "Manufacturing Avg Weekly Hours", "monthly", "economy", "manufacturing"),
     ("TCU", "fred_capacity_utilization", "Capacity Utilization", "monthly", "economy", "economic"),
     ("RSAFS", "fred_retail_sales", "Advance Retail Sales", "monthly", "economy", "economic"),
     ("PCEC96", "fred_real_pce", "Real PCE", "monthly", "economy", "economic"),

@@ -160,6 +160,16 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("RL.EST", "JP", "wb_ruleoflaw_jp", "Rule of Law: Japan", "society", "governance"),
     ("RL.EST", "RU", "wb_ruleoflaw_ru", "Rule of Law: Russia", "society", "governance"),
     ("RL.EST", "BR", "wb_ruleoflaw_br", "Rule of Law: Brazil", "society", "governance"),
+    # ── Prevalence of undernourishment (% of population) ──
+    ("SN.ITK.DEFC.ZS", "WLD", "wb_undernourish_world", "Undernourishment: World", "society", "food_security"),
+    ("SN.ITK.DEFC.ZS", "IN", "wb_undernourish_in", "Undernourishment: India", "society", "food_security"),
+    ("SN.ITK.DEFC.ZS", "NG", "wb_undernourish_ng", "Undernourishment: Nigeria", "society", "food_security"),
+    ("SN.ITK.DEFC.ZS", "BD", "wb_undernourish_bd", "Undernourishment: Bangladesh", "society", "food_security"),
+    ("SN.ITK.DEFC.ZS", "ET", "wb_undernourish_et", "Undernourishment: Ethiopia", "society", "food_security"),
+    # ── Prevalence of severe food insecurity (% of population) ──
+    ("SN.ITK.SVFI.ZS", "WLD", "wb_food_insec_world", "Severe Food Insecurity: World", "society", "food_security"),
+    ("SN.ITK.SVFI.ZS", "SSF", "wb_food_insec_ssa", "Severe Food Insecurity: Sub-Saharan Africa", "society", "food_security"),
+    ("SN.ITK.SVFI.ZS", "SAS", "wb_food_insec_sa", "Severe Food Insecurity: South Asia", "society", "food_security"),
 ]
 
 

@@ -26,13 +26,13 @@ Collect worldwide time series and deliver via REST API.
 | sentiment | Opinions, attention, expectations, prediction markets | sentiment, attention, prediction_market, temporal |
 | society | Health, mortality, conflict, demographics | epidemiology, public_health, excess_deaths, cause_of_death, armed_conflict, displacement, city_stats |
 
-### Categories (49 types)
+### Categories (54 types)
 
 ### Scale
 
 - **Domains**: 6
-- **Categories**: 49
-- **Collectors**: ~1,597 time series
+- **Categories**: 54
+- **Collectors**: ~1,629 time series
 
 ## Architecture
 
@@ -110,6 +110,7 @@ L2 collectors require API keys stored in `~/.secrets/`:
 | ENTSO-E | `ENTSOE_API_KEY` | `~/.secrets/entsoe` | 4 |
 | FBI Crime | `FBI_API_KEY` | `~/.secrets/fbi` | 6 |
 | Congress.gov | `CONGRESS_API_KEY` | `~/.secrets/congress` | 5 |
+| Twitch | `TWITCH_CLIENT_ID/SECRET` | `~/.secrets/twitch` | 7 |
 
 Secret file format: `export KEY_NAME=value`
 
@@ -132,7 +133,7 @@ Secret file format: `export KEY_NAME=value`
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v                      # 736 tests
+pytest tests/ -v                      # 758 tests
 ruff check src/ tests/
 python -m signal_noise count          # Show collector count
 ```

@@ -37,11 +37,11 @@ CATEGORIES = {
     # economy
     "economic", "labor", "inflation", "trade", "fiscal",
     "real_estate", "food_price", "agriculture", "energy",
-    "inequality", "tourism",
+    "inequality", "tourism", "manufacturing", "retail",
     # environment
     "weather", "climate", "marine", "air_quality", "hydrology", "satellite",
     "space_weather", "seismic", "celestial",
-    "wildlife", "biodiversity",
+    "wildlife", "biodiversity", "noise", "cryosphere",
     # technology
     "developer", "academic", "patents",
     "logistics", "aviation", "internet", "space",
@@ -53,6 +53,7 @@ CATEGORIES = {
     "epidemiology", "public_health", "excess_deaths", "cause_of_death",
     "armed_conflict", "displacement", "city_stats",
     "crime", "governance", "demographics", "education", "legislation",
+    "food_security",
 }
 
 # update_frequency: allowed values
