@@ -53,6 +53,8 @@ CATEGORIES = {
     "developer",
     # health
     "epidemiology", "public_health",
+    # market microstructure
+    "microstructure",
     # misc
     "temporal",
 }
