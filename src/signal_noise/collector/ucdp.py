@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import requests
 import pandas as pd
 
@@ -7,6 +8,28 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 _UCDP_BASE = "https://ucdpapi.pcr.uu.se/api"
+
+
+def _load_ucdp_token() -> str:
+    token = os.environ.get("UCDP_API_TOKEN", "")
+    if not token:
+        secrets = os.path.expanduser("~/.secrets/ucdp")
+        if os.path.exists(secrets):
+            for line in open(secrets):
+                line = line.strip()
+                if line.startswith("export UCDP_API_TOKEN="):
+                    token = line.split("=", 1)[1].strip("'\"")
+    return token
+
+
+def _ucdp_headers() -> dict[str, str]:
+    token = _load_ucdp_token()
+    if not token:
+        raise RuntimeError(
+            "UCDP API token not found. Set UCDP_API_TOKEN env var "
+            "or create ~/.secrets/ucdp. Register at https://ucdp.uu.se/"
+        )
+    return {"x-ucdp-access-token": token}
 
 
 class UCDPBattleDeathsCollector(BaseCollector):
@@ -17,6 +40,7 @@ class UCDPBattleDeathsCollector(BaseCollector):
         display_name="UCDP Global Battle-Related Deaths",
         update_frequency="yearly",
         api_docs_url="https://ucdp.uu.se/apidocs/",
+        requires_key=True,
         domain="conflict",
         category="armed_conflict",
     )
@@ -24,7 +48,9 @@ class UCDPBattleDeathsCollector(BaseCollector):
     URL = f"{_UCDP_BASE}/battledeaths/24.1?pagesize=1000"
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.URL, timeout=self.config.request_timeout)
+        resp = requests.get(
+            self.URL, headers=_ucdp_headers(), timeout=self.config.request_timeout,
+        )
         resp.raise_for_status()
         data = resp.json().get("Result", [])
         if not data:
@@ -52,6 +78,7 @@ class UCDPConflictCountCollector(BaseCollector):
         display_name="UCDP Active Armed Conflicts Count",
         update_frequency="yearly",
         api_docs_url="https://ucdp.uu.se/apidocs/",
+        requires_key=True,
         domain="conflict",
         category="armed_conflict",
     )
@@ -59,7 +86,9 @@ class UCDPConflictCountCollector(BaseCollector):
     URL = f"{_UCDP_BASE}/armedconflict/24.1?pagesize=1000"
 
     def fetch(self) -> pd.DataFrame:
-        resp = requests.get(self.URL, timeout=self.config.request_timeout)
+        resp = requests.get(
+            self.URL, headers=_ucdp_headers(), timeout=self.config.request_timeout,
+        )
         resp.raise_for_status()
         data = resp.json().get("Result", [])
         if not data:

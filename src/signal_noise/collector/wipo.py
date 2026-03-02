@@ -7,41 +7,38 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 class WIPOPatentFilingsCollector(BaseCollector):
-    """WIPO — annual PCT international patent filings (global total)."""
+    """WIPO — global non-resident patent applications (annual) via World Bank."""
 
     meta = CollectorMeta(
         name="wipo_patent_filings",
-        display_name="WIPO Global PCT Patent Filings",
+        display_name="WIPO Global Patent Filings (Non-Resident)",
         update_frequency="yearly",
-        api_docs_url="https://www.wipo.int/ipstats/",
+        api_docs_url="https://data.worldbank.org/indicator/IP.PAT.NRES",
         domain="creativity",
         category="patents",
     )
 
     URL = (
-        "https://www3.wipo.int/ipstats/keysearch/indicator"
-        "?indicator=2&type=1&format=json"
+        "https://api.worldbank.org/v2/country/WLD/indicator/IP.PAT.NRES"
+        "?format=json&per_page=100&date=2000:2030"
     )
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)
         resp.raise_for_status()
-        data = resp.json()
-        if isinstance(data, dict):
-            data = data.get("dataSets", data.get("data", []))
-        if not data:
-            raise RuntimeError("No WIPO patent filing data available")
+        payload = resp.json()
+        if len(payload) < 2 or not payload[1]:
+            raise RuntimeError("No World Bank/WIPO patent data")
         rows = []
-        if isinstance(data, list):
-            for entry in data:
-                try:
-                    year = int(entry.get("year", entry.get("Year", 0)))
-                    val = float(entry.get("value", entry.get("Value", 0)))
-                    if year > 0:
-                        dt = pd.Timestamp(year=year, month=1, day=1, tz="UTC")
-                        rows.append({"date": dt, "value": val})
-                except (ValueError, TypeError):
-                    continue
+        for entry in payload[1]:
+            if entry.get("value") is None:
+                continue
+            try:
+                year = int(entry["date"])
+                dt = pd.Timestamp(year=year, month=1, day=1, tz="UTC")
+                rows.append({"date": dt, "value": float(entry["value"])})
+            except (KeyError, ValueError, TypeError):
+                continue
         if not rows:
-            raise RuntimeError("No parseable WIPO data")
+            raise RuntimeError("No WIPO patent filing data")
         return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)

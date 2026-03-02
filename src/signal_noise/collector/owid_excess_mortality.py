@@ -28,12 +28,14 @@ class OWIDExcessMortalityCollector(BaseCollector):
         resp.raise_for_status()
         from io import StringIO
         raw = pd.read_csv(StringIO(resp.text))
-        world = raw[raw["location"] == "World"].copy()
-        if world.empty:
-            world = raw[raw["location"] == "High-income countries"].copy()
-        if world.empty:
+        subset = pd.DataFrame()
+        for loc in ("World", "High-income countries", "United States"):
+            subset = raw[raw["location"] == loc].copy()
+            if not subset.empty:
+                break
+        if subset.empty:
             raise RuntimeError("No aggregate excess mortality data found")
-        df = world[["date", "p_scores_all_ages"]].dropna().copy()
+        df = subset[["date", "p_scores_all_ages"]].dropna().copy()
         df.columns = ["date", "value"]
         df["date"] = pd.to_datetime(df["date"], utc=True)
         return df.sort_values("date").reset_index(drop=True)
