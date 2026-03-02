@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import logging
 
 log = logging.getLogger(__name__)
@@ -65,6 +66,10 @@ def main(argv: list[str] | None = None) -> None:
     p_scheduler = sub.add_parser("scheduler", help="Run collection scheduler (long-lived)")
     p_scheduler.add_argument("--frequency", "-f", help="Only schedule collectors of this frequency")
     p_scheduler.add_argument("--level", "-l", help="Only schedule collectors of this collection level (e.g. L5)")
+    p_scheduler.add_argument(
+        "--exclude", type=str, default="",
+        help="Comma-separated collector names to disable",
+    )
 
     p_rollup = sub.add_parser("rollup-realtime", help="Roll up realtime signals to daily + purge")
     p_rollup.add_argument("--days", type=int, default=30, help="Retention days for realtime data")
@@ -77,6 +82,10 @@ def main(argv: list[str] | None = None) -> None:
     )
     p_serve.add_argument(
         "--migrate", action="store_true", help="Import existing Parquet files before starting"
+    )
+    p_serve.add_argument(
+        "--exclude", type=str, default="",
+        help="Comma-separated collector names to disable from scheduler",
     )
 
     args = parser.parse_args(argv)
@@ -230,6 +239,34 @@ def _classify_level(name: str, meta) -> str:
     return "L1"
 
 
+def _parse_excludes(raw: str | None) -> set[str]:
+    if not raw:
+        return set()
+    return {v.strip() for v in raw.split(",") if v.strip()}
+
+
+def _select_collectors(
+    *,
+    frequency: str | None = None,
+    level: str | None = None,
+    exclude: set[str] | None = None,
+) -> dict[str, type]:
+    from signal_noise.collector import COLLECTORS
+
+    excluded = exclude or set()
+    selected: dict[str, type] = {}
+    for name, cls in COLLECTORS.items():
+        if name in excluded:
+            continue
+        m = cls.meta
+        if frequency and m.update_frequency != frequency:
+            continue
+        if level and _classify_level(name, m) != level:
+            continue
+        selected[name] = cls
+    return selected
+
+
 def _cmd_coverage(args: argparse.Namespace) -> None:
     import json as json_mod
     from collections import Counter
@@ -326,26 +363,25 @@ def _cmd_coverage(args: argparse.Namespace) -> None:
 def _cmd_scheduler(args: argparse.Namespace) -> None:
     import asyncio
 
-    from signal_noise.collector import COLLECTORS
     from signal_noise.config import DB_PATH
     from signal_noise.scheduler.loop import run_scheduler
     from signal_noise.store.sqlite_store import SignalStore
 
     store = SignalStore(DB_PATH)
-    targets = None
-
-    if args.frequency or args.level:
-        targets = {}
-        for name, cls in COLLECTORS.items():
-            m = cls.meta
-            if args.frequency and m.update_frequency != args.frequency:
-                continue
-            if args.level and _classify_level(name, m) != args.level:
-                continue
-            targets[name] = cls
-        log.info("Scheduler: %d collectors selected", len(targets))
-    else:
-        log.info("Scheduler: all %d collectors", len(COLLECTORS))
+    env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
+    cli_excludes = _parse_excludes(args.exclude)
+    excludes = env_excludes | cli_excludes
+    targets = _select_collectors(
+        frequency=args.frequency,
+        level=args.level,
+        exclude=excludes,
+    )
+    log.info(
+        "Scheduler: %d collectors selected (%d excluded)",
+        len(targets), len(excludes),
+    )
+    if excludes:
+        log.info("Excluded collectors: %s", ", ".join(sorted(excludes)))
 
     asyncio.run(run_scheduler(store, collectors=targets))
 
@@ -495,10 +531,20 @@ def _cmd_serve(args: argparse.Namespace) -> None:
     async def _run() -> None:
         tasks = []
         if not args.no_scheduler:
+            env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
+            cli_excludes = _parse_excludes(args.exclude)
+            excludes = env_excludes | cli_excludes
+            targets = _select_collectors(exclude=excludes)
+            log.info(
+                "Serve scheduler: %d collectors selected (%d excluded)",
+                len(targets), len(excludes),
+            )
+            if excludes:
+                log.info("Excluded collectors: %s", ", ".join(sorted(excludes)))
             from signal_noise.scheduler.loop import run_scheduler
 
             tasks.append(asyncio.create_task(
-                run_scheduler(store, event_bus=event_bus),
+                run_scheduler(store, collectors=targets, event_bus=event_bus),
             ))
 
         config = uvicorn.Config(
