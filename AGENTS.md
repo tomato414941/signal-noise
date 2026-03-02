@@ -111,6 +111,8 @@ L2 collectors require API keys stored in `~/.secrets/`:
 | FBI Crime | `FBI_API_KEY` | `~/.secrets/fbi` | 6 |
 | Congress.gov | `CONGRESS_API_KEY` | `~/.secrets/congress` | 5 |
 | Twitch | `TWITCH_CLIENT_ID/SECRET` | `~/.secrets/twitch` | 7 |
+| Reddit | `REDDIT_CLIENT_ID/SECRET` | `~/.secrets/reddit` | 3 |
+| Sonitus | `SONITUS_USER/PASSWORD` | `~/.secrets/sonitus` | 4 |
 
 Secret file format: `export KEY_NAME=value`
 
