@@ -78,6 +78,8 @@ CATEGORIES = {
     "patents", "academic",
     # energy
     "energy",
+    # safety & regulatory
+    "safety", "regulatory",
     # misc
     "temporal",
 }
