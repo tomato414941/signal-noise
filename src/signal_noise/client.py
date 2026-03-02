@@ -8,6 +8,7 @@ from typing import AsyncIterator
 
 import pandas as pd
 import requests
+import websockets
 
 log = logging.getLogger(__name__)
 
@@ -150,8 +151,6 @@ class SignalClient:
         Yields:
             dict with keys: name, timestamp, value, event_type, detail.
         """
-        import websockets
-
         ws_url = self._base_url.replace("http://", "ws://").replace("https://", "wss://")
         url = f"{ws_url}/ws/signals?names={pattern}"
 
@@ -166,6 +165,10 @@ class SignalClient:
                     async for msg in ws:
                         data = json.loads(msg)
                         yield data
+                # Connection closed normally
+                if not reconnect:
+                    return
+                log.info("WebSocket closed, reconnecting...")
             except asyncio.CancelledError:
                 raise
             except Exception as exc:
