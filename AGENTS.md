@@ -57,7 +57,8 @@ Streaming Collectors ──→ signals_realtime ──→ EventBus ──→ Web
 | `store/migration.py` | Parquet → SQLite migration |
 | `analysis/quality.py` | Signal health scoring (completeness, freshness, stability, independence) |
 | `analysis/spectrum.py` | SVD spectral redundancy analysis |
-| `scheduler/loop.py` | asyncio scheduler + streaming task runner + daily rollup |
+| `scheduler/loop.py` | Priority queue scheduler + worker pool + streaming task runner |
+| `scheduler/state.py` | `ScheduleQueue` (min-heap), `ScheduleEntry`, `CircuitBreakerState` |
 | `api/app.py` | FastAPI REST API + WebSocket endpoint |
 | `cli.py` | CLI entrypoint |
 | `config.py` | Paths, `CollectorConfig` |
@@ -137,7 +138,7 @@ Secret file format: `export KEY_NAME=value`
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v                      # 758 tests
+pytest tests/ -v                      # 765 tests
 ruff check src/ tests/
 python -m signal_noise count          # Show collector count
 ```

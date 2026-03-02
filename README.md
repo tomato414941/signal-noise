@@ -14,7 +14,7 @@ Collect worldwide time series and deliver via REST API + WebSocket.
 - **WebSocket** — Real-time signal event streaming (`/ws/signals`)
 - **Streaming collectors** — Binance WebSocket for orderbook depth, trade flow, VPIN, liquidations, funding rate
 - **EventBus** — In-process pub/sub for signal update propagation
-- **Smart scheduling** — asyncio-based per-collector intervals with jitter and circuit breakers
+- **Smart scheduling** — priority queue dispatcher + worker pool with per-collector circuit breakers
 - **Dual storage** — `signals` (daily) + `signals_realtime` (1-min, 30-day retention with daily rollup)
 - **Quality analysis** — health scoring, anomaly detection (z-score), spectral redundancy analysis (SVD)
 

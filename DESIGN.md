@@ -229,24 +229,44 @@ Each collector has a natural update frequency:
 
 signal-noise runs as a long-lived service, scheduling each collector independently.
 
-### Implementation: asyncio self-managed loop
+### Implementation: priority queue + worker pool
 
-No external scheduler dependency (APScheduler, Celery). Each collector runs as
-an independent `asyncio` task with its own interval (`scheduler/loop.py`).
+No external scheduler dependency (APScheduler, Celery). A central dispatcher
+manages a min-heap of `ScheduleEntry` objects and distributes due entries to a
+pool of async workers (`scheduler/loop.py`, `scheduler/state.py`).
+
+```
+ScheduleQueue (min-heap)
+    │
+    ▼
+_dispatcher ── sleep until next_run ── pop due entry
+    │
+    ▼
+asyncio.Queue (maxsize = n_workers * 2)
+    │
+    ├── _worker-0 ─┐
+    ├── _worker-1  │── fetch → save → reschedule
+    ├── ...        │   (semaphore で同時実行制限)
+    └── _worker-N ─┘
+```
 
 Two collector types:
-- **Polling** (`BaseCollector`): periodic fetch → save → sleep cycle
+- **Polling** (`BaseCollector`): dispatched by priority queue, fetched in worker pool
 - **Streaming** (`StreamingCollector`): long-lived WebSocket connection yielding DataFrames
 
 Production features:
-- **Circuit breaker**: after 5 consecutive failures → exponential cooldown (300s–3600s) with half-open recovery
+- **Priority queue**: `ScheduleQueue` (min-heap) orders collectors by next deadline
+- **Worker pool**: `n_workers` (default 8) async workers consume from the dispatch queue
+- **Circuit breaker**: per-collector `CircuitBreakerState` — 5 consecutive failures → exponential cooldown (300s–3600s)
 - **Deterministic jitter**: MD5-based offset (10% of interval) prevents thundering herd at startup
 - **Fetch semaphore**: limits concurrent API calls (default 20) to avoid burst traffic
-- **Fetch timeout**: 300s per collection attempt
+- **Fetch timeout**: 60s per collection attempt
+- **Collector lifecycle**: instances created per-fetch and released immediately (no memory leaks)
 - **Anomaly detection**: z-score check on each incoming DataFrame
 - **EventBus integration**: publishes `update`, `anomaly`, `circuit_break` events
 - **Failure tracking**: `consecutive_failures` persisted in `signal_meta` for health monitoring
 - **Daily rollup**: realtime (1-min) data aggregated to daily at 00:05 UTC, 30-day purge
+- **Exclude filter**: `SIGNAL_NOISE_EXCLUDE` env var to skip broken/geo-restricted collectors
 
 ```python
 @dataclass
@@ -597,7 +617,7 @@ priority. The list serves as a creative inventory, not a roadmap.
 ### Infrastructure & Platform
 
 82. **Public data API** — serve unified time series to other projects and developers
-83. **Data quality monitoring platform** — track API reliability across 1052 sources
+83. **Data quality monitoring platform** — track API reliability across 1,629 sources
 84. **Historical snapshot archive** — immutable daily snapshots for reproducibility
 85. **Webhook / event streaming** — push notifications when specific thresholds are crossed
 86. **Multi-tenant data service** — different consumers subscribe to different signal subsets
