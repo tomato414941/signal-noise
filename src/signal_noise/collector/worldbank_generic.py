@@ -105,6 +105,61 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SP.DYN.LE00.IN", "US", "wb_lifeexp_us", "Life Expectancy: US", "society", "public_health"),
     ("SP.DYN.LE00.IN", "CN", "wb_lifeexp_cn", "Life Expectancy: China", "society", "public_health"),
     ("SP.DYN.LE00.IN", "JP", "wb_lifeexp_jp", "Life Expectancy: Japan", "society", "public_health"),
+    # ── Gini index (income inequality) ──
+    ("SI.POV.GINI", "US", "wb_gini_us", "Gini Index: US", "economy", "inequality"),
+    ("SI.POV.GINI", "CN", "wb_gini_cn", "Gini Index: China", "economy", "inequality"),
+    ("SI.POV.GINI", "GB", "wb_gini_gb", "Gini Index: UK", "economy", "inequality"),
+    ("SI.POV.GINI", "BR", "wb_gini_br", "Gini Index: Brazil", "economy", "inequality"),
+    ("SI.POV.GINI", "ZA", "wb_gini_za", "Gini Index: South Africa", "economy", "inequality"),
+    ("SI.POV.GINI", "DE", "wb_gini_de", "Gini Index: Germany", "economy", "inequality"),
+    ("SI.POV.GINI", "IN", "wb_gini_in", "Gini Index: India", "economy", "inequality"),
+    ("SI.POV.GINI", "MX", "wb_gini_mx", "Gini Index: Mexico", "economy", "inequality"),
+    # ── Birth rate (per 1,000 people) ──
+    ("SP.DYN.CBRT.IN", "US", "wb_birthrate_us", "Birth Rate: US", "society", "demographics"),
+    ("SP.DYN.CBRT.IN", "CN", "wb_birthrate_cn", "Birth Rate: China", "society", "demographics"),
+    ("SP.DYN.CBRT.IN", "JP", "wb_birthrate_jp", "Birth Rate: Japan", "society", "demographics"),
+    ("SP.DYN.CBRT.IN", "IN", "wb_birthrate_in", "Birth Rate: India", "society", "demographics"),
+    ("SP.DYN.CBRT.IN", "NG", "wb_birthrate_ng", "Birth Rate: Nigeria", "society", "demographics"),
+    ("SP.DYN.CBRT.IN", "DE", "wb_birthrate_de", "Birth Rate: Germany", "society", "demographics"),
+    # ── Death rate (per 1,000 people) ──
+    ("SP.DYN.CDRT.IN", "US", "wb_deathrate_us", "Death Rate: US", "society", "demographics"),
+    ("SP.DYN.CDRT.IN", "CN", "wb_deathrate_cn", "Death Rate: China", "society", "demographics"),
+    ("SP.DYN.CDRT.IN", "JP", "wb_deathrate_jp", "Death Rate: Japan", "society", "demographics"),
+    ("SP.DYN.CDRT.IN", "IN", "wb_deathrate_in", "Death Rate: India", "society", "demographics"),
+    ("SP.DYN.CDRT.IN", "RU", "wb_deathrate_ru", "Death Rate: Russia", "society", "demographics"),
+    ("SP.DYN.CDRT.IN", "DE", "wb_deathrate_de", "Death Rate: Germany", "society", "demographics"),
+    # ── International tourism arrivals ──
+    ("ST.INT.ARVL", "US", "wb_tourism_us", "Tourism Arrivals: US", "economy", "tourism"),
+    ("ST.INT.ARVL", "FR", "wb_tourism_fr", "Tourism Arrivals: France", "economy", "tourism"),
+    ("ST.INT.ARVL", "ES", "wb_tourism_es", "Tourism Arrivals: Spain", "economy", "tourism"),
+    ("ST.INT.ARVL", "IT", "wb_tourism_it", "Tourism Arrivals: Italy", "economy", "tourism"),
+    ("ST.INT.ARVL", "JP", "wb_tourism_jp", "Tourism Arrivals: Japan", "economy", "tourism"),
+    ("ST.INT.ARVL", "TH", "wb_tourism_th", "Tourism Arrivals: Thailand", "economy", "tourism"),
+    # ── School enrollment, primary (% gross) ──
+    ("SE.PRM.ENRR", "US", "wb_enrollment_us", "Primary Enrollment: US", "society", "education"),
+    ("SE.PRM.ENRR", "CN", "wb_enrollment_cn", "Primary Enrollment: China", "society", "education"),
+    ("SE.PRM.ENRR", "IN", "wb_enrollment_in", "Primary Enrollment: India", "society", "education"),
+    ("SE.PRM.ENRR", "BR", "wb_enrollment_br", "Primary Enrollment: Brazil", "society", "education"),
+    ("SE.PRM.ENRR", "NG", "wb_enrollment_ng", "Primary Enrollment: Nigeria", "society", "education"),
+    # ── Control of Corruption (governance, -2.5 to 2.5) ──
+    ("CC.EST", "US", "wb_corruption_us", "Control of Corruption: US", "society", "governance"),
+    ("CC.EST", "CN", "wb_corruption_cn", "Control of Corruption: China", "society", "governance"),
+    ("CC.EST", "JP", "wb_corruption_jp", "Control of Corruption: Japan", "society", "governance"),
+    ("CC.EST", "RU", "wb_corruption_ru", "Control of Corruption: Russia", "society", "governance"),
+    ("CC.EST", "BR", "wb_corruption_br", "Control of Corruption: Brazil", "society", "governance"),
+    ("CC.EST", "IN", "wb_corruption_in", "Control of Corruption: India", "society", "governance"),
+    # ── Voice and Accountability (governance, -2.5 to 2.5) ──
+    ("VA.EST", "US", "wb_voice_us", "Voice & Accountability: US", "society", "governance"),
+    ("VA.EST", "CN", "wb_voice_cn", "Voice & Accountability: China", "society", "governance"),
+    ("VA.EST", "RU", "wb_voice_ru", "Voice & Accountability: Russia", "society", "governance"),
+    ("VA.EST", "IN", "wb_voice_in", "Voice & Accountability: India", "society", "governance"),
+    ("VA.EST", "BR", "wb_voice_br", "Voice & Accountability: Brazil", "society", "governance"),
+    # ── Rule of Law (governance, -2.5 to 2.5) ──
+    ("RL.EST", "US", "wb_ruleoflaw_us", "Rule of Law: US", "society", "governance"),
+    ("RL.EST", "CN", "wb_ruleoflaw_cn", "Rule of Law: China", "society", "governance"),
+    ("RL.EST", "JP", "wb_ruleoflaw_jp", "Rule of Law: Japan", "society", "governance"),
+    ("RL.EST", "RU", "wb_ruleoflaw_ru", "Rule of Law: Russia", "society", "governance"),
+    ("RL.EST", "BR", "wb_ruleoflaw_br", "Rule of Law: Brazil", "society", "governance"),
 ]
 
 

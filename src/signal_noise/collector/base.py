@@ -37,6 +37,7 @@ CATEGORIES = {
     # economy
     "economic", "labor", "inflation", "trade", "fiscal",
     "real_estate", "food_price", "agriculture", "energy",
+    "inequality", "tourism",
     # environment
     "weather", "climate", "marine", "air_quality", "hydrology", "satellite",
     "space_weather", "seismic", "celestial",
@@ -47,9 +48,11 @@ CATEGORIES = {
     "transportation", "safety",
     # sentiment
     "sentiment", "attention", "prediction_market", "temporal",
+    "gaming",
     # society
     "epidemiology", "public_health", "excess_deaths", "cause_of_death",
     "armed_conflict", "displacement", "city_stats",
+    "crime", "governance", "demographics", "education",
 }
 
 # update_frequency: allowed values
