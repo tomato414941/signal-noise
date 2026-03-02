@@ -7,6 +7,7 @@ import logging
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector
+from signal_noise.store.event_bus import EventBus, SignalEvent
 from signal_noise.store.sqlite_store import SignalStore
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ async def run_collector_loop(
     max_cooldown: float = 3600.0,
     fetch_semaphore: asyncio.Semaphore | None = None,
     fetch_timeout: float = 300.0,
+    event_bus: EventBus | None = None,
 ) -> None:
     """Single collector loop: fetch -> save -> sleep -> repeat.
 
@@ -74,6 +76,8 @@ async def run_collector_loop(
             failures = 0
             cooldown = base_cooldown
             log.info("Collected %s: %d rows", collector.meta.name, rows)
+            if event_bus is not None:
+                await _publish_events(event_bus, collector.meta.name, df, anomalies)
         except Exception as exc:
             failures += 1
             log.exception("Collector %s failed (%d/%d)", collector.meta.name, failures, max_failures)
@@ -87,6 +91,14 @@ async def run_collector_loop(
                     collector.meta.name, "circuit_break_cooldown",
                     f"{max_failures} failures, cooldown {cooldown:.0f}s",
                 )
+                if event_bus is not None:
+                    await event_bus.publish(SignalEvent(
+                        name=collector.meta.name,
+                        timestamp="",
+                        value=None,
+                        event_type="circuit_break",
+                        detail=f"{max_failures} failures, cooldown {cooldown:.0f}s",
+                    ))
                 await asyncio.sleep(cooldown)
                 cooldown = min(cooldown * 2, max_cooldown)
                 # Half-open: try once more
@@ -113,11 +125,35 @@ async def run_collector_loop(
         await asyncio.sleep(interval)
 
 
+async def _publish_events(
+    bus: EventBus, name: str, df: pd.DataFrame, anomalies: list[dict],
+) -> None:
+    """Publish update and anomaly events for a successful collection."""
+    if not df.empty:
+        latest = df.iloc[-1]
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        ts = str(latest[ts_col]) if ts_col in df.columns else ""
+        val = float(latest[val_col]) if val_col in df.columns and pd.notna(latest[val_col]) else None
+        await bus.publish(SignalEvent(
+            name=name, timestamp=ts, value=val, event_type="update",
+        ))
+    for a in anomalies:
+        await bus.publish(SignalEvent(
+            name=name,
+            timestamp=str(a.get("timestamp", "")),
+            value=a.get("value"),
+            event_type="anomaly",
+            detail=f"z={a.get('z_score', 0):.1f}",
+        ))
+
+
 async def run_scheduler(
     store: SignalStore,
     collectors: dict[str, type[BaseCollector]] | None = None,
     *,
     max_concurrent_fetches: int = 20,
+    event_bus: EventBus | None = None,
 ) -> None:
     """Start all collector loops as concurrent tasks.
 
@@ -147,6 +183,7 @@ async def run_scheduler(
             run_collector_loop(
                 collector, store, interval,
                 jitter=j, fetch_semaphore=semaphore,
+                event_bus=event_bus,
             ),
             name=f"collector:{name}",
         )
