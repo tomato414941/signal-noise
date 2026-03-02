@@ -22,15 +22,15 @@ class TestSonitus:
             assert cls.meta.category == "noise"
             assert cls.meta.category in CATEGORIES
 
-    @patch("signal_noise.collector.sonitus.requests.post")
-    def test_fetch(self, mock_post):
+    @patch("signal_noise.collector.sonitus.requests.get")
+    def test_fetch(self, mock_get):
         mock_resp = MagicMock()
         mock_resp.json.return_value = [
             {"datetime": "2025-03-01T10:00:00Z", "laeq": 55.2},
             {"datetime": "2025-03-01T11:00:00Z", "laeq": 58.7},
         ]
         mock_resp.raise_for_status = MagicMock()
-        mock_post.return_value = mock_resp
+        mock_get.return_value = mock_resp
 
         from signal_noise.collector.sonitus import get_sonitus_collectors
         cls = get_sonitus_collectors()["sonitus_ballyfermot"]
