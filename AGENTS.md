@@ -1,6 +1,6 @@
 # signal-noise
 
-Collect worldwide time series and deliver via REST API.
+Collect worldwide time series and deliver via REST API + WebSocket.
 
 > "even noise is worth collecting -- the signal hides within"
 
@@ -10,7 +10,7 @@ Collect worldwide time series and deliver via REST API.
 |------|-----------|---------|
 | **Provider** | External API / service | Yahoo Finance, FRED, CoinGecko |
 | **Collector** | Class that fetches one time series | `BtcOhlcvCollector`, `FearGreedCollector` |
-| **CollectorMeta** | Collector metadata (name, domain, category, interval) | `CollectorMeta(name="fear_greed", ...)` |
+| **CollectorMeta** | Collector metadata (name, domain, category, signal_type, collection_level, interval) | `CollectorMeta(name="fear_greed", ...)` |
 | **Signal** | A raw time series delivered via API | `fear_greed`, `btc_ohlcv` |
 | **Domain** | Stable top-level grouping (6 types) | markets, economy, environment |
 | **Category** | Concrete classification (~61 types) | equity, weather, labor |
@@ -25,8 +25,6 @@ Collect worldwide time series and deliver via REST API.
 | technology | Software ecosystems, internet, logistics, aviation, R&D | developer, academic, patents, logistics, aviation, internet, space, transportation, safety |
 | sentiment | Opinions, attention, expectations, prediction markets, gaming | sentiment, attention, prediction_market, temporal, gaming |
 | society | Health, mortality, conflict, demographics, governance, legislation | epidemiology, public_health, excess_deaths, cause_of_death, armed_conflict, displacement, city_stats, crime, governance, demographics, education, legislation, food_security |
-
-### Categories (61 types)
 
 ### Scale
 
@@ -55,8 +53,10 @@ Streaming Collectors ──→ signals_realtime ──→ EventBus ──→ Web
 | `collector/binance_ws.py` | Binance WS collectors (orderbook, trade flow, liquidation, funding rate) |
 | `collector/*.py` | Individual polling collector implementations |
 | `store/sqlite_store.py` | `SignalStore` — `signals` + `signals_realtime` tables |
-| `store/events.py` | `EventBus` — in-process pub/sub for signal updates |
+| `store/event_bus.py` | `EventBus` — in-process pub/sub for signal updates |
 | `store/migration.py` | Parquet → SQLite migration |
+| `analysis/quality.py` | Signal health scoring (completeness, freshness, stability, independence) |
+| `analysis/spectrum.py` | SVD spectral redundancy analysis |
 | `scheduler/loop.py` | asyncio scheduler + streaming task runner + daily rollup |
 | `api/app.py` | FastAPI REST API + WebSocket endpoint |
 | `cli.py` | CLI entrypoint |
@@ -79,13 +79,15 @@ python -m signal_noise analyze quality        # Signal health scoring
 python -m signal_noise coverage               # Domain/category coverage matrix
 python -m signal_noise rebuild-manifest       # Rebuild collector discovery cache
 python -m signal_noise backfill               # Fetch extended historical data
+python -m signal_noise rollup-realtime        # Rollup 1-min data to daily + purge old data
 ```
 
 ## REST API
 
 ```
 GET /health                           # Service health check
-GET /health/signals                   # List stale signals
+GET /health/signals                   # Per-signal health details (stale, failing, never_seen)
+GET /health/events                    # EventBus status and subscriber count
 GET /signals                          # List all signals (name, domain, category, ...)
 GET /signals/{name}                   # Signal metadata
 GET /signals/{name}/data?since=...    # Time series data (auto-fallback to realtime for microstructure)

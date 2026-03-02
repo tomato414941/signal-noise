@@ -53,6 +53,9 @@ python -m signal_noise rollup-realtime        # Rollup 1-min data to daily + pur
 # Health check
 curl http://localhost:8000/health
 
+# Per-signal health details
+curl http://localhost:8000/health/signals
+
 # List all signals
 curl http://localhost:8000/signals
 
