@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Query
+import logging
+
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from signal_noise.config import DB_PATH
+from signal_noise.store.event_bus import EventBus
 from signal_noise.store.sqlite_store import SignalStore
+
+log = logging.getLogger(__name__)
 
 app = FastAPI(title="signal-noise", version="0.2.0")
 _store: SignalStore | None = None
+_event_bus: EventBus | None = None
 
 
 def get_store() -> SignalStore:
@@ -135,3 +141,37 @@ def signal_batch(req: BatchRequest) -> dict[str, list[dict]]:
         df = store.get_data(name, since=req.since, columns=col_list, resolution=req.resolution)
         result[name] = df.to_dict(orient="records")
     return result
+
+
+@app.get("/health/events")
+def health_events() -> dict:
+    if _event_bus is None:
+        return {"status": "disabled", "subscribers": 0}
+    return {"status": "active", "subscribers": _event_bus.subscriber_count()}
+
+
+@app.websocket("/ws/signals")
+async def ws_signals(websocket: WebSocket, names: str = "*"):
+    """Push signal events to subscribers via WebSocket.
+
+    Query param ``names``: comma-separated signal name patterns
+    (fnmatch glob). Example: /ws/signals?names=funding_rate_btc,liq_*
+    """
+    if _event_bus is None:
+        await websocket.close(code=1013, reason="EventBus not available")
+        return
+
+    await websocket.accept()
+    try:
+        async for event in _event_bus.subscribe(names):
+            await websocket.send_json({
+                "name": event.name,
+                "timestamp": event.timestamp,
+                "value": event.value,
+                "event_type": event.event_type,
+                "detail": event.detail,
+            })
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        log.exception("WebSocket error for pattern=%s", names)

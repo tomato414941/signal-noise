@@ -457,15 +457,20 @@ def _cmd_serve(args: argparse.Namespace) -> None:
         log.info("Migrated %d signals from Parquet", count)
 
     import signal_noise.api.app as api_mod
+    from signal_noise.store.event_bus import EventBus
 
+    event_bus = EventBus()
     api_mod._store = store
+    api_mod._event_bus = event_bus
 
     async def _run() -> None:
         tasks = []
         if not args.no_scheduler:
             from signal_noise.scheduler.loop import run_scheduler
 
-            tasks.append(asyncio.create_task(run_scheduler(store)))
+            tasks.append(asyncio.create_task(
+                run_scheduler(store, event_bus=event_bus),
+            ))
 
         config = uvicorn.Config(
             api_mod.app,
