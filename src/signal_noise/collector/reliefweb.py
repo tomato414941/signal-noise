@@ -1,6 +1,5 @@
 """ReliefWeb humanitarian crisis report collector.
 
-Requires appname registration (set RELIEFWEB_APPNAME or ~/.secrets/reliefweb).
 Docs: https://apidoc.rwlabs.org/
 """
 from __future__ import annotations
@@ -23,10 +22,7 @@ def _get_appname() -> str:
     secrets_file = Path.home() / ".secrets" / "reliefweb"
     if secrets_file.exists():
         return secrets_file.read_text().strip()
-    raise RuntimeError(
-        "ReliefWeb appname not configured. "
-        "Set RELIEFWEB_APPNAME or create ~/.secrets/reliefweb"
-    )
+    return "signal-noise-research"
 
 
 class ReliefWebCollector(BaseCollector):
@@ -35,7 +31,6 @@ class ReliefWebCollector(BaseCollector):
         display_name="ReliefWeb Disaster Report Count",
         update_frequency="daily",
         api_docs_url="https://apidoc.rwlabs.org/",
-        requires_key=True,
         domain="sentiment",
         category="attention",
     )

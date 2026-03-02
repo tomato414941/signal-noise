@@ -41,7 +41,7 @@ def _fetch_book_summary(currency: str) -> list[dict]:
         r = requests.get(
             f"{_BASE}/get_book_summary_by_currency",
             params={"currency": currency, "kind": "option"},
-            timeout=15,
+            timeout=30,
         )
         r.raise_for_status()
         return r.json().get("result", [])
@@ -53,7 +53,7 @@ def _fetch_instruments(currency: str) -> list[dict]:
         r = requests.get(
             f"{_BASE}/get_instruments",
             params={"currency": currency, "kind": "option", "expired": "false"},
-            timeout=15,
+            timeout=30,
         )
         r.raise_for_status()
         return r.json().get("result", [])
@@ -66,7 +66,7 @@ def _fetch_index_price(currency: str) -> float:
         r = requests.get(
             f"{_BASE}/get_index_price",
             params={"index_name": index_name},
-            timeout=10,
+            timeout=30,
         )
         r.raise_for_status()
         return float(r.json()["result"]["index_price"])
@@ -78,7 +78,7 @@ def _fetch_dvol(currency: str) -> list[dict]:
         r = requests.get(
             f"{_BASE}/get_volatility_index_data",
             params={"currency": currency, "resolution": "3600"},
-            timeout=15,
+            timeout=30,
         )
         r.raise_for_status()
         return r.json().get("result", {}).get("data", [])
@@ -90,7 +90,7 @@ def _fetch_ticker(instrument_name: str) -> dict:
         r = requests.get(
             f"{_BASE}/ticker",
             params={"instrument_name": instrument_name},
-            timeout=10,
+            timeout=30,
         )
         r.raise_for_status()
         return r.json().get("result", {})

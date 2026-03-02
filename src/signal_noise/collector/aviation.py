@@ -71,7 +71,11 @@ class FR24TotalCollector(BaseCollector):
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(
             "https://data-cloud.flightradar24.com/zones/fcgi/feed.js",
-            timeout=self.config.request_timeout,
+            params={"faa": "1", "satellite": "1", "mlat": "1", "flarm": "1",
+                    "adsb": "1", "gnd": "0", "air": "1", "vehicles": "0",
+                    "estimated": "0", "maxage": "14400", "gliders": "0", "stats": "1"},
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=max(self.config.request_timeout, 30),
         )
         resp.raise_for_status()
         data = resp.json()

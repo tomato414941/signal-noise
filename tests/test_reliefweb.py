@@ -49,7 +49,7 @@ class TestReliefWeb:
         assert ReliefWebCollector.meta.name == "reliefweb_disaster_count"
         assert ReliefWebCollector.meta.domain == "sentiment"
         assert ReliefWebCollector.meta.category == "attention"
-        assert ReliefWebCollector.meta.requires_key is True
+        assert ReliefWebCollector.meta.requires_key is False
 
     def test_registered(self):
         from signal_noise.collector import COLLECTORS
@@ -57,18 +57,14 @@ class TestReliefWeb:
         assert "reliefweb_disaster_count" in COLLECTORS
 
     @patch.dict("os.environ", {}, clear=True)
-    def test_missing_appname_raises(self):
-        with patch("signal_noise.collector.reliefweb.Path.home") as mock_home:
-            mock_home.return_value = MagicMock()
-            mock_home.return_value.__truediv__ = lambda s, k: MagicMock()
-            # Make secrets file not exist
-            from signal_noise.collector.reliefweb import _get_appname
+    def test_missing_appname_uses_default(self):
+        from signal_noise.collector.reliefweb import _get_appname
 
-            with patch("signal_noise.collector.reliefweb.Path") as mock_path:
-                mock_file = MagicMock()
-                mock_file.exists.return_value = False
-                mock_path.home.return_value.__truediv__ = lambda s, k: MagicMock(
-                    __truediv__=lambda s, k: mock_file
-                )
-                with pytest.raises(RuntimeError, match="appname not configured"):
-                    _get_appname()
+        with patch("signal_noise.collector.reliefweb.Path") as mock_path:
+            mock_file = MagicMock()
+            mock_file.exists.return_value = False
+            mock_path.home.return_value.__truediv__ = lambda s, k: MagicMock(
+                __truediv__=lambda s, k: mock_file
+            )
+            result = _get_appname()
+            assert result == "signal-noise-research"

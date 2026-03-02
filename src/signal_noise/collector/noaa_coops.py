@@ -43,7 +43,7 @@ def _make_coops_collector(
 
         def fetch(self) -> pd.DataFrame:
             end = datetime.now(UTC)
-            start = end - timedelta(days=31)
+            start = end - timedelta(days=7)
             params: dict[str, str] = {
                 "station": station_id,
                 "begin_date": start.strftime("%Y%m%d"),

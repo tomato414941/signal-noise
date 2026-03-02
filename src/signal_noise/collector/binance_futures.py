@@ -175,7 +175,7 @@ def _make_liquidation_collector(
             resp = requests.get(
                 f"{_BASE}/fapi/v1/allForceOrders",
                 params={"symbol": symbol, "limit": "1000"},
-                timeout=self.config.request_timeout,
+                timeout=max(self.config.request_timeout, 30),
             )
             resp.raise_for_status()
             data = resp.json()
