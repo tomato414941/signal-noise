@@ -141,6 +141,28 @@ YAHOO_TICKERS: list[tuple[str, str, str, str, str]] = [
     ("AAL", "aal", "American Airlines", "infrastructure", "aviation"),
     ("BA", "ba", "Boeing", "infrastructure", "aviation"),
     ("AIR.PA", "airbus", "Airbus", "infrastructure", "aviation"),
+    # CBOE options indicators
+    ("^SKEW", "cboe_skew", "CBOE SKEW Index", "financial", "equity"),
+    # Agricultural commodities (gap fill)
+    ("CC=F", "cocoa", "Cocoa Futures", "financial", "commodity"),
+    ("LE=F", "live_cattle", "Live Cattle Futures", "financial", "commodity"),
+    ("HE=F", "lean_hogs", "Lean Hogs Futures", "financial", "commodity"),
+    ("ZR=F", "rough_rice", "Rough Rice Futures", "financial", "commodity"),
+    ("OJ=F", "orange_juice", "Orange Juice Futures", "financial", "commodity"),
+    # International / thematic ETFs
+    ("EEM", "eem", "iShares Emerging Markets ETF", "financial", "equity"),
+    ("EFA", "efa", "iShares EAFE ETF", "financial", "equity"),
+    ("VWO", "vwo", "Vanguard Emerging Markets ETF", "financial", "equity"),
+    ("TLT", "tlt", "iShares 20+ Year Treasury ETF", "financial", "rates"),
+    ("SHY", "shy", "iShares 1-3 Year Treasury ETF", "financial", "rates"),
+    ("IEF", "ief", "iShares 7-10 Year Treasury ETF", "financial", "rates"),
+    ("LQD", "lqd", "iShares Investment Grade Bond ETF", "financial", "rates"),
+    ("HYG", "hyg", "iShares High Yield Bond ETF", "financial", "rates"),
+    ("ARKK", "arkk", "ARK Innovation ETF", "financial", "equity"),
+    ("TAN", "tan", "Invesco Solar ETF", "financial", "equity"),
+    ("HACK", "hack", "ETFMG Prime Cyber Security ETF", "financial", "equity"),
+    ("BOTZ", "botz", "Global X Robotics & AI ETF", "financial", "equity"),
+    ("URA", "ura", "Global X Uranium ETF", "financial", "commodity"),
 ]
 
 

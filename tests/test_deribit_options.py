@@ -1,4 +1,4 @@
-"""Tests for Deribit BTC options collectors."""
+"""Tests for Deribit BTC/ETH options collectors."""
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -9,12 +9,6 @@ import pytest
 from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import CATEGORIES, DOMAINS
 from signal_noise.collector.deribit_options import (
-    DeribitATM7dCollector,
-    DeribitDVOLCollector,
-    DeribitGEXCollector,
-    DeribitMaxPainCollector,
-    DeribitPutCallRatioCollector,
-    DeribitSkew7dCollector,
     _bs_delta,
     _bs_gamma,
     _compute_gex,
@@ -22,6 +16,7 @@ from signal_noise.collector.deribit_options import (
     _deribit_cache,
     _expiry_to_timestamp,
     _parse_instrument_name,
+    get_deribit_options_collectors,
 )
 
 
@@ -90,24 +85,39 @@ def _clear_cache():
     _deribit_cache.clear()
 
 
+# Get collector classes from factory
+_all_collectors = get_deribit_options_collectors()
+DeribitBTCDVOLCollector = _all_collectors["iv_atm_btc_30d"]
+DeribitBTCATM7dCollector = _all_collectors["iv_atm_btc_7d"]
+DeribitBTCSkew7dCollector = _all_collectors["iv_skew_btc_7d"]
+DeribitBTCPCRCollector = _all_collectors["put_call_ratio_btc"]
+DeribitBTCMaxPainCollector = _all_collectors["max_pain_btc"]
+DeribitBTCGEXCollector = _all_collectors["gamma_exposure_btc"]
+
+
 # ── Helper function tests ──
 
 class TestParseInstrumentName:
     def test_call(self):
         r = _parse_instrument_name("BTC-28MAR26-90000-C")
-        assert r == {"expiry_str": "28MAR26", "strike": 90000.0, "option_type": "C"}
+        assert r["expiry_str"] == "28MAR26"
+        assert r["strike"] == 90000.0
+        assert r["option_type"] == "C"
+        assert r["currency"] == "BTC"
 
     def test_put(self):
         r = _parse_instrument_name("BTC-7MAR26-85000-P")
-        assert r == {"expiry_str": "7MAR26", "strike": 85000.0, "option_type": "P"}
+        assert r["expiry_str"] == "7MAR26"
+        assert r["strike"] == 85000.0
+        assert r["option_type"] == "P"
 
-    def test_large_strike(self):
-        r = _parse_instrument_name("BTC-28MAR26-120000-C")
+    def test_eth(self):
+        r = _parse_instrument_name("ETH-28MAR26-3000-C")
         assert r is not None
-        assert r["strike"] == 120000.0
+        assert r["currency"] == "ETH"
+        assert r["strike"] == 3000.0
 
     def test_invalid(self):
-        assert _parse_instrument_name("ETH-28MAR26-3000-C") is None
         assert _parse_instrument_name("not-an-option") is None
 
 
@@ -187,13 +197,13 @@ class TestComputeGex:
         assert gex == 0.0
 
 
-# ── Collector tests ──
+# ── Collector tests (BTC via factory) ──
 
 class TestDeribitDVOL:
     @patch("signal_noise.collector.deribit_options.requests.get")
     def test_fetch(self, mock_get):
         mock_get.return_value = _mock_response(DVOL_RESPONSE)
-        df = DeribitDVOLCollector().fetch()
+        df = DeribitBTCDVOLCollector().fetch()
         assert len(df) == 1
         assert "timestamp" in df.columns
         assert "value" in df.columns
@@ -203,10 +213,10 @@ class TestDeribitDVOL:
     def test_empty_response(self, mock_get):
         mock_get.return_value = _mock_response({"result": {"data": []}})
         with pytest.raises(RuntimeError, match="No DVOL data"):
-            DeribitDVOLCollector().fetch()
+            DeribitBTCDVOLCollector().fetch()
 
     def test_meta(self):
-        m = DeribitDVOLCollector.meta
+        m = DeribitBTCDVOLCollector.meta
         assert m.name == "iv_atm_btc_30d"
         assert m.domain == "financial"
         assert m.category == "crypto_derivatives"
@@ -226,7 +236,7 @@ class TestDeribitATM7d:
             return _mock_response({"result": []})
 
         mock_get.side_effect = side_effect
-        df = DeribitATM7dCollector().fetch()
+        df = DeribitBTCATM7dCollector().fetch()
         assert len(df) == 1
         assert df["value"].iloc[0] > 0
 
@@ -239,10 +249,10 @@ class TestDeribitATM7d:
 
         mock_get.side_effect = side_effect
         with pytest.raises(RuntimeError):
-            DeribitATM7dCollector().fetch()
+            DeribitBTCATM7dCollector().fetch()
 
     def test_meta(self):
-        m = DeribitATM7dCollector.meta
+        m = DeribitBTCATM7dCollector.meta
         assert m.name == "iv_atm_btc_7d"
         assert m.interval == 3600
 
@@ -266,13 +276,12 @@ class TestDeribitSkew7d:
             return _mock_response({"result": {}})
 
         mock_get.side_effect = side_effect
-        df = DeribitSkew7dCollector().fetch()
+        df = DeribitBTCSkew7dCollector().fetch()
         assert len(df) == 1
-        # skew = put_iv - call_iv = 62 - 58 = 4
         assert df["value"].iloc[0] == pytest.approx(4.0)
 
     def test_meta(self):
-        m = DeribitSkew7dCollector.meta
+        m = DeribitBTCSkew7dCollector.meta
         assert m.name == "iv_skew_btc_7d"
         assert m.interval == 3600
 
@@ -281,9 +290,8 @@ class TestDeribitPutCallRatio:
     @patch("signal_noise.collector.deribit_options.requests.get")
     def test_fetch(self, mock_get):
         mock_get.return_value = _mock_response(BOOK_SUMMARY_RESPONSE)
-        df = DeribitPutCallRatioCollector().fetch()
+        df = DeribitBTCPCRCollector().fetch()
         assert len(df) == 1
-        # put_vol = 80+50+70+60+45+30 = 335, call_vol = 100+30+40+20+35+25 = 250
         expected = 335.0 / 250.0
         assert df["value"].iloc[0] == pytest.approx(expected)
 
@@ -291,7 +299,7 @@ class TestDeribitPutCallRatio:
     def test_empty_response(self, mock_get):
         mock_get.return_value = _mock_response({"result": []})
         with pytest.raises(RuntimeError, match="No Deribit book summary"):
-            DeribitPutCallRatioCollector().fetch()
+            DeribitBTCPCRCollector().fetch()
 
     @patch("signal_noise.collector.deribit_options.requests.get")
     def test_zero_call_volume(self, mock_get):
@@ -299,10 +307,10 @@ class TestDeribitPutCallRatio:
             {"instrument_name": "BTC-7MAR26-90000-P", "mark_iv": 55.0, "volume": 100.0, "open_interest": 500.0},
         ]})
         with pytest.raises(RuntimeError, match="No call volume"):
-            DeribitPutCallRatioCollector().fetch()
+            DeribitBTCPCRCollector().fetch()
 
     def test_meta(self):
-        m = DeribitPutCallRatioCollector.meta
+        m = DeribitBTCPCRCollector.meta
         assert m.name == "put_call_ratio_btc"
         assert m.interval == 3600
 
@@ -318,7 +326,7 @@ class TestDeribitMaxPain:
             return _mock_response({"result": []})
 
         mock_get.side_effect = side_effect
-        df = DeribitMaxPainCollector().fetch()
+        df = DeribitBTCMaxPainCollector().fetch()
         assert len(df) == 1
         assert 80000 <= df["value"].iloc[0] <= 100000
 
@@ -326,10 +334,10 @@ class TestDeribitMaxPain:
     def test_empty_response(self, mock_get):
         mock_get.return_value = _mock_response({"result": []})
         with pytest.raises(RuntimeError):
-            DeribitMaxPainCollector().fetch()
+            DeribitBTCMaxPainCollector().fetch()
 
     def test_meta(self):
-        m = DeribitMaxPainCollector.meta
+        m = DeribitBTCMaxPainCollector.meta
         assert m.name == "max_pain_btc"
         assert m.interval == 3600
 
@@ -347,7 +355,7 @@ class TestDeribitGEX:
             return _mock_response({"result": []})
 
         mock_get.side_effect = side_effect
-        df = DeribitGEXCollector().fetch()
+        df = DeribitBTCGEXCollector().fetch()
         assert len(df) == 1
         assert isinstance(df["value"].iloc[0], float)
 
@@ -360,33 +368,46 @@ class TestDeribitGEX:
 
         mock_get.side_effect = side_effect
         with pytest.raises(RuntimeError):
-            DeribitGEXCollector().fetch()
+            DeribitBTCGEXCollector().fetch()
 
     def test_meta(self):
-        m = DeribitGEXCollector.meta
+        m = DeribitBTCGEXCollector.meta
         assert m.name == "gamma_exposure_btc"
         assert m.interval == 3600
 
 
-# ── Registration test ──
+# ── Factory / Registration tests ──
 
-class TestRegistration:
+class TestFactory:
+    def test_produces_12_collectors(self):
+        collectors = get_deribit_options_collectors()
+        assert len(collectors) == 12
+
+    def test_btc_names(self):
+        collectors = get_deribit_options_collectors()
+        btc = [n for n in collectors if "btc" in n]
+        assert len(btc) == 6
+
+    def test_eth_names(self):
+        collectors = get_deribit_options_collectors()
+        eth = [n for n in collectors if "eth" in n]
+        assert len(eth) == 6
+
     def test_all_registered(self):
         from signal_noise.collector import COLLECTORS
 
         expected = [
             "iv_atm_btc_30d", "iv_atm_btc_7d", "iv_skew_btc_7d",
             "put_call_ratio_btc", "max_pain_btc", "gamma_exposure_btc",
+            "iv_atm_eth_30d", "iv_atm_eth_7d", "iv_skew_eth_7d",
+            "put_call_ratio_eth", "max_pain_eth", "gamma_exposure_eth",
         ]
         for name in expected:
             assert name in COLLECTORS, f"{name} not registered"
 
     def test_taxonomy_valid(self):
-        collectors = [
-            DeribitDVOLCollector, DeribitATM7dCollector, DeribitSkew7dCollector,
-            DeribitPutCallRatioCollector, DeribitMaxPainCollector, DeribitGEXCollector,
-        ]
-        for cls in collectors:
-            assert cls.meta.domain in DOMAINS, f"{cls.meta.name}: invalid domain"
-            assert cls.meta.category in CATEGORIES, f"{cls.meta.name}: invalid category"
-            assert cls.meta.interval == 3600, f"{cls.meta.name}: wrong interval"
+        collectors = get_deribit_options_collectors()
+        for name, cls in collectors.items():
+            assert cls.meta.domain in DOMAINS, f"{name}: invalid domain"
+            assert cls.meta.category in CATEGORIES, f"{name}: invalid category"
+            assert cls.meta.interval == 3600, f"{name}: wrong interval"
