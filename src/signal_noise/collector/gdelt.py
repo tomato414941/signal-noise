@@ -33,6 +33,17 @@ GDELT_DOC_SERIES: list[tuple[str, str, str]] = [
     ("gold price", "gdelt_doc_gold", "GDELT News: Gold Prices"),
     ("supply chain", "gdelt_doc_supply", "GDELT News: Supply Chain"),
     ("cyber attack", "gdelt_doc_cyber", "GDELT News: Cyber Attacks"),
+    # geopolitical
+    ("sanctions", "gdelt_doc_sanctions", "GDELT News: Sanctions"),
+    ("military conflict", "gdelt_doc_military", "GDELT News: Military Conflict"),
+    ("nato", "gdelt_doc_nato", "GDELT News: NATO"),
+    ("war", "gdelt_doc_war", "GDELT News: War"),
+    ("missile", "gdelt_doc_missile", "GDELT News: Missile"),
+    ("nuclear weapon", "gdelt_doc_nuclear", "GDELT News: Nuclear Weapon"),
+    ("coup", "gdelt_doc_coup", "GDELT News: Coup"),
+    ("protest", "gdelt_doc_protest", "GDELT News: Protest"),
+    ("refugee crisis", "gdelt_doc_refugee", "GDELT News: Refugee Crisis"),
+    ("terrorism", "gdelt_doc_terrorism", "GDELT News: Terrorism"),
 ]
 
 

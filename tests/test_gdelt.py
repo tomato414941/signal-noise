@@ -71,7 +71,7 @@ class TestGDELTDoc:
 
 class TestGDELTRegistry:
     def test_doc_series_count(self):
-        assert len(GDELT_DOC_SERIES) >= 10
+        assert len(GDELT_DOC_SERIES) >= 25
 
     def test_no_duplicates(self):
         names = [t[1] for t in GDELT_DOC_SERIES]
