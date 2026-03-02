@@ -132,7 +132,7 @@ async def test_funding_rate_dedup_same_minute():
 def test_meta_attributes():
     liq = BinanceLiquidationStreamCollector()
     assert liq.meta.name == "liq_stream_btc"
-    assert liq.meta.domain == "financial"
+    assert liq.meta.domain == "markets"
 
     fr = BinanceFundingRateStreamCollector()
     assert fr.meta.name == "funding_rate_stream_btc"

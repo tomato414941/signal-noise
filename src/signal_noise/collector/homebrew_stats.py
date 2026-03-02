@@ -18,7 +18,7 @@ class HomebrewInstallsCollector(BaseCollector):
         display_name="Homebrew wget Install Events (30d)",
         update_frequency="daily",
         api_docs_url="https://formulae.brew.sh/analytics/",
-        domain="developer",
+        domain="technology",
         category="developer",
     )
 

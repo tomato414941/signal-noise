@@ -58,7 +58,7 @@ def _make_realtime_collector(
             display_name=f"Realtime Temp: {city}",
             update_frequency="hourly",
             api_docs_url="https://open-meteo.com/en/docs",
-            domain="earth",
+            domain="environment",
             category="weather",
         )
 

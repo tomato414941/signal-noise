@@ -19,7 +19,7 @@ class MarineTrafficCollector(BaseCollector):
         display_name="World Bank Global Exports (current US$)",
         update_frequency="yearly",
         api_docs_url="https://api.worldbank.org/v2/country/WLD/indicator/NE.EXP.GNFS.CD",
-        domain="infrastructure",
+        domain="technology",
         category="logistics",
     )
 

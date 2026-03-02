@@ -25,7 +25,7 @@ def _make_drought_collector(
             display_name=display_name,
             update_frequency="weekly",
             api_docs_url="https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx",
-            domain="earth",
+            domain="environment",
             category="hydrology",
         )
 

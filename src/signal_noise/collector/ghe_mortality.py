@@ -14,7 +14,7 @@ class GHEMortalityCollector(BaseCollector):
         display_name="WHO Global All-Cause Mortality Rate",
         update_frequency="yearly",
         api_docs_url="https://www.who.int/data/gho/info/gho-odata-api",
-        domain="health",
+        domain="society",
         category="public_health",
     )
 

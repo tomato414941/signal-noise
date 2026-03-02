@@ -14,7 +14,7 @@ class UNHCRDisplacedCollector(BaseCollector):
         display_name="UNHCR Global Forcibly Displaced Population",
         update_frequency="yearly",
         api_docs_url="https://api.unhcr.org/docs/",
-        domain="conflict",
+        domain="society",
         category="displacement",
     )
 

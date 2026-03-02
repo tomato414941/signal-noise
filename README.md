@@ -4,11 +4,11 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,476+ signals** across **17 domains** and **48 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**1,476+ signals** across **6 domains** and **48 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
-- **Broad coverage** — financial, macro, sentiment, earth, geophysical, infrastructure, real estate, developer, health, computed
+- **Broad coverage** — markets, economy, environment, technology, sentiment, society
 - **Collection Spectrum** — L1 (free APIs) through L6 (physical sensors). See [DESIGN.md](DESIGN.md) for the full spectrum
 - **REST API** — FastAPI with signal discovery, time series data, anomaly detection, and batch queries
 - **WebSocket** — Real-time signal event streaming (`/ws/signals`)
@@ -97,23 +97,12 @@ signal-noise is a **data collection service**. It collects and delivers raw time
 
 | Domain | Description | Example categories |
 |--------|-------------|-------------------|
-| financial | Equities, FX, bonds, crypto | equity, crypto, forex, rates, commodity |
-| macro | GDP, employment, inflation | economic, labor, inflation, trade, fiscal |
-| sentiment | Sentiment indices, social media | sentiment, attention |
-| earth | Weather, climate, ocean | weather, climate, marine, air_quality |
-| geophysical | Solar, seismic, celestial | space_weather, seismic, celestial |
-| infrastructure | Logistics, aviation, internet | logistics, aviation, internet |
-| real_estate | Housing, property prices | real_estate |
-| developer | GitHub, npm, StackOverflow | developer, academic, patents |
-| health | Epidemiology, disease surveillance | epidemiology, public_health |
-| computed | Calculated features | temporal |
-| creativity | Creative industries, media | — |
-| food | Food prices, agriculture | food_price, agriculture |
-| conflict | Armed conflict, displacement | armed_conflict, displacement |
-| urban | City statistics | city_stats |
-| animal | Biodiversity, wildlife | biodiversity, wildlife |
-| mortality | Cause of death | cause_of_death |
-| prediction | Prediction markets | prediction_market |
+| markets | Equities, FX, bonds, crypto, derivatives | equity, crypto, forex, rates, commodity |
+| economy | GDP, employment, inflation, housing, agriculture | economic, labor, inflation, real_estate, energy |
+| environment | Weather, climate, ocean, geology, biodiversity | weather, climate, seismic, space_weather, wildlife |
+| technology | Software ecosystems, internet, logistics, R&D | developer, internet, logistics, aviation, academic |
+| sentiment | Opinions, attention, prediction markets | sentiment, attention, prediction_market |
+| society | Health, mortality, conflict, demographics | public_health, epidemiology, armed_conflict, city_stats |
 
 ## Development
 

@@ -29,7 +29,7 @@ def _make_docker_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://docs.docker.com/docker-hub/api/latest/",
-            domain="developer",
+            domain="technology",
             category="developer",
         )
 

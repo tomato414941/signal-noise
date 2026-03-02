@@ -95,7 +95,7 @@ def _make_ping_collector(
             display_name=f"Ping RTT: {display}",
             update_frequency="hourly",
             api_docs_url="",
-            domain="infrastructure",
+            domain="technology",
             category="internet",
             collection_level="L5",
         )
@@ -120,7 +120,7 @@ def _make_dns_collector(
             display_name=f"DNS Resolve: {display}",
             update_frequency="hourly",
             api_docs_url="",
-            domain="infrastructure",
+            domain="technology",
             category="internet",
             collection_level="L5",
         )
@@ -144,7 +144,7 @@ class ProbeHTTPGoogleCollector(BaseCollector):
         display_name="HTTP Response: Google",
         update_frequency="hourly",
         api_docs_url="",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
         collection_level="L5",
     )
@@ -164,7 +164,7 @@ class ProbeHTTPGitHubCollector(BaseCollector):
         display_name="HTTP Response: GitHub",
         update_frequency="hourly",
         api_docs_url="",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
         collection_level="L5",
     )
@@ -184,7 +184,7 @@ class ProbeHTTPCloudflareCollector(BaseCollector):
         display_name="HTTP Response: Cloudflare",
         update_frequency="hourly",
         api_docs_url="",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
         collection_level="L5",
     )

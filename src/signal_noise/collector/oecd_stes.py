@@ -46,7 +46,7 @@ def _make_oecd_cli_collector(
             display_name=display_name,
             update_frequency="monthly",
             api_docs_url="https://data.oecd.org/leadind/composite-leading-indicator-cli.htm",
-            domain="macro",
+            domain="economy",
             category="economic",
         )
 

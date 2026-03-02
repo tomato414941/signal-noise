@@ -21,7 +21,7 @@ class CloudflareRadarCollector(BaseCollector):
         display_name="HTTPS Page-Load Adoption %",
         update_frequency="daily",
         api_docs_url="https://letsencrypt.org/stats/",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
     )
 
@@ -54,7 +54,7 @@ class LetsEncryptCertCountCollector(BaseCollector):
         display_name="Let's Encrypt Active Certificates",
         update_frequency="daily",
         api_docs_url="https://letsencrypt.org/stats/",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
     )
 

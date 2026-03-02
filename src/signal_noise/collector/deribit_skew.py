@@ -14,7 +14,7 @@ class DeribitSkewCollector(BaseCollector):
         display_name="Deribit BTC Options Skew",
         update_frequency="daily",
         api_docs_url="https://docs.deribit.com/",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

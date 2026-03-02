@@ -21,7 +21,7 @@ class RocketLaunchCountCollector(BaseCollector):
         display_name="Orbital Launches (monthly count)",
         update_frequency="monthly",
         api_docs_url="https://thespacedevs.com/llapi",
-        domain="infrastructure",
+        domain="technology",
         category="space",
     )
 
@@ -70,7 +70,7 @@ class RocketLaunchSuccessRateCollector(BaseCollector):
         display_name="Orbital Launch Success Rate (6-month rolling)",
         update_frequency="monthly",
         api_docs_url="https://thespacedevs.com/llapi",
-        domain="infrastructure",
+        domain="technology",
         category="space",
     )
 

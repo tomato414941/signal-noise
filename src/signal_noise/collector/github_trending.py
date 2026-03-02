@@ -104,7 +104,7 @@ class GitHubTrendingReposCollector(BaseCollector):
         display_name="GitHub Trending Repos",
         update_frequency="hourly",
         api_docs_url="",
-        domain="developer",
+        domain="technology",
         category="developer",
         collection_level="L3",
     )
@@ -123,7 +123,7 @@ class GitHubTrendingStarsCollector(BaseCollector):
         display_name="GitHub Trending Stars Today",
         update_frequency="hourly",
         api_docs_url="",
-        domain="developer",
+        domain="technology",
         category="developer",
         collection_level="L3",
     )
@@ -142,7 +142,7 @@ class GitHubTrendingLanguagesCollector(BaseCollector):
         display_name="GitHub Trending Languages",
         update_frequency="hourly",
         api_docs_url="",
-        domain="developer",
+        domain="technology",
         category="developer",
         collection_level="L3",
     )

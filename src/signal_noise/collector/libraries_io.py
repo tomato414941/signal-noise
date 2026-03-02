@@ -21,7 +21,7 @@ class LibrariesIOCollector(BaseCollector):
         display_name="GitHub Daily New Repositories",
         update_frequency="daily",
         api_docs_url="https://docs.github.com/en/rest/search",
-        domain="developer",
+        domain="technology",
         category="developer",
     )
 

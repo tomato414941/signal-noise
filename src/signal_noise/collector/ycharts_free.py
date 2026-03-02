@@ -14,7 +14,7 @@ class FedBalanceSheetCollector(BaseCollector):
         display_name="Fed Balance Sheet Total Assets",
         update_frequency="weekly",
         api_docs_url="https://fred.stlouisfed.org/series/WALCL",
-        domain="macro",
+        domain="economy",
         category="fiscal",
     )
 

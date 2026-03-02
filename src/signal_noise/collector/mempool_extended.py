@@ -37,7 +37,7 @@ def _make_pool_hashrate_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://mempool.space/docs/api",
-            domain="financial",
+            domain="markets",
             category="crypto",
         )
 
@@ -75,7 +75,7 @@ class MempoolBlocksMinedCollector(BaseCollector):
         display_name="Mempool Blocks Mined (24h)",
         update_frequency="daily",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -104,7 +104,7 @@ class MempoolNetworkHashrateCollector(BaseCollector):
         display_name="Mempool Network Hashrate",
         update_frequency="daily",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -133,7 +133,7 @@ class MempoolTxCountCollector(BaseCollector):
         display_name="Mempool TX Count (recent blocks)",
         update_frequency="hourly",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -162,7 +162,7 @@ class MempoolBlockSizeCollector(BaseCollector):
         display_name="Mempool Avg Block Size",
         update_frequency="hourly",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -191,7 +191,7 @@ class MempoolBlockWeightCollector(BaseCollector):
         display_name="Mempool Avg Block Weight",
         update_frequency="hourly",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

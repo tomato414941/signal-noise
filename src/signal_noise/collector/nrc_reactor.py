@@ -20,7 +20,7 @@ class NRCReactorPowerCollector(BaseCollector):
         display_name="NRC US Nuclear Reactor Average Power %",
         update_frequency="daily",
         api_docs_url="https://www.nrc.gov/reading-rm/doc-collections/event-status/reactor-status/",
-        domain="infrastructure",
+        domain="economy",
         category="energy",
     )
 
@@ -68,7 +68,7 @@ class NRCReactorOutageCountCollector(BaseCollector):
         display_name="NRC US Nuclear Reactors at 0% Power",
         update_frequency="daily",
         api_docs_url="https://www.nrc.gov/reading-rm/doc-collections/event-status/reactor-status/",
-        domain="infrastructure",
+        domain="economy",
         category="energy",
     )
 

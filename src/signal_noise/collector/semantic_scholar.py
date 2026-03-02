@@ -28,7 +28,7 @@ def _make_s2_collector(
             display_name=display_name,
             update_frequency="monthly",
             api_docs_url="https://api.semanticscholar.org/",
-            domain="creativity",
+            domain="technology",
             category="academic",
         )
 

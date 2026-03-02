@@ -31,7 +31,7 @@ class ManifoldActiveMarketsCollector(BaseCollector):
         display_name="Manifold Markets Active Markets",
         update_frequency="daily",
         api_docs_url="https://docs.manifold.markets/api",
-        domain="prediction",
+        domain="sentiment",
         category="prediction_market",
     )
 
@@ -50,7 +50,7 @@ class ManifoldTotalLiquidityCollector(BaseCollector):
         display_name="Manifold Markets Total Liquidity",
         update_frequency="daily",
         api_docs_url="https://docs.manifold.markets/api",
-        domain="prediction",
+        domain="sentiment",
         category="prediction_market",
     )
 
@@ -69,7 +69,7 @@ class ManifoldTotalTradersCollector(BaseCollector):
         display_name="Manifold Markets Total Traders",
         update_frequency="daily",
         api_docs_url="https://docs.manifold.markets/api",
-        domain="prediction",
+        domain="sentiment",
         category="prediction_market",
     )
 

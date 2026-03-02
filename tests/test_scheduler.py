@@ -18,7 +18,7 @@ class _DummyCollector(BaseCollector):
         display_name="Dummy",
         update_frequency="daily",
         api_docs_url="",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -82,7 +82,7 @@ class _FailThenSucceedCollector(BaseCollector):
         display_name="Flaky",
         update_frequency="daily",
         api_docs_url="",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -104,7 +104,7 @@ class _AlwaysFailCollector(BaseCollector):
         display_name="Broken",
         update_frequency="daily",
         api_docs_url="",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -191,7 +191,7 @@ class _SlowCollector(BaseCollector):
         display_name="Slow",
         update_frequency="daily",
         api_docs_url="",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

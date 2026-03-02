@@ -14,7 +14,7 @@ class HuggingFaceModelsCollector(BaseCollector):
         display_name="Hugging Face Trending Model Downloads",
         update_frequency="daily",
         api_docs_url="https://huggingface.co/docs/hub/api",
-        domain="developer",
+        domain="technology",
         category="developer",
     )
 

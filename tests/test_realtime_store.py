@@ -74,7 +74,7 @@ def test_get_realtime_latest_empty(store):
 def test_save_realtime_collection_result(store):
     df = _make_df(["2026-03-01T10:00:00Z"], [0.42])
     n = store.save_realtime_collection_result(
-        "rt_sig", df, "financial", "microstructure", 60, "scalar",
+        "rt_sig", df, "markets", "microstructure", 60, "scalar",
     )
     assert n == 1
 

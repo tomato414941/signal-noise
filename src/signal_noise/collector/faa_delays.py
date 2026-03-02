@@ -18,7 +18,7 @@ class FAADelayCountCollector(BaseCollector):
         display_name="FAA Airports with Active Delays",
         update_frequency="hourly",
         api_docs_url="https://nasstatus.faa.gov/api/airport-status-information",
-        domain="infrastructure",
+        domain="technology",
         category="aviation",
     )
 
@@ -62,7 +62,7 @@ class FAAGroundStopCollector(BaseCollector):
         display_name="FAA Active Ground Stops",
         update_frequency="hourly",
         api_docs_url="https://nasstatus.faa.gov/api/airport-status-information",
-        domain="infrastructure",
+        domain="technology",
         category="aviation",
     )
 

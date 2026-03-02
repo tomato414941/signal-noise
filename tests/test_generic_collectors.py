@@ -13,7 +13,7 @@ class TestYahooGeneric:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "financial", "equity")
+        cls = _make_yahoo_collector("^VIX", "test_vix", "Test VIX", "markets", "equity")
         assert cls.meta.name == "test_vix"
         assert cls._ticker == "^VIX"
         assert isinstance(cls.meta, CollectorMeta)

@@ -35,7 +35,7 @@ class TestFinnhubMetric:
     def test_factory_creates_collector(self):
         cls = _make_metric_collector(
             "AAPL", "eps", "test_eps", "Test EPS",
-            "quarterly", "financial", "equity",
+            "quarterly", "markets", "equity",
         )
         assert cls.meta.name == "test_eps"
         assert cls.meta.requires_key is True
@@ -61,7 +61,7 @@ class TestFinnhubMetric:
         mock_get.return_value = mock_resp
 
         cls = _make_metric_collector(
-            "AAPL", "eps", "test_eps", "Test", "quarterly", "financial", "equity",
+            "AAPL", "eps", "test_eps", "Test", "quarterly", "markets", "equity",
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -77,7 +77,7 @@ class TestFinnhubMetric:
         mock_get.return_value = mock_resp
 
         cls = _make_metric_collector(
-            "AAPL", "eps", "test_empty", "Test", "quarterly", "financial", "equity",
+            "AAPL", "eps", "test_empty", "Test", "quarterly", "markets", "equity",
         )
         with pytest.raises(RuntimeError, match="no quarterly eps data"):
             cls().fetch()
@@ -91,7 +91,7 @@ class TestFinnhubMetric:
         mock_get.return_value = mock_resp
 
         cls = _make_metric_collector(
-            "AAPL", "eps", "test_err", "Test", "quarterly", "financial", "equity",
+            "AAPL", "eps", "test_err", "Test", "quarterly", "markets", "equity",
         )
         with pytest.raises(RuntimeError, match="metric error"):
             cls().fetch()
@@ -114,10 +114,10 @@ class TestFinnhubMetric:
         mock_get.return_value = mock_resp
 
         cls_eps = _make_metric_collector(
-            "AAPL", "eps", "t_eps", "T", "quarterly", "financial", "equity",
+            "AAPL", "eps", "t_eps", "T", "quarterly", "markets", "equity",
         )
         cls_pe = _make_metric_collector(
-            "AAPL", "peTTM", "t_pe", "T", "quarterly", "financial", "equity",
+            "AAPL", "peTTM", "t_pe", "T", "quarterly", "markets", "equity",
         )
         cls_eps().fetch()
         cls_pe().fetch()
@@ -279,7 +279,7 @@ class TestFinnhubEarnings:
         mock_get.return_value = mock_resp
 
         cls = _make_earnings_collector(
-            "AAPL", "test_earn", "Test Earn", "quarterly", "financial", "equity",
+            "AAPL", "test_earn", "Test Earn", "quarterly", "markets", "equity",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -294,7 +294,7 @@ class TestFinnhubEarnings:
         mock_get.return_value = mock_resp
 
         cls = _make_earnings_collector(
-            "AAPL", "test_noearn", "Test", "quarterly", "financial", "equity",
+            "AAPL", "test_noearn", "Test", "quarterly", "markets", "equity",
         )
         with pytest.raises(RuntimeError, match="no earnings"):
             cls().fetch()

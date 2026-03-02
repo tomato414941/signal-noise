@@ -14,7 +14,7 @@ class CoinMarketCapDominanceCollector(BaseCollector):
         display_name="CoinGecko BTC Dominance (snapshot)",
         update_frequency="daily",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

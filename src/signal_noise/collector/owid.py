@@ -14,7 +14,7 @@ class OWIDCovidCollector(BaseCollector):
         display_name="OWID Global COVID-19 New Cases",
         update_frequency="daily",
         api_docs_url="https://github.com/owid/covid-19-data",
-        domain="health",
+        domain="society",
         category="epidemiology",
     )
 

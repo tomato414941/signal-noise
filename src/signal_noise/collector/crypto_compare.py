@@ -14,7 +14,7 @@ class CryptoCompareVolumeCollector(BaseCollector):
         display_name="CryptoCompare Total Exchange Volume",
         update_frequency="daily",
         api_docs_url="https://min-api.cryptocompare.com/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

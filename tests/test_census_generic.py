@@ -33,7 +33,7 @@ class TestCensusFactory:
         cls = _make_census_collector(
             "/eits/resconst", "TOTAL", "PERMITS", "yes",
             "test_permits", "Test Permits",
-            "monthly", "macro", "economic",
+            "monthly", "economy", "economic",
         )
         df = cls().fetch()
         assert len(df) == 3  # only TOTAL/PERMITS/SA=yes
@@ -52,7 +52,7 @@ class TestCensusFactory:
         cls = _make_census_collector(
             "/eits/resconst", "TOTAL", "PERMITS", "yes",
             "test_permits", "Test Permits",
-            "monthly", "macro", "economic",
+            "monthly", "economy", "economic",
         )
         with pytest.raises(RuntimeError, match="No Census data"):
             cls().fetch()
@@ -63,9 +63,9 @@ class TestCensusMeta:
         cls = _make_census_collector(
             "/eits/ressales", "AVERAG", "SOLD", "no",
             "test_price", "Test Price",
-            "monthly", "real_estate", "real_estate",
+            "monthly", "economy", "real_estate",
         )
-        assert cls.meta.domain == "real_estate"
+        assert cls.meta.domain == "economy"
         assert cls.meta.category == "real_estate"
 
 

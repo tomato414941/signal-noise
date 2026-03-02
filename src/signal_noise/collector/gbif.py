@@ -14,7 +14,7 @@ class GBIFOccurrenceCollector(BaseCollector):
         display_name="GBIF Daily Occurrence Records",
         update_frequency="daily",
         api_docs_url="https://www.gbif.org/developer/occurrence",
-        domain="animal",
+        domain="environment",
         category="biodiversity",
     )
 

@@ -20,7 +20,7 @@ class SubmarineCableCollector(BaseCollector):
         display_name="Submarine Internet Cables (cumulative)",
         update_frequency="monthly",
         api_docs_url="https://www.submarinecablemap.com/",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
     )
 

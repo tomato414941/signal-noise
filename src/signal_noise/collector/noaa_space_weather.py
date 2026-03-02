@@ -20,7 +20,7 @@ class SolarFlareCollector(BaseCollector):
         display_name="NOAA Solar Flare Daily Count",
         update_frequency="daily",
         api_docs_url="https://services.swpc.noaa.gov/json/goes/primary/xray-flares-latest.json",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 
@@ -58,7 +58,7 @@ class KpIndexCollector(BaseCollector):
         display_name="NOAA Kp Index (daily max)",
         update_frequency="daily",
         api_docs_url="https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 
@@ -99,7 +99,7 @@ class SolarWindSpeedCollector(BaseCollector):
         display_name="NOAA Solar Wind Speed (km/s)",
         update_frequency="hourly",
         api_docs_url="https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 
@@ -137,7 +137,7 @@ class SunspotNumberCollector(BaseCollector):
         display_name="NOAA SWPC Daily Sunspot Number",
         update_frequency="daily",
         api_docs_url="https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 

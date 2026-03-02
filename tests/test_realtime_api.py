@@ -15,7 +15,7 @@ def _setup_store(tmp_path):
     store = SignalStore(tmp_path / "test.db")
 
     # Register a microstructure signal
-    store.save_meta("book_imbalance_btc", "financial", "microstructure", 60)
+    store.save_meta("book_imbalance_btc", "markets", "microstructure", 60)
 
     # Insert realtime data
     df = pd.DataFrame({

@@ -40,7 +40,7 @@ class TestHealth:
         assert data["never_seen"] == 0
 
     def test_health_degraded_stale(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
             " 'now', '-3 hours') WHERE name = 'btc'"
@@ -52,7 +52,7 @@ class TestHealth:
         assert data["stale"] == 1
 
     def test_health_degraded_failing(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store.increment_failures("btc")
         r = client.get("/health")
         data = r.json()
@@ -60,14 +60,14 @@ class TestHealth:
         assert data["failing"] == 1
 
     def test_health_never_seen(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         r = client.get("/health")
         data = r.json()
         assert data["status"] == "ok"
         assert data["never_seen"] == 1
 
     def test_health_fresh(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
         store.save("btc", df)
         r = client.get("/health")
@@ -77,16 +77,16 @@ class TestHealth:
 
     def test_health_signals_4states(self, client: TestClient, store: SignalStore) -> None:
         # stale
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
             " 'now', '-3 hours') WHERE name = 'btc'"
         )
         store._conn.commit()
         # never_seen
-        store.save_meta("new_sig", "earth", "weather", 86400)
+        store.save_meta("new_sig", "environment", "weather", 86400)
         # failing
-        store.save_meta("broken", "financial", "crypto", 3600)
+        store.save_meta("broken", "markets", "crypto", 3600)
         store.increment_failures("broken")
         r = client.get("/health/signals")
         assert r.status_code == 200
@@ -114,7 +114,7 @@ class TestSignals:
         assert r.json() == []
 
     def test_list_with_data(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         r = client.get("/signals")
         assert r.status_code == 200
         data = r.json()
@@ -122,7 +122,7 @@ class TestSignals:
         assert data[0]["name"] == "btc"
 
     def test_meta_found(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         r = client.get("/signals/btc")
         assert r.status_code == 200
         assert r.json()["category"] == "crypto"
@@ -132,7 +132,7 @@ class TestSignals:
         assert r.status_code == 404
 
     def test_data(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01", "2024-01-02"], "value": [1.0, 2.0]})
         store.save("btc", df)
         r = client.get("/signals/btc/data")
@@ -141,7 +141,7 @@ class TestSignals:
         assert len(data) == 2
 
     def test_data_since(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({
             "timestamp": ["2024-01-01", "2024-01-02", "2024-01-03"],
             "value": [1.0, 2.0, 3.0],
@@ -156,7 +156,7 @@ class TestSignals:
         assert r.status_code == 404
 
     def test_latest(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01", "2024-01-02"], "value": [1.0, 2.0]})
         store.save("btc", df)
         r = client.get("/signals/btc/latest")
@@ -168,7 +168,7 @@ class TestSignals:
         assert r.status_code == 404
 
     def test_data_columns_filter(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         df = pd.DataFrame({
             "timestamp": ["2024-01-01"],
             "value": [100.0],
@@ -184,7 +184,7 @@ class TestSignals:
         assert set(row.keys()) == {"timestamp", "high", "low"}
 
     def test_data_ohlcv_full(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         df = pd.DataFrame({
             "timestamp": ["2024-01-01"],
             "value": [100.0],
@@ -202,23 +202,23 @@ class TestSignals:
 
 class TestFilters:
     def test_filter_by_domain(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
-        store.save_meta("temp", "earth", "weather", 86400)
-        r = client.get("/signals?domain=financial")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
+        store.save_meta("temp", "environment", "weather", 86400)
+        r = client.get("/signals?domain=markets")
         data = r.json()
         assert len(data) == 1
         assert data[0]["name"] == "btc"
 
     def test_filter_by_category(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
-        store.save_meta("sp500", "financial", "equity", 86400)
+        store.save_meta("btc", "markets", "crypto", 3600)
+        store.save_meta("sp500", "markets", "equity", 86400)
         r = client.get("/signals?category=crypto")
         data = r.json()
         assert len(data) == 1
         assert data[0]["name"] == "btc"
 
     def test_filter_by_signal_type(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         store.save_meta("fear", "sentiment", "sentiment", 86400)
         r = client.get("/signals?signal_type=ohlcv")
         data = r.json()
@@ -226,18 +226,18 @@ class TestFilters:
         assert data[0]["name"] == "btc"
 
     def test_filter_combined(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
-        store.save_meta("sp500", "financial", "equity", 86400, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
+        store.save_meta("sp500", "markets", "equity", 86400, "ohlcv")
         store.save_meta("fear", "sentiment", "sentiment", 86400)
-        r = client.get("/signals?domain=financial&signal_type=ohlcv")
+        r = client.get("/signals?domain=markets&signal_type=ohlcv")
         data = r.json()
         assert len(data) == 2
 
 
 class TestBatch:
     def test_batch_basic(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
-        store.save_meta("sp500", "financial", "equity", 86400)
+        store.save_meta("btc", "markets", "crypto", 3600)
+        store.save_meta("sp500", "markets", "equity", 86400)
         df1 = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [100.0]})
         df2 = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [4800.0]})
         store.save("btc", df1)
@@ -251,7 +251,7 @@ class TestBatch:
         assert data["sp500"][0]["value"] == 4800.0
 
     def test_batch_unknown_signal_skipped(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [100.0]})
         store.save("btc", df)
         r = client.post("/signals/batch", json={"names": ["btc", "nonexistent"]})
@@ -261,7 +261,7 @@ class TestBatch:
         assert "nonexistent" not in data
 
     def test_batch_with_since(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({
             "timestamp": ["2024-01-01", "2024-01-02", "2024-01-03"],
             "value": [1.0, 2.0, 3.0],
@@ -276,7 +276,7 @@ class TestBatch:
         assert r.json() == {}
 
     def test_batch_with_columns(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         df = pd.DataFrame({
             "timestamp": ["2024-01-01"],
             "value": [100.0],
@@ -300,13 +300,13 @@ class TestAnomaliesAPI:
         assert r.status_code == 404
 
     def test_anomalies_empty(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         r = client.get("/signals/btc/anomalies")
         assert r.status_code == 200
         assert r.json()["anomalies"] == []
 
     def test_anomalies_detected(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         # Seed history with small variance
         hist = pd.DataFrame({
             "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
@@ -324,7 +324,7 @@ class TestAnomaliesAPI:
 
     def test_anomalies_auto_lookback_default(self, client: TestClient, store: SignalStore) -> None:
         """Without explicit lookback, auto-calculate from meta interval."""
-        store.save_meta("daily_sig", "financial", "equity", 86400)
+        store.save_meta("daily_sig", "markets", "equity", 86400)
         hist = pd.DataFrame({
             "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
             "value": [100.0 + i * 0.1 for i in range(20)],
@@ -336,7 +336,7 @@ class TestAnomaliesAPI:
 
     def test_anomalies_explicit_lookback(self, client: TestClient, store: SignalStore) -> None:
         """Explicit lookback should override auto-calculation."""
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         hist = pd.DataFrame({
             "timestamp": [f"2024-01-{i+1:02d}" for i in range(20)],
             "value": [100.0 + i * 0.1 for i in range(20)],
@@ -348,7 +348,7 @@ class TestAnomaliesAPI:
 
     def test_anomalies_auto_lookback_weekly(self, client: TestClient, store: SignalStore) -> None:
         """Weekly signal (604800s) should get lookback = max(100, 7*30) = 210."""
-        store.save_meta("weekly_sig", "macro", "economic", 604800)
+        store.save_meta("weekly_sig", "economy", "economic", 604800)
         r = client.get("/signals/weekly_sig/anomalies")
         assert r.status_code == 200
         assert r.json()["anomalies"] == []
@@ -379,7 +379,7 @@ class TestAuditAPI:
 
 class TestResolutionAPI:
     def test_signal_data_with_resolution(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         timestamps = pd.date_range("2024-01-01T00:00:00Z", periods=60, freq="min")
         df = pd.DataFrame({
             "timestamp": [ts.isoformat() for ts in timestamps],
@@ -393,7 +393,7 @@ class TestResolutionAPI:
         assert data[0]["value"] == 59
 
     def test_signal_data_without_resolution(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         df = pd.DataFrame({
             "timestamp": ["2024-01-01T00:00:00", "2024-01-01T01:00:00"],
             "value": [1.0, 2.0],
@@ -404,7 +404,7 @@ class TestResolutionAPI:
         assert len(r.json()) == 2
 
     def test_batch_with_resolution(self, client: TestClient, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         timestamps = pd.date_range("2024-01-01T00:00:00Z", periods=4, freq="h")
         df = pd.DataFrame({
             "timestamp": [ts.isoformat() for ts in timestamps],

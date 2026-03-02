@@ -14,7 +14,7 @@ class CitibikeStationStatusCollector(BaseCollector):
         display_name="Citi Bike NYC Available Bikes",
         update_frequency="daily",
         api_docs_url="https://gbfs.citibikenyc.com/gbfs/gbfs.json",
-        domain="urban",
+        domain="technology",
         category="transportation",
     )
 

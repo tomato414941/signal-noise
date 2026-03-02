@@ -45,7 +45,7 @@ class TestPortWatchFetch:
 
     def test_meta(self):
         cls = _make_portwatch_collector("Suez Canal", "test_suez", "Test Suez")
-        assert cls.meta.domain == "infrastructure"
+        assert cls.meta.domain == "technology"
         assert cls.meta.category == "logistics"
         assert cls.meta.update_frequency == "weekly"
 

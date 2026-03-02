@@ -14,7 +14,7 @@ class NearEarthObjectCollector(BaseCollector):
         display_name="Near-Earth Object Close Approaches",
         update_frequency="daily",
         api_docs_url="https://ssd-api.jpl.nasa.gov/doc/cad.html",
-        domain="geophysical",
+        domain="environment",
         category="celestial",
     )
 

@@ -12,7 +12,7 @@ class BtcDominanceCollector(BaseCollector):
         display_name="BTC Market Dominance",
         update_frequency="daily",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

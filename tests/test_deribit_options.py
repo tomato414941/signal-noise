@@ -218,7 +218,7 @@ class TestDeribitDVOL:
     def test_meta(self):
         m = DeribitBTCDVOLCollector.meta
         assert m.name == "iv_atm_btc_30d"
-        assert m.domain == "financial"
+        assert m.domain == "markets"
         assert m.category == "crypto_derivatives"
         assert m.interval == 3600
 

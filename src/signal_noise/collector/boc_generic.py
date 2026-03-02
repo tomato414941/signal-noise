@@ -10,18 +10,18 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 # (series_code, collector_name, display_name, frequency, domain, category)
 BOC_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── Exchange rates (daily) ──
-    ("FXUSDCAD", "boc_usd_cad", "BOC: USD/CAD", "daily", "financial", "forex"),
-    ("FXEURCAD", "boc_eur_cad", "BOC: EUR/CAD", "daily", "financial", "forex"),
-    ("FXGBPCAD", "boc_gbp_cad", "BOC: GBP/CAD", "daily", "financial", "forex"),
-    ("FXJPYCAD", "boc_jpy_cad", "BOC: JPY/CAD", "daily", "financial", "forex"),
-    ("FXCNYCAD", "boc_cny_cad", "BOC: CNY/CAD", "daily", "financial", "forex"),
-    ("FXAUDCAD", "boc_aud_cad", "BOC: AUD/CAD", "daily", "financial", "forex"),
+    ("FXUSDCAD", "boc_usd_cad", "BOC: USD/CAD", "daily", "markets", "forex"),
+    ("FXEURCAD", "boc_eur_cad", "BOC: EUR/CAD", "daily", "markets", "forex"),
+    ("FXGBPCAD", "boc_gbp_cad", "BOC: GBP/CAD", "daily", "markets", "forex"),
+    ("FXJPYCAD", "boc_jpy_cad", "BOC: JPY/CAD", "daily", "markets", "forex"),
+    ("FXCNYCAD", "boc_cny_cad", "BOC: CNY/CAD", "daily", "markets", "forex"),
+    ("FXAUDCAD", "boc_aud_cad", "BOC: AUD/CAD", "daily", "markets", "forex"),
     # ── Policy rate ──
-    ("V39079", "boc_target_rate", "BOC: Overnight Target Rate", "daily", "financial", "rates"),
+    ("V39079", "boc_target_rate", "BOC: Overnight Target Rate", "daily", "markets", "rates"),
     # ── Government bond yields ──
-    ("BD.CDN.2YR.DQ.YLD", "boc_yield_2y", "BOC: Canada 2Y Yield", "daily", "financial", "rates"),
-    ("BD.CDN.5YR.DQ.YLD", "boc_yield_5y", "BOC: Canada 5Y Yield", "daily", "financial", "rates"),
-    ("BD.CDN.10YR.DQ.YLD", "boc_yield_10y", "BOC: Canada 10Y Yield", "daily", "financial", "rates"),
+    ("BD.CDN.2YR.DQ.YLD", "boc_yield_2y", "BOC: Canada 2Y Yield", "daily", "markets", "rates"),
+    ("BD.CDN.5YR.DQ.YLD", "boc_yield_5y", "BOC: Canada 5Y Yield", "daily", "markets", "rates"),
+    ("BD.CDN.10YR.DQ.YLD", "boc_yield_10y", "BOC: Canada 10Y Yield", "daily", "markets", "rates"),
 ]
 
 

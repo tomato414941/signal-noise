@@ -36,7 +36,7 @@ class EONETWildfireCollector(BaseCollector):
         display_name="NASA EONET: Active Wildfires",
         update_frequency="daily",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 
@@ -53,7 +53,7 @@ class EONETStormCollector(BaseCollector):
         display_name="NASA EONET: Active Severe Storms",
         update_frequency="daily",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 
@@ -70,7 +70,7 @@ class EONETVolcanoCollector(BaseCollector):
         display_name="NASA EONET: Active Volcanoes",
         update_frequency="daily",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 
@@ -87,7 +87,7 @@ class EONETTotalCollector(BaseCollector):
         display_name="NASA EONET: Total Active Events",
         update_frequency="daily",
         api_docs_url="https://eonet.gsfc.nasa.gov/docs/v3",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 

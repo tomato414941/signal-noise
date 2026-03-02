@@ -50,10 +50,10 @@ class TestBEAGeneric:
 
     def test_factory_creates_collector(self):
         cls = _make_bea_collector(
-            "NIPA", "T10106", "1", "test_bea", "Test", "quarterly", "macro", "economic",
+            "NIPA", "T10106", "1", "test_bea", "Test", "quarterly", "economy", "economic",
         )
         assert cls.meta.name == "test_bea"
-        assert cls.meta.domain == "macro"
+        assert cls.meta.domain == "economy"
         assert cls.meta.requires_key is True
         assert isinstance(cls.meta, CollectorMeta)
 
@@ -83,7 +83,7 @@ class TestBEAGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_bea_collector(
-            "NIPA", "T10106", "1", "test_gdp", "Test", "quarterly", "macro", "economic",
+            "NIPA", "T10106", "1", "test_gdp", "Test", "quarterly", "economy", "economic",
         )
         df = cls().fetch()
         assert len(df) == 2  # only line 1
@@ -109,7 +109,7 @@ class TestBEAGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_bea_collector(
-            "NIPA", "T10101", "1", "test_growth", "Test", "quarterly", "macro", "economic",
+            "NIPA", "T10101", "1", "test_growth", "Test", "quarterly", "economy", "economic",
         )
         df = cls().fetch()
         assert len(df) == 2  # "---" skipped
@@ -131,7 +131,7 @@ class TestBEAGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_bea_collector(
-            "NIPA", "T10106", "1", "test_err", "Test", "quarterly", "macro", "economic",
+            "NIPA", "T10106", "1", "test_err", "Test", "quarterly", "economy", "economic",
         )
         with pytest.raises(RuntimeError, match="BEA API error"):
             cls().fetch()
@@ -147,7 +147,7 @@ class TestBEAGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_bea_collector(
-            "NIPA", "T10106", "1", "test_empty", "Test", "quarterly", "macro", "economic",
+            "NIPA", "T10106", "1", "test_empty", "Test", "quarterly", "economy", "economic",
         )
         with pytest.raises(RuntimeError, match="No data for BEA"):
             cls().fetch()

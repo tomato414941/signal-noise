@@ -14,7 +14,7 @@ class GlassnodeActiveAddressesCollector(BaseCollector):
         display_name="BTC Active Addresses (blockchain.info)",
         update_frequency="daily",
         api_docs_url="https://www.blockchain.com/explorer/api/charts_api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

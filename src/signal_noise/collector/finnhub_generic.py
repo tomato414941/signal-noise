@@ -131,9 +131,9 @@ def _fetch_earnings(symbol: str, timeout: int = 60) -> list[dict]:
 FINNHUB_METRIC_SERIES: list[tuple[str, str, str, str, str, str, str]] = []
 
 _METRICS = [
-    ("eps", "EPS", "quarterly", "financial", "equity"),
-    ("peTTM", "P/E Ratio (TTM)", "quarterly", "financial", "equity"),
-    ("roeTTM", "ROE (TTM)", "quarterly", "financial", "equity"),
+    ("eps", "EPS", "quarterly", "markets", "equity"),
+    ("peTTM", "P/E Ratio (TTM)", "quarterly", "markets", "equity"),
+    ("roeTTM", "ROE (TTM)", "quarterly", "markets", "equity"),
 ]
 
 for _sym in _STOCKS:
@@ -165,7 +165,7 @@ FINNHUB_INSIDER_SERIES: list[tuple[str, str, str, str, str, str]] = [
 FINNHUB_EARNINGS_SERIES: list[tuple[str, str, str, str, str, str]] = [
     (sym, f"finnhub_{sym.lower()}_earnings",
      f"Finnhub: {_STOCK_NAMES[sym]} Earnings Surprise",
-     "quarterly", "financial", "equity")
+     "quarterly", "markets", "equity")
     for sym in _STOCKS
 ]
 

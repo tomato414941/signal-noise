@@ -55,7 +55,7 @@ def _make_weather_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://open-meteo.com/en/docs/historical-weather-api",
-            domain="earth",
+            domain="environment",
             category="weather",
         )
 

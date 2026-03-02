@@ -18,7 +18,7 @@ class WikimediaTotalCollector(BaseCollector):
         display_name="Wikimedia Total Daily Pageviews",
         update_frequency="daily",
         api_docs_url="https://wikitech.wikimedia.org/wiki/Analytics/AQS/Pageviews",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
     )
 

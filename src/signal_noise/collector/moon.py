@@ -21,7 +21,7 @@ class MoonPhaseCollector(BaseCollector):
         display_name="Moon Phase (0=New, 0.5=Full)",
         update_frequency="daily",
         api_docs_url="N/A",
-        domain="geophysical",
+        domain="environment",
         category="celestial",
     )
 

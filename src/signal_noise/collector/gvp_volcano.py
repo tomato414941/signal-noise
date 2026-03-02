@@ -18,7 +18,7 @@ class GVPVolcanoCollector(BaseCollector):
         display_name="GVP Holocene Eruptions (per decade)",
         update_frequency="weekly",
         api_docs_url="https://volcano.si.edu/database/webservices.cfm",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 

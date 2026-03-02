@@ -14,7 +14,7 @@ class IRISSeismicCollector(BaseCollector):
         display_name="Global Seismic Events M4+ (IRIS)",
         update_frequency="daily",
         api_docs_url="https://service.iris.edu/fdsnws/event/1/",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 

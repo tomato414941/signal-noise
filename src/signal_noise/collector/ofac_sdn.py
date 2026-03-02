@@ -22,7 +22,7 @@ class OFACSDNCollector(BaseCollector):
         display_name="OFAC SDN Entity Count",
         update_frequency="weekly",
         api_docs_url="https://ofac.treasury.gov/specially-designated-nationals-and-blocked-persons-list-sdn-human-readable-lists",
-        domain="macro",
+        domain="economy",
         category="trade",
     )
 

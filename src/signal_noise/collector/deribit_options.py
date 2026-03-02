@@ -313,7 +313,7 @@ def _make_dvol_collector(currency: str) -> type[BaseCollector]:
             display_name=f"Deribit {currency} DVOL (30d ATM IV)",
             update_frequency="hourly",
             api_docs_url="https://docs.deribit.com/",
-            domain="financial",
+            domain="markets",
             category="crypto_derivatives",
             collect_interval=3600,
         )
@@ -341,7 +341,7 @@ def _make_atm7d_collector(currency: str) -> type[BaseCollector]:
             display_name=f"Deribit {currency} 7d ATM IV",
             update_frequency="hourly",
             api_docs_url="https://docs.deribit.com/",
-            domain="financial",
+            domain="markets",
             category="crypto_derivatives",
             collect_interval=3600,
         )
@@ -379,7 +379,7 @@ def _make_skew7d_collector(currency: str) -> type[BaseCollector]:
             display_name=f"Deribit {currency} 7d 25-delta Skew",
             update_frequency="hourly",
             api_docs_url="https://docs.deribit.com/",
-            domain="financial",
+            domain="markets",
             category="crypto_derivatives",
             collect_interval=3600,
         )
@@ -429,7 +429,7 @@ def _make_pcr_collector(currency: str) -> type[BaseCollector]:
             display_name=f"Deribit {currency} Put/Call Volume Ratio",
             update_frequency="hourly",
             api_docs_url="https://docs.deribit.com/",
-            domain="financial",
+            domain="markets",
             category="crypto_derivatives",
             collect_interval=3600,
         )
@@ -467,7 +467,7 @@ def _make_maxpain_collector(currency: str) -> type[BaseCollector]:
             display_name=f"Deribit {currency} Max Pain",
             update_frequency="hourly",
             api_docs_url="https://docs.deribit.com/",
-            domain="financial",
+            domain="markets",
             category="crypto_derivatives",
             collect_interval=3600,
         )
@@ -500,7 +500,7 @@ def _make_gex_collector(currency: str) -> type[BaseCollector]:
             display_name=f"Deribit {currency} Gamma Exposure",
             update_frequency="hourly",
             api_docs_url="https://docs.deribit.com/",
-            domain="financial",
+            domain="markets",
             category="crypto_derivatives",
             collect_interval=3600,
         )

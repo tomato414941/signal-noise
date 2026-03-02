@@ -17,7 +17,7 @@ class MockStreamCollector(StreamingCollector):
         display_name="Mock Stream",
         update_frequency="hourly",
         api_docs_url="",
-        domain="financial",
+        domain="markets",
         category="crypto",
         signal_type="scalar",
         collect_interval=60,

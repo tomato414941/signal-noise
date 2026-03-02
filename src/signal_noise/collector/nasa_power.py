@@ -49,7 +49,7 @@ def _make_power_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://power.larc.nasa.gov/docs/services/api/",
-            domain="earth",
+            domain="environment",
             category="satellite",
         )
 

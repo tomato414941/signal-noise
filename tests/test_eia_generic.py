@@ -70,7 +70,7 @@ class TestEIABatchFetch:
         cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
             "value", "daily",
-            "test_wti", "Test WTI", "financial", "commodity",
+            "test_wti", "Test WTI", "markets", "commodity",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -88,12 +88,12 @@ class TestEIABatchFetch:
         wti_cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
             "value", "daily",
-            "test_wti", "Test WTI", "financial", "commodity",
+            "test_wti", "Test WTI", "markets", "commodity",
         )
         brent_cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RBRTE",
             "value", "daily",
-            "test_brent", "Test Brent", "financial", "commodity",
+            "test_brent", "Test Brent", "markets", "commodity",
         )
         wti_df = wti_cls().fetch()
         brent_df = brent_cls().fetch()
@@ -119,7 +119,7 @@ class TestEIABatchFetch:
         cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
             "value", "daily",
-            "test_wti", "Test WTI", "financial", "commodity",
+            "test_wti", "Test WTI", "markets", "commodity",
         )
         df = cls().fetch()
         assert len(df) == 4
@@ -135,7 +135,7 @@ class TestEIABatchFetch:
         cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
             "value", "daily",
-            "test_wti", "Test WTI", "financial", "commodity",
+            "test_wti", "Test WTI", "markets", "commodity",
         )
         with pytest.raises(RuntimeError, match="No EIA data"):
             cls().fetch()
@@ -144,7 +144,7 @@ class TestEIABatchFetch:
         cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
             "value", "daily",
-            "test_wti", "Test WTI", "financial", "commodity",
+            "test_wti", "Test WTI", "markets", "commodity",
         )
         with patch("signal_noise.collector.eia_generic._EIA_API_KEY", None):
             with patch.dict("os.environ", {}, clear=True):
@@ -157,7 +157,7 @@ class TestEIAMeta:
         cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
             "value", "daily",
-            "test_wti", "Test WTI", "financial", "commodity",
+            "test_wti", "Test WTI", "markets", "commodity",
         )
         assert cls.meta.requires_key is True
 
@@ -165,9 +165,9 @@ class TestEIAMeta:
         cls = _make_eia_collector(
             "total-energy/data", "msn", "TETCBUS",
             "value", "monthly",
-            "test_total", "Test Total", "macro", "economic",
+            "test_total", "Test Total", "economy", "economic",
         )
-        assert cls.meta.domain == "macro"
+        assert cls.meta.domain == "economy"
         assert cls.meta.category == "economic"
 
 

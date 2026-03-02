@@ -20,7 +20,7 @@ class SeaLevelCollector(BaseCollector):
         display_name="Global Mean Sea Level Change (mm)",
         update_frequency="monthly",
         api_docs_url="https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/",
-        domain="earth",
+        domain="environment",
         category="marine",
     )
 

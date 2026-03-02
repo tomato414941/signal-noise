@@ -16,7 +16,7 @@ class BOJPolicyRateCollector(BaseCollector):
         display_name="BOJ Policy Rate (%)",
         update_frequency="monthly",
         api_docs_url="https://fred.stlouisfed.org/series/IRSTCB01JPM156N",
-        domain="financial",
+        domain="markets",
         category="rates",
     )
 

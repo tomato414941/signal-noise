@@ -20,7 +20,7 @@ class CrossrefDOICollector(BaseCollector):
         display_name="Crossref Daily DOI Registrations",
         update_frequency="daily",
         api_docs_url="https://api.crossref.org/swagger-ui/index.html",
-        domain="creativity",
+        domain="technology",
         category="academic",
     )
 

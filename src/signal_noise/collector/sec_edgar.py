@@ -25,7 +25,7 @@ def _make_edgar_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://efts.sec.gov/LATEST/search-index",
-            domain="financial",
+            domain="markets",
             category="regulatory",
         )
 

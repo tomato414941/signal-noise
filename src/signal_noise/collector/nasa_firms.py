@@ -20,7 +20,7 @@ class NASAFIRMSCollector(BaseCollector):
         display_name="NASA FIRMS Active Fire Count",
         update_frequency="daily",
         api_docs_url="https://firms.modaps.eosdis.nasa.gov/",
-        domain="earth",
+        domain="environment",
         category="satellite",
     )
 

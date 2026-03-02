@@ -86,7 +86,7 @@ class TestEurostatFactory:
 
         cls = _make_eurostat_collector(
             "prc_hicp_midx", "coicop=CP00&unit=I15&geo=EU27_2020",
-            "test_hicp", "Test HICP", "monthly", "macro", "inflation",
+            "test_hicp", "Test HICP", "monthly", "economy", "inflation",
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -107,7 +107,7 @@ class TestEurostatFactory:
 
         cls = _make_eurostat_collector(
             "namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA",
-            "test_gdp", "Test GDP", "quarterly", "macro", "economic",
+            "test_gdp", "Test GDP", "quarterly", "economy", "economic",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -121,7 +121,7 @@ class TestEurostatFactory:
 
         cls = _make_eurostat_collector(
             "prc_hicp_midx", "coicop=CP00&unit=I15&geo=EU27_2020",
-            "test_hicp", "Test HICP", "monthly", "macro", "inflation",
+            "test_hicp", "Test HICP", "monthly", "economy", "inflation",
         )
         with pytest.raises(RuntimeError, match="No Eurostat data"):
             cls().fetch()
@@ -131,9 +131,9 @@ class TestEurostatMeta:
     def test_domain_category(self):
         cls = _make_eurostat_collector(
             "une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=EU27_2020",
-            "test_unemp", "Test Unemp", "monthly", "macro", "labor",
+            "test_unemp", "Test Unemp", "monthly", "economy", "labor",
         )
-        assert cls.meta.domain == "macro"
+        assert cls.meta.domain == "economy"
         assert cls.meta.category == "labor"
         assert cls.meta.requires_key is False
 

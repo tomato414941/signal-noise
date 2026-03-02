@@ -34,7 +34,7 @@ def _make_pypi_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://pypistats.org/api/",
-            domain="developer",
+            domain="technology",
             category="developer",
         )
 

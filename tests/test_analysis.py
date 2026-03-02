@@ -23,7 +23,7 @@ def _seed_signals(store: SignalStore, n_signals: int = 3, n_rows: int = 100) -> 
     names = [f"sig_{i}" for i in range(n_signals)]
     dates = pd.date_range("2023-01-01", periods=n_rows, freq="D")
     for i, name in enumerate(names):
-        store.save_meta(name, "financial", "equity", 86400)
+        store.save_meta(name, "markets", "equity", 86400)
         values = np.cumsum(np.random.randn(n_rows)) + (i + 1) * 10
         df = pd.DataFrame({"timestamp": dates, "value": values})
         store.save(name, df)
@@ -58,8 +58,8 @@ class TestComputeSpectrum:
             # top signals (3) + extended range (up to 20) should not double-count
             assert total_count <= 20
             assert total_count >= 3
-            # All signals are "financial" domain
-            assert "financial" in pc.domain_composition
+            # All signals are "markets" domain
+            assert "markets" in pc.domain_composition
 
     def test_top_signals_count(self, store: SignalStore) -> None:
         from signal_noise.analysis.spectrum import compute_spectrum
@@ -128,7 +128,7 @@ class TestComputeQuality:
     def test_no_data_health_zero(self, store: SignalStore) -> None:
         from signal_noise.analysis.quality import compute_quality
 
-        store.save_meta("empty_sig", "financial", "equity", 86400)
+        store.save_meta("empty_sig", "markets", "equity", 86400)
         result = compute_quality(store, days=90)
         assert result.n_signals == 1
         sig = result.signals[0]
@@ -141,7 +141,7 @@ class TestComputeQuality:
         now = datetime.now(timezone.utc)
         dates = [(now - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(90)]
         df = pd.DataFrame({"date": dates, "value": np.random.randn(90)})
-        store.save_meta("complete_sig", "financial", "equity", 86400)
+        store.save_meta("complete_sig", "markets", "equity", 86400)
         store.save("complete_sig", df)
         result = compute_quality(store, days=90)
         sig = result.signals[0]
@@ -152,7 +152,7 @@ class TestComputeQuality:
 
         dates = [(datetime(2020, 1, 1) + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(100)]
         df = pd.DataFrame({"date": dates, "value": np.random.randn(100)})
-        store.save_meta("old_sig", "financial", "equity", 86400)
+        store.save_meta("old_sig", "markets", "equity", 86400)
         store.save("old_sig", df)
         result = compute_quality(store, days=90)
         sig = result.signals[0]
@@ -167,7 +167,7 @@ class TestComputeQuality:
         # First half: mean=0, second half: mean=100
         values = list(np.random.randn(50)) + list(np.random.randn(50) + 100)
         df = pd.DataFrame({"date": dates, "value": values})
-        store.save_meta("unstable_sig", "financial", "equity", 86400)
+        store.save_meta("unstable_sig", "markets", "equity", 86400)
         store.save("unstable_sig", df)
         result = compute_quality(store, days=120)
         sig = result.signals[0]
@@ -183,11 +183,11 @@ class TestComputeQuality:
         from signal_noise.analysis.quality import compute_quality
 
         _seed_signals(store, n_signals=3, n_rows=100)
-        store.save_meta("weather_sig", "earth", "weather", 86400)
+        store.save_meta("weather_sig", "environment", "weather", 86400)
         dates = pd.date_range("2023-01-01", periods=100, freq="D")
         df = pd.DataFrame({"timestamp": dates, "value": np.random.randn(100)})
         store.save("weather_sig", df)
-        result = compute_quality(store, days=90, domain="earth")
+        result = compute_quality(store, days=90, domain="environment")
         assert result.n_signals == 1
         assert result.signals[0].name == "weather_sig"
 

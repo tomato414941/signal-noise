@@ -16,7 +16,7 @@ class GlobalTempAnomalyCollector(BaseCollector):
         display_name="NOAA Global Temperature Anomaly",
         update_frequency="monthly",
         api_docs_url="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -57,7 +57,7 @@ class LandTempAnomalyCollector(BaseCollector):
         display_name="NOAA Land Temperature Anomaly",
         update_frequency="monthly",
         api_docs_url="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -98,7 +98,7 @@ class CO2DailyCollector(BaseCollector):
         display_name="Mauna Loa CO2 (Daily)",
         update_frequency="daily",
         api_docs_url="https://gml.noaa.gov/ccgg/trends/data.html",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -149,7 +149,7 @@ class NASAGlobalTempCollector(BaseCollector):
         display_name="NASA GISS Global Temperature Index",
         update_frequency="monthly",
         api_docs_url="https://data.giss.nasa.gov/gistemp/",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 

@@ -18,7 +18,7 @@ class MempoolSizeCollector(BaseCollector):
         display_name="Bitcoin Mempool Size (vMB)",
         update_frequency="hourly",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -58,7 +58,7 @@ class MempoolFeeCollector(BaseCollector):
         display_name="Bitcoin Fee Rate (sat/vB)",
         update_frequency="hourly",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

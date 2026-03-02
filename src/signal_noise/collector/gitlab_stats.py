@@ -14,7 +14,7 @@ class GitLabProjectsCollector(BaseCollector):
         display_name="GitLab New Public Projects (daily)",
         update_frequency="daily",
         api_docs_url="https://docs.gitlab.com/ee/api/projects.html",
-        domain="developer",
+        domain="technology",
         category="developer",
     )
 

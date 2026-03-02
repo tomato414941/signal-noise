@@ -36,9 +36,9 @@ class TestFredGenericFactory:
         assert len(ids) == len(set(ids))
 
     def test_factory_creates_collector(self):
-        cls = _make_fred_collector("ICSA", "test_icsa", "Test ICSA", "weekly", "macro", "labor")
+        cls = _make_fred_collector("ICSA", "test_icsa", "Test ICSA", "weekly", "economy", "labor")
         assert cls.meta.name == "test_icsa"
-        assert cls.meta.domain == "macro"
+        assert cls.meta.domain == "economy"
         assert cls.meta.category == "labor"
         assert cls.meta.requires_key is True
 
@@ -75,7 +75,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("ICSA", "test_icsa", "Test", "weekly", "macro", "labor")
+        cls = _make_fred_collector("ICSA", "test_icsa", "Test", "weekly", "economy", "labor")
         df = cls().fetch()
         assert "date" in df.columns
         assert "value" in df.columns
@@ -91,7 +91,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("UNRATE", "test_unrate", "Test", "monthly", "macro", "labor")
+        cls = _make_fred_collector("UNRATE", "test_unrate", "Test", "monthly", "economy", "labor")
         df = cls().fetch()
         assert df["date"].is_monotonic_increasing
 
@@ -103,7 +103,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("GDP", "test_gdp", "Test", "quarterly", "macro", "economic")
+        cls = _make_fred_collector("GDP", "test_gdp", "Test", "quarterly", "economy", "economic")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 
@@ -120,7 +120,7 @@ class TestFredGenericFetch:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_fred_collector("TEST", "test_miss", "Test", "daily", "macro", "labor")
+        cls = _make_fred_collector("TEST", "test_miss", "Test", "daily", "economy", "labor")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
 

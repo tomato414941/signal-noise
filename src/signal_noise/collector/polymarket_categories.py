@@ -25,7 +25,7 @@ def _make_polymarket_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://docs.polymarket.com/",
-            domain="prediction",
+            domain="sentiment",
             category="prediction_market",
         )
 

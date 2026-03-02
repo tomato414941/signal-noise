@@ -63,7 +63,7 @@ class UKCarbonActualCollector(_UKCarbonBase):
         display_name="UK Carbon Intensity (Actual, gCO2/kWh)",
         update_frequency="daily",
         api_docs_url="https://carbon-intensity.github.io/api-definitions/",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -75,6 +75,6 @@ class UKCarbonForecastCollector(_UKCarbonBase):
         display_name="UK Carbon Intensity (Forecast, gCO2/kWh)",
         update_frequency="daily",
         api_docs_url="https://carbon-intensity.github.io/api-definitions/",
-        domain="earth",
+        domain="environment",
         category="climate",
     )

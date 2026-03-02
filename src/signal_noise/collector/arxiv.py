@@ -25,7 +25,7 @@ def _make_arxiv_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://info.arxiv.org/help/api/index.html",
-            domain="creativity",
+            domain="technology",
             category="academic",
         )
 

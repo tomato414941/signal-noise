@@ -14,7 +14,7 @@ class BinanceOpenInterestCollector(BaseCollector):
         display_name="Binance BTC Open Interest",
         update_frequency="daily",
         api_docs_url="https://binance-docs.github.io/apidocs/futures/en/",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

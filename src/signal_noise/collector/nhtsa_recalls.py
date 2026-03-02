@@ -20,7 +20,7 @@ class NHTSARecallCountCollector(BaseCollector):
         display_name="NHTSA Vehicle Recall Campaigns (monthly)",
         update_frequency="monthly",
         api_docs_url="https://www.nhtsa.gov/nhtsa-datasets-and-apis",
-        domain="infrastructure",
+        domain="technology",
         category="safety",
     )
 
@@ -74,7 +74,7 @@ class NHTSARecallVehicleCountCollector(BaseCollector):
         display_name="NHTSA Vehicles Affected by Recalls (monthly)",
         update_frequency="monthly",
         api_docs_url="https://www.nhtsa.gov/nhtsa-datasets-and-apis",
-        domain="infrastructure",
+        domain="technology",
         category="safety",
     )
 

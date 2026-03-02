@@ -14,7 +14,7 @@ class WorldBankFoodPriceCollector(BaseCollector):
         display_name="World Bank Food Production Index",
         update_frequency="yearly",
         api_docs_url="https://data.worldbank.org/indicator/AG.PRD.FOOD.XD",
-        domain="food",
+        domain="economy",
         category="food_price",
     )
 

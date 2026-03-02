@@ -14,7 +14,7 @@ class MessariCollector(BaseCollector):
         display_name="BTC Real Volume 24h (CoinPaprika)",
         update_frequency="daily",
         api_docs_url="https://api.coinpaprika.com/",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

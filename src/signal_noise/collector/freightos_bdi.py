@@ -22,7 +22,7 @@ class FreightosBDICollector(BaseCollector):
         display_name="US Goods Trade Balance (FRED, monthly)",
         update_frequency="daily",
         api_docs_url="https://fred.stlouisfed.org/series/BOPGSTB",
-        domain="infrastructure",
+        domain="technology",
         category="logistics",
     )
 

@@ -21,7 +21,7 @@ class DelphiFluHospitalizationsCollector(BaseCollector):
         display_name="Flu Hospitalizations (Delphi)",
         update_frequency="weekly",
         api_docs_url="https://cmu-delphi.github.io/delphi-epidata/",
-        domain="health",
+        domain="society",
         category="epidemiology",
     )
 

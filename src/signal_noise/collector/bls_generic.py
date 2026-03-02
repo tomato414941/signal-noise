@@ -28,68 +28,68 @@ _bls_cache = SharedAPICache(ttl=3600)  # cache for 1 hour (data is monthly)
 # (series_id, collector_name, display_name, frequency, domain, category)
 BLS_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── CPI (Consumer Price Index) ─────────────────────────────
-    ("CUSR0000SA0", "bls_cpi_all", "BLS CPI All Urban (SA)", "monthly", "macro", "inflation"),
-    ("CUSR0000SA0L1E", "bls_cpi_core", "BLS CPI Core (ex Food/Energy)", "monthly", "macro", "inflation"),
-    ("CUSR0000SAF1", "bls_cpi_food", "BLS CPI Food", "monthly", "macro", "inflation"),
-    ("CUSR0000SACE", "bls_cpi_energy", "BLS CPI Energy", "monthly", "macro", "inflation"),
-    ("CUSR0000SAH1", "bls_cpi_shelter", "BLS CPI Shelter", "monthly", "macro", "inflation"),
-    ("CUSR0000SETB01", "bls_cpi_gasoline", "BLS CPI Gasoline", "monthly", "macro", "inflation"),
-    ("CUSR0000SAM", "bls_cpi_medical", "BLS CPI Medical Care", "monthly", "macro", "inflation"),
-    ("CUSR0000SAE", "bls_cpi_education", "BLS CPI Education/Communication", "monthly", "macro", "inflation"),
-    ("CUSR0000SETA01", "bls_cpi_new_vehicles", "BLS CPI New Vehicles", "monthly", "macro", "inflation"),
-    ("CUSR0000SETA02", "bls_cpi_used_vehicles", "BLS CPI Used Vehicles", "monthly", "macro", "inflation"),
-    ("CUSR0000SAA", "bls_cpi_apparel", "BLS CPI Apparel", "monthly", "macro", "inflation"),
+    ("CUSR0000SA0", "bls_cpi_all", "BLS CPI All Urban (SA)", "monthly", "economy", "inflation"),
+    ("CUSR0000SA0L1E", "bls_cpi_core", "BLS CPI Core (ex Food/Energy)", "monthly", "economy", "inflation"),
+    ("CUSR0000SAF1", "bls_cpi_food", "BLS CPI Food", "monthly", "economy", "inflation"),
+    ("CUSR0000SACE", "bls_cpi_energy", "BLS CPI Energy", "monthly", "economy", "inflation"),
+    ("CUSR0000SAH1", "bls_cpi_shelter", "BLS CPI Shelter", "monthly", "economy", "inflation"),
+    ("CUSR0000SETB01", "bls_cpi_gasoline", "BLS CPI Gasoline", "monthly", "economy", "inflation"),
+    ("CUSR0000SAM", "bls_cpi_medical", "BLS CPI Medical Care", "monthly", "economy", "inflation"),
+    ("CUSR0000SAE", "bls_cpi_education", "BLS CPI Education/Communication", "monthly", "economy", "inflation"),
+    ("CUSR0000SETA01", "bls_cpi_new_vehicles", "BLS CPI New Vehicles", "monthly", "economy", "inflation"),
+    ("CUSR0000SETA02", "bls_cpi_used_vehicles", "BLS CPI Used Vehicles", "monthly", "economy", "inflation"),
+    ("CUSR0000SAA", "bls_cpi_apparel", "BLS CPI Apparel", "monthly", "economy", "inflation"),
 
     # ── PPI (Producer Price Index) ─────────────────────────────
-    ("WPUFD49104", "bls_ppi_final", "BLS PPI Final Demand", "monthly", "macro", "inflation"),
-    ("WPUFD4131", "bls_ppi_core", "BLS PPI Core (ex Food/Energy)", "monthly", "macro", "inflation"),
-    ("WPUFD41", "bls_ppi_goods", "BLS PPI Finished Goods", "monthly", "macro", "inflation"),
+    ("WPUFD49104", "bls_ppi_final", "BLS PPI Final Demand", "monthly", "economy", "inflation"),
+    ("WPUFD4131", "bls_ppi_core", "BLS PPI Core (ex Food/Energy)", "monthly", "economy", "inflation"),
+    ("WPUFD41", "bls_ppi_goods", "BLS PPI Finished Goods", "monthly", "economy", "inflation"),
 
     # ── Employment ─────────────────────────────────────────────
-    ("CES0000000001", "bls_nfp_total", "BLS Total Nonfarm Payrolls", "monthly", "macro", "labor"),
-    ("CES0500000001", "bls_nfp_private", "BLS Private Payrolls", "monthly", "macro", "labor"),
-    ("CES3000000001", "bls_nfp_mfg", "BLS Manufacturing Payrolls", "monthly", "macro", "labor"),
-    ("CES4200000001", "bls_nfp_retail", "BLS Retail Trade Payrolls", "monthly", "macro", "labor"),
-    ("CES6500000001", "bls_nfp_edu_health", "BLS Education/Health Payrolls", "monthly", "macro", "labor"),
-    ("CES7000000001", "bls_nfp_leisure", "BLS Leisure/Hospitality Payrolls", "monthly", "macro", "labor"),
-    ("CES2000000001", "bls_nfp_construction", "BLS Construction Payrolls", "monthly", "macro", "labor"),
-    ("CES9000000001", "bls_nfp_govt", "BLS Government Payrolls", "monthly", "macro", "labor"),
-    ("CES6000000001", "bls_nfp_professional", "BLS Professional/Business Payrolls", "monthly", "macro", "labor"),
-    ("CES4000000001", "bls_nfp_trade_transport", "BLS Trade/Transport/Utilities Payrolls", "monthly", "macro", "labor"),
-    ("CES5000000001", "bls_nfp_info", "BLS Information Payrolls", "monthly", "macro", "labor"),
-    ("CES5500000001", "bls_nfp_financial", "BLS Financial Activities Payrolls", "monthly", "macro", "labor"),
+    ("CES0000000001", "bls_nfp_total", "BLS Total Nonfarm Payrolls", "monthly", "economy", "labor"),
+    ("CES0500000001", "bls_nfp_private", "BLS Private Payrolls", "monthly", "economy", "labor"),
+    ("CES3000000001", "bls_nfp_mfg", "BLS Manufacturing Payrolls", "monthly", "economy", "labor"),
+    ("CES4200000001", "bls_nfp_retail", "BLS Retail Trade Payrolls", "monthly", "economy", "labor"),
+    ("CES6500000001", "bls_nfp_edu_health", "BLS Education/Health Payrolls", "monthly", "economy", "labor"),
+    ("CES7000000001", "bls_nfp_leisure", "BLS Leisure/Hospitality Payrolls", "monthly", "economy", "labor"),
+    ("CES2000000001", "bls_nfp_construction", "BLS Construction Payrolls", "monthly", "economy", "labor"),
+    ("CES9000000001", "bls_nfp_govt", "BLS Government Payrolls", "monthly", "economy", "labor"),
+    ("CES6000000001", "bls_nfp_professional", "BLS Professional/Business Payrolls", "monthly", "economy", "labor"),
+    ("CES4000000001", "bls_nfp_trade_transport", "BLS Trade/Transport/Utilities Payrolls", "monthly", "economy", "labor"),
+    ("CES5000000001", "bls_nfp_info", "BLS Information Payrolls", "monthly", "economy", "labor"),
+    ("CES5500000001", "bls_nfp_financial", "BLS Financial Activities Payrolls", "monthly", "economy", "labor"),
 
     # ── Unemployment ───────────────────────────────────────────
-    ("LNS14000000", "bls_unemp_rate", "BLS Unemployment Rate", "monthly", "macro", "labor"),
-    ("LNS14000001", "bls_unemp_rate_men", "BLS Unemployment Rate (Men)", "monthly", "macro", "labor"),
-    ("LNS14000002", "bls_unemp_rate_women", "BLS Unemployment Rate (Women)", "monthly", "macro", "labor"),
-    ("LNS12000000", "bls_labor_force", "BLS Civilian Labor Force", "monthly", "macro", "labor"),
-    ("LNS11300000", "bls_participation", "BLS Labor Force Participation Rate", "monthly", "macro", "labor"),
-    ("LNS12032194", "bls_u6_rate", "BLS U-6 Unemployment Rate", "monthly", "macro", "labor"),
+    ("LNS14000000", "bls_unemp_rate", "BLS Unemployment Rate", "monthly", "economy", "labor"),
+    ("LNS14000001", "bls_unemp_rate_men", "BLS Unemployment Rate (Men)", "monthly", "economy", "labor"),
+    ("LNS14000002", "bls_unemp_rate_women", "BLS Unemployment Rate (Women)", "monthly", "economy", "labor"),
+    ("LNS12000000", "bls_labor_force", "BLS Civilian Labor Force", "monthly", "economy", "labor"),
+    ("LNS11300000", "bls_participation", "BLS Labor Force Participation Rate", "monthly", "economy", "labor"),
+    ("LNS12032194", "bls_u6_rate", "BLS U-6 Unemployment Rate", "monthly", "economy", "labor"),
 
     # ── Unemployment components ────────────────────────────────
-    ("LNS13023621", "bls_job_losers", "BLS Unemployment - Job Losers", "monthly", "macro", "labor"),
-    ("LNS13023557", "bls_reentrants", "BLS Unemployment - Reentrants", "monthly", "macro", "labor"),
+    ("LNS13023621", "bls_job_losers", "BLS Unemployment - Job Losers", "monthly", "economy", "labor"),
+    ("LNS13023557", "bls_reentrants", "BLS Unemployment - Reentrants", "monthly", "economy", "labor"),
 
     # ── Average hourly/weekly earnings ─────────────────────────
-    ("CES0500000003", "bls_avg_hourly_priv", "BLS Avg Hourly Earnings (Private)", "monthly", "macro", "labor"),
-    ("CES0500000011", "bls_avg_weekly_priv", "BLS Avg Weekly Earnings (Private)", "monthly", "macro", "labor"),
-    ("CES0500000002", "bls_avg_hours_priv", "BLS Avg Weekly Hours (Private)", "monthly", "macro", "labor"),
+    ("CES0500000003", "bls_avg_hourly_priv", "BLS Avg Hourly Earnings (Private)", "monthly", "economy", "labor"),
+    ("CES0500000011", "bls_avg_weekly_priv", "BLS Avg Weekly Earnings (Private)", "monthly", "economy", "labor"),
+    ("CES0500000002", "bls_avg_hours_priv", "BLS Avg Weekly Hours (Private)", "monthly", "economy", "labor"),
 
     # ── Import/Export prices ───────────────────────────────────
-    ("EIUIR", "bls_import_price", "BLS Import Price Index (All)", "monthly", "macro", "trade"),
-    ("EIUIR100", "bls_import_ex_fuel", "BLS Import Price ex Fuel", "monthly", "macro", "trade"),
-    ("EIUIQ", "bls_export_price", "BLS Export Price Index (All)", "monthly", "macro", "trade"),
+    ("EIUIR", "bls_import_price", "BLS Import Price Index (All)", "monthly", "economy", "trade"),
+    ("EIUIR100", "bls_import_ex_fuel", "BLS Import Price ex Fuel", "monthly", "economy", "trade"),
+    ("EIUIQ", "bls_export_price", "BLS Export Price Index (All)", "monthly", "economy", "trade"),
 
     # ── Productivity ───────────────────────────────────────────
-    ("PRS85006092", "bls_nfb_productivity", "BLS Nonfarm Productivity", "quarterly", "macro", "economic"),
-    ("PRS85006112", "bls_unit_labor_cost", "BLS Unit Labor Costs", "quarterly", "macro", "economic"),
+    ("PRS85006092", "bls_nfb_productivity", "BLS Nonfarm Productivity", "quarterly", "economy", "economic"),
+    ("PRS85006112", "bls_unit_labor_cost", "BLS Unit Labor Costs", "quarterly", "economy", "economic"),
 
     # ── JOLTS (Job Openings) ───────────────────────────────────
-    ("JTS000000000000000JOL", "bls_jolts_openings", "BLS JOLTS Job Openings", "monthly", "macro", "labor"),
-    ("JTS000000000000000HIR", "bls_jolts_hires", "BLS JOLTS Hires", "monthly", "macro", "labor"),
-    ("JTS000000000000000TSR", "bls_jolts_separations", "BLS JOLTS Total Separations", "monthly", "macro", "labor"),
-    ("JTS000000000000000QUR", "bls_jolts_quits", "BLS JOLTS Quits", "monthly", "macro", "labor"),
+    ("JTS000000000000000JOL", "bls_jolts_openings", "BLS JOLTS Job Openings", "monthly", "economy", "labor"),
+    ("JTS000000000000000HIR", "bls_jolts_hires", "BLS JOLTS Hires", "monthly", "economy", "labor"),
+    ("JTS000000000000000TSR", "bls_jolts_separations", "BLS JOLTS Total Separations", "monthly", "economy", "labor"),
+    ("JTS000000000000000QUR", "bls_jolts_quits", "BLS JOLTS Quits", "monthly", "economy", "labor"),
 ]
 
 _ALL_SERIES_IDS = [s[0] for s in BLS_SERIES]

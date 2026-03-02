@@ -197,7 +197,7 @@ class TestFuturesMeta:
             "ETHUSDT", "eth", "oi",
             "/futures/data/openInterestHist", "sumOpenInterest", "timestamp", "1h", "Open Interest",
         )
-        assert cls.meta.domain == "financial"
+        assert cls.meta.domain == "markets"
         assert cls.meta.category == "crypto_derivatives"
 
     def test_update_frequency(self):
@@ -265,7 +265,7 @@ class TestFundingRateCollectors:
     def test_meta(self):
         collectors = get_funding_rate_collectors()
         for name, cls in collectors.items():
-            assert cls.meta.domain == "financial"
+            assert cls.meta.domain == "markets"
             assert cls.meta.category == "crypto_derivatives"
             assert cls.meta.signal_type == "scalar"
             assert cls.meta.update_frequency == "hourly"
@@ -297,7 +297,7 @@ class TestLiquidationCollectors:
     def test_meta(self):
         collectors = get_liquidation_collectors()
         for name, cls in collectors.items():
-            assert cls.meta.domain == "financial"
+            assert cls.meta.domain == "markets"
             assert cls.meta.category == "crypto_derivatives"
             assert cls.meta.signal_type == "scalar"
             assert cls.meta.interval == 3600
@@ -326,7 +326,7 @@ class TestOpenInterestCollectors:
     def test_meta(self):
         collectors = get_open_interest_collectors()
         for name, cls in collectors.items():
-            assert cls.meta.domain == "financial"
+            assert cls.meta.domain == "markets"
             assert cls.meta.category == "crypto_derivatives"
             assert cls.meta.signal_type == "scalar"
             assert cls.meta.interval == 3600
@@ -355,7 +355,7 @@ class TestLongShortRatioCollectors:
     def test_meta(self):
         collectors = get_long_short_ratio_collectors()
         for name, cls in collectors.items():
-            assert cls.meta.domain == "financial"
+            assert cls.meta.domain == "markets"
             assert cls.meta.category == "crypto_derivatives"
             assert cls.meta.signal_type == "scalar"
             assert cls.meta.interval == 3600

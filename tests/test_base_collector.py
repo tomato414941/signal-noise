@@ -98,7 +98,7 @@ class TestBaseCollector:
             assert result.iloc[2]["value"] == 30.0  # newer wins
 
     def test_taxonomy_constants_non_empty(self):
-        assert len(DOMAINS) >= 8
+        assert len(DOMAINS) >= 6
         assert len(CATEGORIES) >= 20
         assert len(FREQUENCIES) >= 5
 

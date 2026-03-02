@@ -25,7 +25,7 @@ class EnsoCollector(BaseCollector):
         display_name="ENSO Oceanic Niño Index",
         update_frequency="monthly",
         api_docs_url="https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -70,7 +70,7 @@ class ArcticOscillationCollector(BaseCollector):
         display_name="Arctic Oscillation Index (monthly)",
         update_frequency="monthly",
         api_docs_url="https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/ao.shtml",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -119,7 +119,7 @@ class NaoCollector(BaseCollector):
         display_name="North Atlantic Oscillation Index (monthly)",
         update_frequency="monthly",
         api_docs_url="https://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/nao.shtml",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -144,7 +144,7 @@ class SoiCollector(BaseCollector):
         display_name="Southern Oscillation Index (SOI)",
         update_frequency="monthly",
         api_docs_url="https://www.cpc.ncep.noaa.gov/data/indices/soi",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -191,7 +191,7 @@ class PdoCollector(BaseCollector):
         display_name="Pacific Decadal Oscillation (PDO)",
         update_frequency="monthly",
         api_docs_url="https://www.ncei.noaa.gov/pub/data/cmb/ersst/v5/index/ersst.v5.pdo.dat",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -238,7 +238,7 @@ class AmoCollector(BaseCollector):
         display_name="Atlantic Multidecadal Oscillation (AMO)",
         update_frequency="monthly",
         api_docs_url="https://www.psl.noaa.gov/data/timeseries/AMO/",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 
@@ -286,7 +286,7 @@ class IodCollector(BaseCollector):
         display_name="Indian Ocean Dipole (IOD) Mode Index",
         update_frequency="monthly",
         api_docs_url="https://www.psl.noaa.gov/gcos_wgsp/Timeseries/DMI/",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 

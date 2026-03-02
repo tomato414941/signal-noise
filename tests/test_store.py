@@ -65,16 +65,16 @@ class TestSignalStore:
         assert store.get_latest("nonexistent") is None
 
     def test_save_meta_and_list(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
-        store.save_meta("sp500", "financial", "equity", 86400)
+        store.save_meta("btc", "markets", "crypto", 3600)
+        store.save_meta("sp500", "markets", "equity", 86400)
         signals = store.list_signals()
         assert len(signals) == 2
         assert signals[0]["name"] == "btc"
-        assert signals[0]["domain"] == "financial"
+        assert signals[0]["domain"] == "markets"
         assert signals[0]["interval"] == 3600
 
     def test_get_meta(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         meta = store.get_meta("btc")
         assert meta is not None
         assert meta["category"] == "crypto"
@@ -165,7 +165,7 @@ class TestOHLCV:
 
 class TestSignalType:
     def test_save_meta_with_signal_type(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         meta = store.get_meta("btc")
         assert meta is not None
         assert meta["signal_type"] == "ohlcv"
@@ -177,7 +177,7 @@ class TestSignalType:
         assert meta["signal_type"] == "scalar"
 
     def test_signal_type_in_list(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600, "ohlcv")
+        store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         store.save_meta("fear", "sentiment", "sentiment", 86400)
         signals = store.list_signals()
         types = {s["name"]: s["signal_type"] for s in signals}
@@ -255,14 +255,14 @@ class TestTimestampNormalization:
 
     def test_save_meta_does_not_set_last_updated(self, store: SignalStore) -> None:
         """save_meta() should not touch last_updated; only save() sets it."""
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         meta = store.get_meta("btc")
         assert meta is not None
         assert meta["last_updated"] is None
 
     def test_save_sets_last_updated_iso_format(self, store: SignalStore) -> None:
         """save() should set last_updated in ISO 8601 format."""
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01T00:00:00+00:00"], "value": [50000.0]})
         store.save("btc", df)
         meta = store.get_meta("btc")
@@ -274,12 +274,12 @@ class TestTimestampNormalization:
 
 class TestFreshness:
     def test_check_freshness_no_stale(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 86400)
+        store.save_meta("btc", "markets", "crypto", 86400)
         stale = store.check_freshness()
         assert stale == []
 
     def test_check_freshness_stale(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         # Backdate last_updated by 3 hours (> 3600 * 2.0 = 7200s)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
@@ -292,7 +292,7 @@ class TestFreshness:
         assert stale[0]["expected_interval"] == 3600
 
     def test_check_freshness_custom_threshold(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
             " 'now', '-2 hours') WHERE name = 'btc'"
@@ -306,7 +306,7 @@ class TestFreshness:
         assert len(stale) == 0
 
     def test_reset_failures(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store.increment_failures("btc")
         store.increment_failures("btc")
         meta = store.get_meta("btc")
@@ -316,13 +316,13 @@ class TestFreshness:
         assert meta["consecutive_failures"] == 0
 
     def test_increment_failures(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store.increment_failures("btc")
         meta = store.get_meta("btc")
         assert meta["consecutive_failures"] == 1
 
     def test_check_freshness_includes_failures(self, store: SignalStore) -> None:
-        store.save_meta("btc", "financial", "crypto", 3600)
+        store.save_meta("btc", "markets", "crypto", 3600)
         store.increment_failures("btc")
         store.increment_failures("btc")
         store._conn.execute(
@@ -455,13 +455,13 @@ class TestCheckHealth:
         assert h == {"never_seen": [], "fresh": [], "stale": [], "failing": []}
 
     def test_never_seen(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         h = store.check_health()
         assert len(h["never_seen"]) == 1
         assert h["never_seen"][0]["name"] == "s"
 
     def test_fresh(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
         store.save("s", df)
         h = store.check_health()
@@ -469,7 +469,7 @@ class TestCheckHealth:
         assert h["fresh"][0]["name"] == "s"
 
     def test_stale(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
             " 'now', '-3 hours') WHERE name = 's'"
@@ -479,7 +479,7 @@ class TestCheckHealth:
         assert len(h["stale"]) == 1
 
     def test_failing_takes_priority(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
             " 'now', '-3 hours') WHERE name = 's'"
@@ -492,19 +492,19 @@ class TestCheckHealth:
 
     def test_all_four_states(self, store: SignalStore) -> None:
         # fresh
-        store.save_meta("a", "financial", "crypto", 3600)
+        store.save_meta("a", "markets", "crypto", 3600)
         store.save("a", pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]}))
         # never_seen
-        store.save_meta("b", "earth", "weather", 86400)
+        store.save_meta("b", "environment", "weather", 86400)
         # stale
-        store.save_meta("c", "macro", "economic", 3600)
+        store.save_meta("c", "economy", "economic", 3600)
         store._conn.execute(
             "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ',"
             " 'now', '-3 hours') WHERE name = 'c'"
         )
         store._conn.commit()
         # failing
-        store.save_meta("d", "financial", "crypto", 3600)
+        store.save_meta("d", "markets", "crypto", 3600)
         store.increment_failures("d")
         h = store.check_health()
         assert [s["name"] for s in h["fresh"]] == ["a"]
@@ -516,7 +516,7 @@ class TestCheckHealth:
 class TestBatchMethods:
     def test_save_collection_result_single_commit(self, store: SignalStore) -> None:
         df = pd.DataFrame({"timestamp": ["2024-01-01", "2024-01-02"], "value": [1.0, 2.0]})
-        rows = store.save_collection_result("s", df, "financial", "crypto", 3600)
+        rows = store.save_collection_result("s", df, "markets", "crypto", 3600)
         assert rows == 2
         # Data saved
         result = store.get_data("s")
@@ -524,7 +524,7 @@ class TestBatchMethods:
         # Meta upserted
         meta = store.get_meta("s")
         assert meta is not None
-        assert meta["domain"] == "financial"
+        assert meta["domain"] == "markets"
         assert meta["category"] == "crypto"
         assert meta["interval"] == 3600
         assert meta["last_updated"] is not None
@@ -536,26 +536,26 @@ class TestBatchMethods:
         assert logs[0]["rows"] == 2
 
     def test_save_collection_result_resets_failures(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         store.increment_failures("s")
         store.increment_failures("s")
         assert store.get_meta("s")["consecutive_failures"] == 2
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
-        store.save_collection_result("s", df, "financial", "crypto", 3600)
+        store.save_collection_result("s", df, "markets", "crypto", 3600)
         assert store.get_meta("s")["consecutive_failures"] == 0
 
     def test_save_collection_result_empty_df(self, store: SignalStore) -> None:
-        rows = store.save_collection_result("s", pd.DataFrame(), "financial", "crypto", 3600)
+        rows = store.save_collection_result("s", pd.DataFrame(), "markets", "crypto", 3600)
         assert rows == 0
 
     def test_save_collection_result_custom_event(self, store: SignalStore) -> None:
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
-        store.save_collection_result("s", df, "financial", "crypto", 3600, event="half_open_recovered")
+        store.save_collection_result("s", df, "markets", "crypto", 3600, event="half_open_recovered")
         logs = store.get_audit_log("s")
         assert logs[0]["event"] == "half_open_recovered"
 
     def test_save_collection_failure_single_commit(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         store.save_collection_failure("s", "timeout error")
         meta = store.get_meta("s")
         assert meta["consecutive_failures"] == 1
@@ -565,7 +565,7 @@ class TestBatchMethods:
         assert "timeout" in logs[0]["detail"]
 
     def test_save_collection_failure_increments(self, store: SignalStore) -> None:
-        store.save_meta("s", "financial", "crypto", 3600)
+        store.save_meta("s", "markets", "crypto", 3600)
         store.save_collection_failure("s", "err1")
         store.save_collection_failure("s", "err2")
         assert store.get_meta("s")["consecutive_failures"] == 2

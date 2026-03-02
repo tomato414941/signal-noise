@@ -37,7 +37,7 @@ def _make_water_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url=f"https://waterdata.usgs.gov/nwis/dv?site_no={site_id}",
-            domain="earth",
+            domain="environment",
             category="hydrology",
         )
 

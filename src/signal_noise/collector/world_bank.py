@@ -28,7 +28,7 @@ def _make_wb_collector(
             display_name=display_name,
             update_frequency="yearly",
             api_docs_url="https://datahelpdesk.worldbank.org/knowledgebase/articles/889392",
-            domain="macro",
+            domain="economy",
             category="economic",
         )
 

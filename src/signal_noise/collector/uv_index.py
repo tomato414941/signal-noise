@@ -18,7 +18,7 @@ class UVIndexCollector(BaseCollector):
         display_name="UV Index (New York)",
         update_frequency="daily",
         api_docs_url="https://open-meteo.com/en/docs",
-        domain="earth",
+        domain="environment",
         category="weather",
     )
 

@@ -20,7 +20,7 @@ class PBOCLPRCollector(BaseCollector):
         display_name="PBOC Discount Rate (%)",
         update_frequency="monthly",
         api_docs_url="https://fred.stlouisfed.org/series/INTDSRCNM193N",
-        domain="financial",
+        domain="markets",
         category="rates",
     )
 

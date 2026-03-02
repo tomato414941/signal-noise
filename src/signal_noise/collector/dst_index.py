@@ -14,7 +14,7 @@ class DstIndexCollector(BaseCollector):
         display_name="Dst Geomagnetic Storm Index",
         update_frequency="hourly",
         api_docs_url="https://www.swpc.noaa.gov/products/geospace-geomagnetic-activity-plot",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 

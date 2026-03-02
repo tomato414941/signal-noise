@@ -14,7 +14,7 @@ class RiverDischargeCollector(BaseCollector):
         display_name="Mississippi River Discharge (cfs)",
         update_frequency="daily",
         api_docs_url="https://waterservices.usgs.gov/",
-        domain="earth",
+        domain="environment",
         category="hydrology",
     )
 

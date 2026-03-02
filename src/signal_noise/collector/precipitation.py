@@ -19,7 +19,7 @@ class GlobalPrecipitationCollector(BaseCollector):
         display_name="Global Precipitation Index (mm/day)",
         update_frequency="daily",
         api_docs_url="https://open-meteo.com/en/docs/historical-weather-api",
-        domain="earth",
+        domain="environment",
         category="weather",
     )
 

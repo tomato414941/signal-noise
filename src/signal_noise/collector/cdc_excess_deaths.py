@@ -14,7 +14,7 @@ class CDCExcessDeathsCollector(BaseCollector):
         display_name="CDC US Weekly Excess Deaths",
         update_frequency="weekly",
         api_docs_url="https://data.cdc.gov/NCHS/Excess-Deaths-Associated-with-COVID-19/xkkf-xrst",
-        domain="mortality",
+        domain="society",
         category="excess_deaths",
     )
 

@@ -14,7 +14,7 @@ class CO2GlobalCollector(BaseCollector):
         display_name="CO2 Monthly Global Average (ppm)",
         update_frequency="monthly",
         api_docs_url="https://gml.noaa.gov/ccgg/trends/",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 

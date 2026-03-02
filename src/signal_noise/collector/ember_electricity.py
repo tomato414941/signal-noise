@@ -46,7 +46,7 @@ def _make_ember_collector(
             display_name=display_name,
             update_frequency="yearly",
             api_docs_url="https://ember-climate.org/data/",
-            domain="infrastructure",
+            domain="economy",
             category="energy",
         )
 

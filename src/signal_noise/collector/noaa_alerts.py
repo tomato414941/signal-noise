@@ -36,7 +36,7 @@ class NOAAAlertsTotalCollector(BaseCollector):
         display_name="NOAA Alerts (Total)",
         update_frequency="hourly",
         api_docs_url="https://www.weather.gov/documentation/services-web-api",
-        domain="earth",
+        domain="environment",
         category="weather",
     )
 
@@ -54,7 +54,7 @@ class NOAAAlertLandCollector(BaseCollector):
         display_name="NOAA Alerts (Land)",
         update_frequency="hourly",
         api_docs_url="https://www.weather.gov/documentation/services-web-api",
-        domain="earth",
+        domain="environment",
         category="weather",
     )
 
@@ -72,7 +72,7 @@ class NOAAAlertMarineCollector(BaseCollector):
         display_name="NOAA Alerts (Marine)",
         update_frequency="hourly",
         api_docs_url="https://www.weather.gov/documentation/services-web-api",
-        domain="earth",
+        domain="environment",
         category="weather",
     )
 

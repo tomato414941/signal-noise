@@ -14,7 +14,7 @@ class EthBtcCollector(BaseCollector):
         display_name="ETH/BTC Ratio",
         update_frequency="hourly",
         api_docs_url="https://binance-docs.github.io/apidocs/spot/en/",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

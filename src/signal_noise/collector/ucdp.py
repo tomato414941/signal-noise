@@ -41,7 +41,7 @@ class UCDPBattleDeathsCollector(BaseCollector):
         update_frequency="yearly",
         api_docs_url="https://ucdp.uu.se/apidocs/",
         requires_key=True,
-        domain="conflict",
+        domain="society",
         category="armed_conflict",
     )
 
@@ -79,7 +79,7 @@ class UCDPConflictCountCollector(BaseCollector):
         update_frequency="yearly",
         api_docs_url="https://ucdp.uu.se/apidocs/",
         requires_key=True,
-        domain="conflict",
+        domain="society",
         category="armed_conflict",
     )
 

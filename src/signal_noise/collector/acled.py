@@ -31,7 +31,7 @@ class ACLEDEventsCollector(BaseCollector):
         update_frequency="weekly",
         api_docs_url="https://apidocs.acleddata.com/",
         requires_key=True,
-        domain="conflict",
+        domain="society",
         category="armed_conflict",
     )
 

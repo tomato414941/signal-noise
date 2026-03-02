@@ -115,7 +115,7 @@ class TestTotalTVL:
         assert len(df) == 2
 
     def test_meta(self):
-        assert DeFiTotalTVLCollector.meta.domain == "financial"
+        assert DeFiTotalTVLCollector.meta.domain == "markets"
         assert DeFiTotalTVLCollector.meta.category == "crypto"
 
 

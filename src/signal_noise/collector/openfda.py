@@ -39,7 +39,7 @@ class FDADrugAdverseEventsCollector(BaseCollector):
         display_name="FDA Drug Adverse Events",
         update_frequency="daily",
         api_docs_url="https://open.fda.gov/apis/drug/event/",
-        domain="health",
+        domain="society",
         category="public_health",
     )
 
@@ -55,7 +55,7 @@ class FDADrugRecallsCollector(BaseCollector):
         display_name="FDA Drug Recalls",
         update_frequency="weekly",
         api_docs_url="https://open.fda.gov/apis/drug/enforcement/",
-        domain="health",
+        domain="society",
         category="public_health",
     )
 
@@ -71,7 +71,7 @@ class FDAFoodRecallsCollector(BaseCollector):
         display_name="FDA Food Recalls",
         update_frequency="weekly",
         api_docs_url="https://open.fda.gov/apis/food/enforcement/",
-        domain="health",
+        domain="society",
         category="public_health",
     )
 

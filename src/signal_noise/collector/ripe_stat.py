@@ -18,7 +18,7 @@ class RIPEPeerCountCollector(BaseCollector):
         display_name="RIPE RIS IPv4 Full-Feed Peers",
         update_frequency="daily",
         api_docs_url="https://stat.ripe.net/docs/02.data-api/",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
     )
 

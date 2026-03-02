@@ -14,7 +14,7 @@ class WIPOPatentFilingsCollector(BaseCollector):
         display_name="WIPO Global Patent Filings (Non-Resident)",
         update_frequency="yearly",
         api_docs_url="https://data.worldbank.org/indicator/IP.PAT.NRES",
-        domain="creativity",
+        domain="technology",
         category="patents",
     )
 

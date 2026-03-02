@@ -45,7 +45,7 @@ def _make_marine_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://open-meteo.com/en/docs/marine-weather-api",
-            domain="earth",
+            domain="environment",
             category="marine",
         )
 

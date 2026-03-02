@@ -18,7 +18,7 @@ class GitHubRepoCountCollector(BaseCollector):
         display_name="GitHub New Public Repos (daily)",
         update_frequency="daily",
         api_docs_url="https://docs.github.com/en/rest/search/search",
-        domain="developer",
+        domain="technology",
         category="developer",
     )
 

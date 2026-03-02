@@ -20,7 +20,7 @@ class LetsEncryptCollector(BaseCollector):
         display_name="Let's Encrypt Daily Certificates Issued",
         update_frequency="daily",
         api_docs_url="https://letsencrypt.org/stats/",
-        domain="infrastructure",
+        domain="technology",
         category="internet",
     )
 

@@ -21,7 +21,7 @@ class OECDCLICollector(BaseCollector):
         display_name="OECD Composite Leading Indicator (G7)",
         update_frequency="monthly",
         api_docs_url="https://data.oecd.org/leadind/composite-leading-indicator-cli.htm",
-        domain="macro",
+        domain="economy",
         category="economic",
     )
 

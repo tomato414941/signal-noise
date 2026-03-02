@@ -14,7 +14,7 @@ class NYCTaxiTripsCollector(BaseCollector):
         display_name="NYC Yellow Taxi Monthly Trips",
         update_frequency="monthly",
         api_docs_url="https://data.cityofnewyork.us/Transportation/2024-Yellow-Taxi-Trip-Data/wn6i-ogsj",
-        domain="urban",
+        domain="technology",
         category="transportation",
     )
 

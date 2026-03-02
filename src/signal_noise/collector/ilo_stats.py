@@ -18,7 +18,7 @@ class ILOUnemploymentCollector(BaseCollector):
         display_name="Global Unemployment Rate (%)",
         update_frequency="yearly",
         api_docs_url="https://api.worldbank.org/v2/country/WLD/indicator/SL.UEM.TOTL.ZS",
-        domain="macro",
+        domain="economy",
         category="labor",
     )
 

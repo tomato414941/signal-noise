@@ -15,7 +15,7 @@ class USPTOPatentGrantsCollector(BaseCollector):
         display_name="US Patent Grants (Annual)",
         update_frequency="yearly",
         api_docs_url="https://data.worldbank.org/indicator/IP.PAT.RESD",
-        domain="creativity",
+        domain="technology",
         category="patents",
     )
 
@@ -53,7 +53,7 @@ class USPTOPatentAppsCollector(BaseCollector):
         display_name="Global Patent Applications Non-Resident (Annual)",
         update_frequency="yearly",
         api_docs_url="https://data.worldbank.org/indicator/IP.PAT.NRES",
-        domain="creativity",
+        domain="technology",
         category="patents",
     )
 

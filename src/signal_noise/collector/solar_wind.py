@@ -14,7 +14,7 @@ class SolarWindCollector(BaseCollector):
         display_name="Solar Wind Speed (km/s)",
         update_frequency="hourly",
         api_docs_url="https://www.swpc.noaa.gov/products/real-time-solar-wind",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 

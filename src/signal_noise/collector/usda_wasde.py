@@ -28,7 +28,7 @@ def _make_usda_collector(
             display_name=display_name,
             update_frequency="monthly",
             api_docs_url="https://apps.fas.usda.gov/OpenData/swagger/ui/index",
-            domain="food",
+            domain="economy",
             category="agriculture",
         )
 

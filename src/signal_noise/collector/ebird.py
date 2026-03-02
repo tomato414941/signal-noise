@@ -28,7 +28,7 @@ class EBirdObservationsCollector(BaseCollector):
         update_frequency="daily",
         api_docs_url="https://documenter.getpostman.com/view/664302/S1ENwy59",
         requires_key=True,
-        domain="animal",
+        domain="environment",
         category="wildlife",
     )
 

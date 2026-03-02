@@ -21,7 +21,7 @@ class TSACheckpointCollector(BaseCollector):
         display_name="US Airline Load Factor (%, monthly)",
         update_frequency="monthly",
         api_docs_url="https://fred.stlouisfed.org/series/LOADFACTOR",
-        domain="infrastructure",
+        domain="technology",
         category="aviation",
     )
 

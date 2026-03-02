@@ -17,7 +17,7 @@ class UNPopulationCollector(BaseCollector):
         display_name="World Population Estimate",
         update_frequency="yearly",
         api_docs_url="https://api.worldbank.org/v2/country/WLD/indicator/SP.POP.TOTL",
-        domain="macro",
+        domain="economy",
         category="economic",
     )
 

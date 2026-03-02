@@ -14,7 +14,7 @@ class CDCFluCollector(BaseCollector):
         display_name="CDC ILI National Rate (%)",
         update_frequency="weekly",
         api_docs_url="https://www.cdc.gov/flu/weekly/",
-        domain="health",
+        domain="society",
         category="epidemiology",
     )
 

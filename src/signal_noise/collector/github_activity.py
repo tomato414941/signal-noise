@@ -55,7 +55,7 @@ class BitcoinCommitsCollector(_GithubCommitCollector):
         display_name="GitHub bitcoin/bitcoin Weekly Commits",
         update_frequency="weekly",
         api_docs_url="https://docs.github.com/en/rest/metrics/statistics",
-        domain="developer",
+        domain="technology",
         category="developer",
     )
 
@@ -68,6 +68,6 @@ class EthereumCommitsCollector(_GithubCommitCollector):
         display_name="GitHub ethereum/go-ethereum Weekly Commits",
         update_frequency="weekly",
         api_docs_url="https://docs.github.com/en/rest/metrics/statistics",
-        domain="developer",
+        domain="technology",
         category="developer",
     )

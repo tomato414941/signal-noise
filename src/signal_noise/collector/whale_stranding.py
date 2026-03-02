@@ -14,7 +14,7 @@ class NOAAWhaleStrandingCollector(BaseCollector):
         display_name="NOAA Marine Mammal Strandings",
         update_frequency="monthly",
         api_docs_url="https://www.fisheries.noaa.gov/national/marine-life-distress/national-stranding-database-public-access",
-        domain="animal",
+        domain="environment",
         category="wildlife",
     )
 

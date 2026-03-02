@@ -22,7 +22,7 @@ class ISSLatitudeCollector(BaseCollector):
         display_name="ISS Latitude",
         update_frequency="hourly",
         api_docs_url="http://api.open-notify.org",
-        domain="infrastructure",
+        domain="technology",
         category="space",
         collect_interval=900,
     )
@@ -41,7 +41,7 @@ class ISSLongitudeCollector(BaseCollector):
         display_name="ISS Longitude",
         update_frequency="hourly",
         api_docs_url="http://api.open-notify.org",
-        domain="infrastructure",
+        domain="technology",
         category="space",
         collect_interval=900,
     )
@@ -60,7 +60,7 @@ class ISSCrewCountCollector(BaseCollector):
         display_name="People In Space",
         update_frequency="hourly",
         api_docs_url="http://api.open-notify.org",
-        domain="infrastructure",
+        domain="technology",
         category="space",
         collect_interval=900,
     )

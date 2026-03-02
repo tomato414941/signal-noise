@@ -47,7 +47,7 @@ class DXYCollector(_YahooCollector):
         display_name="US Dollar Index (DXY)",
         update_frequency="daily",
         api_docs_url="https://finance.yahoo.com/quote/DX-Y.NYB/",
-        domain="financial",
+        domain="markets",
         category="forex",
         signal_type="ohlcv",
     )
@@ -60,7 +60,7 @@ class GoldCollector(_YahooCollector):
         display_name="Gold Futures",
         update_frequency="daily",
         api_docs_url="https://finance.yahoo.com/quote/GC=F/",
-        domain="financial",
+        domain="markets",
         category="commodity",
         signal_type="ohlcv",
     )
@@ -73,7 +73,7 @@ class SP500Collector(_YahooCollector):
         display_name="S&P 500",
         update_frequency="daily",
         api_docs_url="https://finance.yahoo.com/quote/%5EGSPC/",
-        domain="financial",
+        domain="markets",
         category="equity",
         signal_type="ohlcv",
     )

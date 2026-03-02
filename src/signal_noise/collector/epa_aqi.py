@@ -14,7 +14,7 @@ class EPAAQICollector(BaseCollector):
         display_name="US PM2.5 Average (WHO)",
         update_frequency="yearly",
         api_docs_url="https://www.who.int/data/gho/info/gho-odata-api",
-        domain="earth",
+        domain="environment",
         category="air_quality",
     )
 

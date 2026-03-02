@@ -48,7 +48,7 @@ class TestOECDCLIFactory:
 
     def test_meta(self):
         cls = _make_oecd_cli_collector("USA", "test_cli_us", "Test CLI US")
-        assert cls.meta.domain == "macro"
+        assert cls.meta.domain == "economy"
         assert cls.meta.category == "economic"
         assert cls.meta.update_frequency == "monthly"
 

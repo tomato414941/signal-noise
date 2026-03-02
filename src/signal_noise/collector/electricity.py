@@ -16,7 +16,7 @@ class ElectricityCollector(BaseCollector):
         update_frequency="monthly",
         api_docs_url="https://www.eia.gov/opendata/",
         requires_key=True,
-        domain="financial",
+        domain="markets",
         category="commodity",
     )
 

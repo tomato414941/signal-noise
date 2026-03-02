@@ -14,7 +14,7 @@ class NYC311ComplaintsCollector(BaseCollector):
         display_name="NYC 311 Daily Complaints",
         update_frequency="daily",
         api_docs_url="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9",
-        domain="urban",
+        domain="society",
         category="city_stats",
     )
 

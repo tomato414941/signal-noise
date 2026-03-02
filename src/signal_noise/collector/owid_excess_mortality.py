@@ -14,7 +14,7 @@ class OWIDExcessMortalityCollector(BaseCollector):
         display_name="OWID Global Excess Mortality (P-score)",
         update_frequency="weekly",
         api_docs_url="https://github.com/owid/covid-19-data/tree/master/public/data/excess_mortality",
-        domain="mortality",
+        domain="society",
         category="excess_deaths",
     )
 

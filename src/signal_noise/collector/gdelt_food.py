@@ -24,7 +24,7 @@ def _make_gdelt_food_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/",
-            domain="food",
+            domain="economy",
             category="food_price",
         )
 

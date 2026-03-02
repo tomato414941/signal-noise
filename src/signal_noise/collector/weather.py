@@ -16,7 +16,7 @@ class NYWeatherCollector(BaseCollector):
         update_frequency="hourly",
         api_docs_url="https://openweathermap.org/api",
         requires_key=True,
-        domain="earth",
+        domain="environment",
         category="weather",
     )
 

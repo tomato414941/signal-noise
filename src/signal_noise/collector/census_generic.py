@@ -21,59 +21,59 @@ _GET_FIELDS = "data_type_code,time_slot_id,seasonally_adj,category_code,cell_val
 CENSUS_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
     # ── Housing ────────────────────────────────────────────────
     ("/eits/resconst", "TOTAL", "APERMITS", "yes",
-     "census_building_permits", "Census Building Permits", "monthly", "macro", "economic"),
+     "census_building_permits", "Census Building Permits", "monthly", "economy", "economic"),
     ("/eits/resconst", "TOTAL", "ASTARTS", "yes",
-     "census_housing_starts", "Census Housing Starts", "monthly", "macro", "economic"),
+     "census_housing_starts", "Census Housing Starts", "monthly", "economy", "economic"),
     ("/eits/resconst", "TOTAL", "ACOMPLETIONS", "yes",
-     "census_housing_completions", "Census Housing Completions", "monthly", "macro", "economic"),
+     "census_housing_completions", "Census Housing Completions", "monthly", "economy", "economic"),
 
     # ── New home sales ─────────────────────────────────────────
     ("/eits/ressales", "TOTAL", "ASOLD", "yes",
-     "census_new_home_sales", "Census New Home Sales", "monthly", "macro", "economic"),
+     "census_new_home_sales", "Census New Home Sales", "monthly", "economy", "economic"),
     ("/eits/ressales", "TOTAL", "FORSALE", "yes",
-     "census_homes_for_sale", "Census New Homes For Sale", "monthly", "macro", "economic"),
+     "census_homes_for_sale", "Census New Homes For Sale", "monthly", "economy", "economic"),
     ("/eits/ressales", "AVERAG", "SOLD", "no",
-     "census_avg_home_price", "Census Avg New Home Price", "monthly", "real_estate", "real_estate"),
+     "census_avg_home_price", "Census Avg New Home Price", "monthly", "economy", "real_estate"),
     ("/eits/ressales", "MEDIAN", "SOLD", "no",
-     "census_median_home_price", "Census Median New Home Price", "monthly", "real_estate", "real_estate"),
+     "census_median_home_price", "Census Median New Home Price", "monthly", "economy", "real_estate"),
 
     # ── Retail & food services ─────────────────────────────────
     ("/eits/marts", "SM", "44X72", "yes",
-     "census_retail_total", "Census Retail & Food Sales", "monthly", "macro", "economic"),
+     "census_retail_total", "Census Retail & Food Sales", "monthly", "economy", "economic"),
     ("/eits/marts", "SM", "441", "yes",
-     "census_auto_sales", "Census Motor Vehicle Sales", "monthly", "macro", "economic"),
+     "census_auto_sales", "Census Motor Vehicle Sales", "monthly", "economy", "economic"),
     ("/eits/marts", "SM", "454", "yes",
-     "census_ecommerce", "Census E-Commerce Sales", "monthly", "macro", "economic"),
+     "census_ecommerce", "Census E-Commerce Sales", "monthly", "economy", "economic"),
     ("/eits/marts", "SM", "722", "yes",
-     "census_food_services", "Census Food Services Sales", "monthly", "macro", "economic"),
+     "census_food_services", "Census Food Services Sales", "monthly", "economy", "economic"),
     ("/eits/marts", "SM", "452", "yes",
-     "census_general_merch", "Census General Merchandise Sales", "monthly", "macro", "economic"),
+     "census_general_merch", "Census General Merchandise Sales", "monthly", "economy", "economic"),
 
     # ── Trade ──────────────────────────────────────────────────
     ("/eits/ftd", "IMP", "BOPGS", "yes",
-     "census_imports_total", "Census Total Imports", "monthly", "macro", "trade"),
+     "census_imports_total", "Census Total Imports", "monthly", "economy", "trade"),
     ("/eits/ftd", "EXP", "BOPGS", "yes",
-     "census_exports_total", "Census Total Exports", "monthly", "macro", "trade"),
+     "census_exports_total", "Census Total Exports", "monthly", "economy", "trade"),
 
     # ── Construction spending ──────────────────────────────────
     ("/eits/vip", "T", "AXXXX", "yes",
-     "census_construction_spend", "Census Construction Spending", "monthly", "macro", "economic"),
+     "census_construction_spend", "Census Construction Spending", "monthly", "economy", "economic"),
     ("/eits/vip", "P", "AXXXX", "yes",
-     "census_private_construction", "Census Private Construction", "monthly", "macro", "economic"),
+     "census_private_construction", "Census Private Construction", "monthly", "economy", "economic"),
     ("/eits/vip", "V", "AXXXX", "yes",
-     "census_public_construction", "Census Public Construction", "monthly", "macro", "economic"),
+     "census_public_construction", "Census Public Construction", "monthly", "economy", "economic"),
 
     # ── Business inventories ───────────────────────────────────
     ("/eits/mtis", "IM", "MNFCTR", "yes",
-     "census_mfg_inventories", "Census Manufacturing Inventories", "monthly", "macro", "economic"),
+     "census_mfg_inventories", "Census Manufacturing Inventories", "monthly", "economy", "economic"),
     ("/eits/mtis", "IM", "WHLSLR", "yes",
-     "census_wholesale_inventories", "Census Wholesale Inventories", "monthly", "macro", "economic"),
+     "census_wholesale_inventories", "Census Wholesale Inventories", "monthly", "economy", "economic"),
     ("/eits/mtis", "IM", "RETAIL", "yes",
-     "census_retail_inventories", "Census Retail Inventories", "monthly", "macro", "economic"),
+     "census_retail_inventories", "Census Retail Inventories", "monthly", "economy", "economic"),
 
     # ── Wholesale trade ────────────────────────────────────────
     ("/eits/mwts", "SM", "42", "yes",
-     "census_wholesale_sales", "Census Wholesale Sales", "monthly", "macro", "economic"),
+     "census_wholesale_sales", "Census Wholesale Sales", "monthly", "economy", "economic"),
 ]
 
 

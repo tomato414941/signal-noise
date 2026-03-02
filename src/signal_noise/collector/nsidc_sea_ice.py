@@ -14,7 +14,7 @@ class NSIDCSeaIceCollector(BaseCollector):
         display_name="Arctic Sea Ice Extent (million km²)",
         update_frequency="daily",
         api_docs_url="https://nsidc.org/data/seaice_index",
-        domain="earth",
+        domain="environment",
         category="climate",
     )
 

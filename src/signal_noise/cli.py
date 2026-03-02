@@ -232,8 +232,6 @@ def _classify_level(name: str, meta) -> str:
         return meta.collection_level
     if name.startswith("probe_"):
         return "L5"
-    if meta.domain == "computed":
-        return "L4"
     if meta.requires_key:
         return "L2"
     return "L1"

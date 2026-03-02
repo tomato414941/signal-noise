@@ -30,7 +30,7 @@ class TestWHOGHOFactory:
 
         cls = _make_who_gho_collector(
             "WHOSIS_000001", "GLOBAL", "SEX_BTSX",
-            "test_life_exp", "Test Life Exp", "health", "public_health",
+            "test_life_exp", "Test Life Exp", "society", "public_health",
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -46,7 +46,7 @@ class TestWHOGHOFactory:
 
         cls = _make_who_gho_collector(
             "GHED_CHEGDP_SHA2011", "USA", None,
-            "test_health_exp", "Test Health Exp", "health", "public_health",
+            "test_health_exp", "Test Health Exp", "society", "public_health",
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -64,7 +64,7 @@ class TestWHOGHOFactory:
 
         cls = _make_who_gho_collector(
             "WHOSIS_000001", "GLOBAL", "SEX_BTSX",
-            "test_empty", "Test Empty", "health", "public_health",
+            "test_empty", "Test Empty", "society", "public_health",
         )
         with pytest.raises(RuntimeError, match="No WHO data"):
             cls().fetch()
@@ -72,9 +72,9 @@ class TestWHOGHOFactory:
     def test_meta(self):
         cls = _make_who_gho_collector(
             "WHOSIS_000001", "GLOBAL", "SEX_BTSX",
-            "test_meta", "Test Meta", "health", "public_health",
+            "test_meta", "Test Meta", "society", "public_health",
         )
-        assert cls.meta.domain == "health"
+        assert cls.meta.domain == "society"
         assert cls.meta.category == "public_health"
         assert cls.meta.update_frequency == "yearly"
 

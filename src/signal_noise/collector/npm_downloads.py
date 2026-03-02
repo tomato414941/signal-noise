@@ -33,7 +33,7 @@ def _make_npm_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://github.com/npm/registry/blob/main/docs/download-counts.md",
-            domain="developer",
+            domain="technology",
             category="developer",
         )
 

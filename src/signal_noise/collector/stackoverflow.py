@@ -31,7 +31,7 @@ def _make_so_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://api.stackexchange.com/docs",
-            domain="developer",
+            domain="technology",
             category="developer",
         )
 

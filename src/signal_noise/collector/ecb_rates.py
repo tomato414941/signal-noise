@@ -16,7 +16,7 @@ class ECBDepositRateCollector(BaseCollector):
         display_name="ECB Deposit Facility Rate (%)",
         update_frequency="daily",
         api_docs_url="https://data.ecb.europa.eu/",
-        domain="financial",
+        domain="markets",
         category="rates",
     )
 

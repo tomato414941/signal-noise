@@ -14,7 +14,7 @@ class CoinDanceCollector(BaseCollector):
         display_name="Bitcoin Node Count",
         update_frequency="daily",
         api_docs_url="https://coin.dance/nodes",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

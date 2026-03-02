@@ -29,7 +29,7 @@ def _make_crates_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://crates.io/policies",
-            domain="developer",
+            domain="technology",
             category="developer",
         )
 

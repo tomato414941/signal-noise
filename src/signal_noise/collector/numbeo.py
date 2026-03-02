@@ -22,7 +22,7 @@ class NumbeoCollector(BaseCollector):
         display_name="Big Mac Index (USD, USA)",
         update_frequency="monthly",
         api_docs_url="https://github.com/TheEconomist/big-mac-data",
-        domain="macro",
+        domain="economy",
         category="economic",
     )
 

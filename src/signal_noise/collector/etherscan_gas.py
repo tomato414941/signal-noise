@@ -14,7 +14,7 @@ class EtherscanGasCollector(BaseCollector):
         display_name="Ethereum Average Gas Price (Gwei)",
         update_frequency="daily",
         api_docs_url="https://docs.etherscan.io/etherscan-v2",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

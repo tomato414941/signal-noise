@@ -14,7 +14,7 @@ class ProMEDAlertCollector(BaseCollector):
         display_name="Global Health Alerts (monthly)",
         update_frequency="monthly",
         api_docs_url="https://www.who.int/emergencies/disease-outbreak-news",
-        domain="health",
+        domain="society",
         category="public_health",
     )
 

@@ -47,7 +47,7 @@ class TestCOTFactory:
         cls = _make_cot_collector(
             "BITCOIN", "cot_btc", "COT Bitcoin",
             "oi", "Open Interest", "open_interest_all",
-            "financial", "crypto",
+            "markets", "crypto",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -64,7 +64,7 @@ class TestCOTFactory:
         cls = _make_cot_collector(
             "BITCOIN", "cot_btc", "COT Bitcoin",
             "net_nc", "Net Non-Commercial", None,
-            "financial", "crypto",
+            "markets", "crypto",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -81,7 +81,7 @@ class TestCOTFactory:
         cls = _make_cot_collector(
             "BITCOIN", "cot_btc", "COT Bitcoin",
             "net_c", "Net Commercial", None,
-            "financial", "crypto",
+            "markets", "crypto",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -98,7 +98,7 @@ class TestCOTFactory:
         cls = _make_cot_collector(
             "BITCOIN", "cot_btc", "COT Bitcoin",
             "oi", "Open Interest", "open_interest_all",
-            "financial", "crypto",
+            "markets", "crypto",
         )
         with pytest.raises(RuntimeError, match="No COT data"):
             cls().fetch()
@@ -109,9 +109,9 @@ class TestCOTMeta:
         cls = _make_cot_collector(
             "GOLD", "cot_gold", "COT Gold",
             "oi", "Open Interest", "open_interest_all",
-            "financial", "commodity",
+            "markets", "commodity",
         )
-        assert cls.meta.domain == "financial"
+        assert cls.meta.domain == "markets"
         assert cls.meta.category == "commodity"
         assert cls.meta.update_frequency == "weekly"
 
@@ -119,7 +119,7 @@ class TestCOTMeta:
         cls = _make_cot_collector(
             "EURO FX", "cot_eur", "COT Euro FX",
             "net_nc", "Net Non-Commercial", None,
-            "financial", "forex",
+            "markets", "forex",
         )
         assert cls.meta.name == "cot_eur_net_nc"
         assert "Net Non-Commercial" in cls.meta.display_name

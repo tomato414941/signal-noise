@@ -17,65 +17,65 @@ _BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data
 EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
     # ── GDP ────────────────────────────────────────────────────
     ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EU27_2020&s_adj=SCA&freq=Q",
-     "eu_gdp_real", "Eurostat EU GDP (Real, SA)", "quarterly", "macro", "economic"),
+     "eu_gdp_real", "Eurostat EU GDP (Real, SA)", "quarterly", "economy", "economic"),
     ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=EA20&s_adj=SCA&freq=Q",
-     "eu_gdp_ea", "Eurostat Euro Area GDP (Real)", "quarterly", "macro", "economic"),
+     "eu_gdp_ea", "Eurostat Euro Area GDP (Real)", "quarterly", "economy", "economic"),
     ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=DE&s_adj=SCA&freq=Q",
-     "eu_gdp_de", "Eurostat Germany GDP (Real)", "quarterly", "macro", "economic"),
+     "eu_gdp_de", "Eurostat Germany GDP (Real)", "quarterly", "economy", "economic"),
     ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=FR&s_adj=SCA&freq=Q",
-     "eu_gdp_fr", "Eurostat France GDP (Real)", "quarterly", "macro", "economic"),
+     "eu_gdp_fr", "Eurostat France GDP (Real)", "quarterly", "economy", "economic"),
     ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=IT&s_adj=SCA&freq=Q",
-     "eu_gdp_it", "Eurostat Italy GDP (Real)", "quarterly", "macro", "economic"),
+     "eu_gdp_it", "Eurostat Italy GDP (Real)", "quarterly", "economy", "economic"),
     ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=ES&s_adj=SCA&freq=Q",
-     "eu_gdp_es", "Eurostat Spain GDP (Real)", "quarterly", "macro", "economic"),
+     "eu_gdp_es", "Eurostat Spain GDP (Real)", "quarterly", "economy", "economic"),
 
     # ── HICP (Harmonized CPI) ─────────────────────────────────
     ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=EU27_2020",
-     "eu_hicp_all", "Eurostat EU HICP All Items", "monthly", "macro", "inflation"),
+     "eu_hicp_all", "Eurostat EU HICP All Items", "monthly", "economy", "inflation"),
     ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=EA20",
-     "eu_hicp_ea", "Eurostat Euro Area HICP", "monthly", "macro", "inflation"),
+     "eu_hicp_ea", "Eurostat Euro Area HICP", "monthly", "economy", "inflation"),
     ("prc_hicp_midx", "coicop=TOT_X_NRG_FOOD&unit=I15&geo=EU27_2020",
-     "eu_hicp_core", "Eurostat EU Core HICP", "monthly", "macro", "inflation"),
+     "eu_hicp_core", "Eurostat EU Core HICP", "monthly", "economy", "inflation"),
     ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=DE",
-     "eu_hicp_de", "Eurostat Germany HICP", "monthly", "macro", "inflation"),
+     "eu_hicp_de", "Eurostat Germany HICP", "monthly", "economy", "inflation"),
     ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=FR",
-     "eu_hicp_fr", "Eurostat France HICP", "monthly", "macro", "inflation"),
+     "eu_hicp_fr", "Eurostat France HICP", "monthly", "economy", "inflation"),
 
     # ── Unemployment ───────────────────────────────────────────
     ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=EU27_2020",
-     "eu_unemp_total", "Eurostat EU Unemployment Rate", "monthly", "macro", "labor"),
+     "eu_unemp_total", "Eurostat EU Unemployment Rate", "monthly", "economy", "labor"),
     ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=EA20",
-     "eu_unemp_ea", "Eurostat Euro Area Unemployment", "monthly", "macro", "labor"),
+     "eu_unemp_ea", "Eurostat Euro Area Unemployment", "monthly", "economy", "labor"),
     ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=DE",
-     "eu_unemp_de", "Eurostat Germany Unemployment", "monthly", "macro", "labor"),
+     "eu_unemp_de", "Eurostat Germany Unemployment", "monthly", "economy", "labor"),
     ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=FR",
-     "eu_unemp_fr", "Eurostat France Unemployment", "monthly", "macro", "labor"),
+     "eu_unemp_fr", "Eurostat France Unemployment", "monthly", "economy", "labor"),
     ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=ES",
-     "eu_unemp_es", "Eurostat Spain Unemployment", "monthly", "macro", "labor"),
+     "eu_unemp_es", "Eurostat Spain Unemployment", "monthly", "economy", "labor"),
     ("une_rt_m", "age=Y_LT25&sex=T&unit=PC_ACT&s_adj=SA&geo=EU27_2020",
-     "eu_unemp_youth", "Eurostat EU Youth Unemployment", "monthly", "macro", "labor"),
+     "eu_unemp_youth", "Eurostat EU Youth Unemployment", "monthly", "economy", "labor"),
 
     # ── Industrial production ─────────────────────────────────
     ("sts_inpr_m", "nace_r2=B-D&unit=I15&s_adj=SCA&geo=EU27_2020",
-     "eu_indprod", "Eurostat EU Industrial Production", "monthly", "macro", "economic"),
+     "eu_indprod", "Eurostat EU Industrial Production", "monthly", "economy", "economic"),
     ("sts_inpr_m", "nace_r2=B-D&unit=I15&s_adj=SCA&geo=DE",
-     "eu_indprod_de", "Eurostat Germany Industrial Production", "monthly", "macro", "economic"),
+     "eu_indprod_de", "Eurostat Germany Industrial Production", "monthly", "economy", "economic"),
     ("sts_inpr_m", "nace_r2=C&unit=I15&s_adj=SCA&geo=EU27_2020",
-     "eu_mfg_prod", "Eurostat EU Manufacturing Production", "monthly", "macro", "economic"),
+     "eu_mfg_prod", "Eurostat EU Manufacturing Production", "monthly", "economy", "economic"),
 
     # ── Retail trade ───────────────────────────────────────────
     ("sts_trtu_m", "nace_r2=G47&unit=I15&s_adj=SCA&geo=EU27_2020",
-     "eu_retail", "Eurostat EU Retail Trade Volume", "monthly", "macro", "economic"),
+     "eu_retail", "Eurostat EU Retail Trade Volume", "monthly", "economy", "economic"),
     ("sts_trtu_m", "nace_r2=G47&unit=I15&s_adj=SCA&geo=EA20",
-     "eu_retail_ea", "Eurostat Euro Area Retail Trade", "monthly", "macro", "economic"),
+     "eu_retail_ea", "Eurostat Euro Area Retail Trade", "monthly", "economy", "economic"),
 
     # ── Trade balance (monthly, ratio) ────────────────────────
     ("ext_st_eu27_2020sitc", "partner=EXT_EU27_2020&sitc06=TOTAL&stk_flow=BAL_RT",
-     "eu_trade_balance", "Eurostat EU Trade Balance Ratio", "monthly", "macro", "trade"),
+     "eu_trade_balance", "Eurostat EU Trade Balance Ratio", "monthly", "economy", "trade"),
 
     # ── Construction ───────────────────────────────────────────
     ("sts_copr_m", "nace_r2=F&unit=I15&s_adj=SCA&geo=EU27_2020",
-     "eu_construction", "Eurostat EU Construction Output", "monthly", "macro", "economic"),
+     "eu_construction", "Eurostat EU Construction Output", "monthly", "economy", "economic"),
 
     # ── Business confidence ────────────────────────────────────
     ("ei_bsin_m_r2", "indic=BS-ICI&s_adj=SA&geo=EU27_2020",
@@ -85,31 +85,31 @@ EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
 
     # ── Energy ─────────────────────────────────────────────────
     ("nrg_cb_oilm", "siec=O4100_TOT&nrg_bal=IMP&geo=EU27_2020",
-     "eu_oil_supply", "Eurostat EU Crude Oil Imports", "monthly", "macro", "economic"),
+     "eu_oil_supply", "Eurostat EU Crude Oil Imports", "monthly", "economy", "economic"),
     ("nrg_cb_gasm", "siec=G3000&nrg_bal=IC_OBS&unit=TJ_GCV&geo=EU27_2020",
-     "eu_natgas_supply", "Eurostat EU Natural Gas Consumption", "monthly", "macro", "economic"),
+     "eu_natgas_supply", "Eurostat EU Natural Gas Consumption", "monthly", "economy", "economic"),
 
     # ── Government debt ────────────────────────────────────────
     ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=EU27_2020&freq=Q",
-     "eu_govt_debt", "Eurostat EU Govt Debt/GDP", "quarterly", "macro", "fiscal"),
+     "eu_govt_debt", "Eurostat EU Govt Debt/GDP", "quarterly", "economy", "fiscal"),
     ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=EA20&freq=Q",
-     "eu_govt_debt_ea", "Eurostat Euro Area Govt Debt/GDP", "quarterly", "macro", "fiscal"),
+     "eu_govt_debt_ea", "Eurostat Euro Area Govt Debt/GDP", "quarterly", "economy", "fiscal"),
     ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=DE&freq=Q",
-     "eu_govt_debt_de", "Eurostat Germany Govt Debt/GDP", "quarterly", "macro", "fiscal"),
+     "eu_govt_debt_de", "Eurostat Germany Govt Debt/GDP", "quarterly", "economy", "fiscal"),
     ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=FR&freq=Q",
-     "eu_govt_debt_fr", "Eurostat France Govt Debt/GDP", "quarterly", "macro", "fiscal"),
+     "eu_govt_debt_fr", "Eurostat France Govt Debt/GDP", "quarterly", "economy", "fiscal"),
     ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=IT&freq=Q",
-     "eu_govt_debt_it", "Eurostat Italy Govt Debt/GDP", "quarterly", "macro", "fiscal"),
+     "eu_govt_debt_it", "Eurostat Italy Govt Debt/GDP", "quarterly", "economy", "fiscal"),
 
     # ── Exchange rate ──────────────────────────────────────────
     ("ert_bil_eur_m", "currency=USD&statinfo=AVG",
-     "eu_eurusd", "Eurostat EUR/USD Rate", "monthly", "financial", "forex"),
+     "eu_eurusd", "Eurostat EUR/USD Rate", "monthly", "markets", "forex"),
     ("ert_bil_eur_m", "currency=GBP&statinfo=AVG",
-     "eu_eurgbp", "Eurostat EUR/GBP Rate", "monthly", "financial", "forex"),
+     "eu_eurgbp", "Eurostat EUR/GBP Rate", "monthly", "markets", "forex"),
     ("ert_bil_eur_m", "currency=JPY&statinfo=AVG",
-     "eu_eurjpy", "Eurostat EUR/JPY Rate", "monthly", "financial", "forex"),
+     "eu_eurjpy", "Eurostat EUR/JPY Rate", "monthly", "markets", "forex"),
     ("ert_bil_eur_m", "currency=CHF&statinfo=AVG",
-     "eu_eurchf", "Eurostat EUR/CHF Rate", "monthly", "financial", "forex"),
+     "eu_eurchf", "Eurostat EUR/CHF Rate", "monthly", "markets", "forex"),
 ]
 
 

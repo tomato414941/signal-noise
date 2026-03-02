@@ -14,7 +14,7 @@ class ChicagoCrimeCollector(BaseCollector):
         display_name="Chicago Daily Crime Count",
         update_frequency="daily",
         api_docs_url="https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2",
-        domain="urban",
+        domain="society",
         category="city_stats",
     )
 

@@ -20,7 +20,7 @@ class FEMADisasterCountCollector(BaseCollector):
         display_name="FEMA Disaster Declarations (monthly count)",
         update_frequency="monthly",
         api_docs_url="https://www.fema.gov/about/openfema/api",
-        domain="infrastructure",
+        domain="technology",
         category="safety",
     )
 
@@ -75,7 +75,7 @@ class FEMAMajorDisasterCountCollector(BaseCollector):
         display_name="FEMA Major Disaster Declarations (monthly)",
         update_frequency="monthly",
         api_docs_url="https://www.fema.gov/about/openfema/api",
-        domain="infrastructure",
+        domain="technology",
         category="safety",
     )
 

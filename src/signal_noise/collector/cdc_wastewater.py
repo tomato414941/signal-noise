@@ -60,7 +60,7 @@ class CDCWastewaterDetectionCollector(BaseCollector):
         display_name="CDC Wastewater Detection Rate",
         update_frequency="weekly",
         api_docs_url="https://data.cdc.gov/Public-Health-Surveillance/NWSS-Public-SARS-CoV-2-Wastewater-Metric-Data/2ew6-ywp6",
-        domain="health",
+        domain="society",
         category="epidemiology",
     )
 
@@ -77,7 +77,7 @@ class CDCWastewaterChangeCollector(BaseCollector):
         display_name="CDC Wastewater % Change",
         update_frequency="weekly",
         api_docs_url="https://data.cdc.gov/Public-Health-Surveillance/NWSS-Public-SARS-CoV-2-Wastewater-Metric-Data/2ew6-ywp6",
-        domain="health",
+        domain="society",
         category="epidemiology",
     )
 

@@ -14,7 +14,7 @@ class SolarFlareCollector(BaseCollector):
         display_name="Solar Flare Events (daily)",
         update_frequency="daily",
         api_docs_url="https://ccmc.gsfc.nasa.gov/tools/DONKI/",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 

@@ -40,7 +40,7 @@ def _make_chain_tvl_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://defillama.com/docs/api",
-            domain="financial",
+            domain="markets",
             category="crypto",
         )
 
@@ -75,7 +75,7 @@ class DeFiTotalTVLCollector(BaseCollector):
         display_name="DeFi TVL: Total",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -122,7 +122,7 @@ def _make_stablecoin_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://defillama.com/docs/api",
-            domain="financial",
+            domain="markets",
             category="crypto",
         )
 
@@ -159,7 +159,7 @@ class DeFiDEXVolumeCollector(BaseCollector):
         display_name="DEX Daily Volume (Total)",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -220,7 +220,7 @@ def _make_protocol_tvl_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://defillama.com/docs/api",
-            domain="financial",
+            domain="markets",
             category="crypto",
         )
 
@@ -257,7 +257,7 @@ class DeFiTotalFeesCollector(BaseCollector):
         display_name="DeFi Total Fees (Daily)",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -294,7 +294,7 @@ class DeFiOptionsVolumeCollector(BaseCollector):
         display_name="DeFi Options Volume (Daily)",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -331,7 +331,7 @@ class DeFiPerpsVolumeCollector(BaseCollector):
         display_name="DeFi Perps Volume (Daily)",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 
@@ -368,7 +368,7 @@ class DeFiAvgYieldCollector(BaseCollector):
         display_name="DeFi Avg Yield (Median APY)",
         update_frequency="daily",
         api_docs_url="https://defillama.com/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

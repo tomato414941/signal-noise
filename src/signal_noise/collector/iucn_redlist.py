@@ -28,7 +28,7 @@ class IUCNThreatenedSpeciesCollector(BaseCollector):
         update_frequency="yearly",
         api_docs_url="https://www.iucnredlist.org/resources/summary-statistics",
         requires_key=True,
-        domain="animal",
+        domain="environment",
         category="biodiversity",
     )
 

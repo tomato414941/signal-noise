@@ -17,7 +17,7 @@ class EarthquakeCountCollector(BaseCollector):
         display_name="Daily M4.5+ Earthquake Count",
         update_frequency="daily",
         api_docs_url="https://earthquake.usgs.gov/fdsnws/event/1/",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 
@@ -88,7 +88,7 @@ class USGSQuakeCount24hCollector(_USGSHourlyBase):
         display_name="USGS Earthquakes (24h count)",
         update_frequency="hourly",
         api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 
@@ -111,7 +111,7 @@ class USGSQuakeMaxMag24hCollector(_USGSHourlyBase):
         display_name="USGS Max Magnitude (24h)",
         update_frequency="hourly",
         api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 
@@ -140,7 +140,7 @@ class USGSQuakeSignificantCollector(_USGSHourlyBase):
         display_name="USGS Significant Quakes (24h)",
         update_frequency="hourly",
         api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
-        domain="geophysical",
+        domain="environment",
         category="seismic",
     )
 

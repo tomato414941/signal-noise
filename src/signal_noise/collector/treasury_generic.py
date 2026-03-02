@@ -37,7 +37,7 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str, str]] = [
         "tot_pub_debt_out_amt",
         "tsy_total_debt",
         "US Total Public Debt",
-        "macro",
+        "economy",
         "fiscal",
     ),
     (
@@ -45,7 +45,7 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str, str]] = [
         "debt_held_public_amt",
         "tsy_debt_public",
         "US Debt Held by Public",
-        "macro",
+        "economy",
         "fiscal",
     ),
     (
@@ -53,7 +53,7 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str, str]] = [
         "avg_interest_rate_amt",
         "tsy_avg_rate_bills",
         "Avg Interest Rate: T-Bills",
-        "financial",
+        "markets",
         "rates",
     ),
     (
@@ -61,7 +61,7 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str, str]] = [
         "avg_interest_rate_amt",
         "tsy_avg_rate_notes",
         "Avg Interest Rate: T-Notes",
-        "financial",
+        "markets",
         "rates",
     ),
     (
@@ -69,7 +69,7 @@ TREASURY_FISCAL_SERIES: list[tuple[str, str, str, str, str, str]] = [
         "avg_interest_rate_amt",
         "tsy_avg_rate_bonds",
         "Avg Interest Rate: T-Bonds",
-        "financial",
+        "markets",
         "rates",
     ),
 ]
@@ -84,7 +84,7 @@ def _make_yield_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
-            domain="financial",
+            domain="markets",
             category="rates",
         )
 
@@ -204,7 +204,7 @@ def _make_tips_collector(
             display_name=display_name,
             update_frequency="daily",
             api_docs_url="https://home.treasury.gov/resource-center/data-chart-center/interest-rates",
-            domain="financial",
+            domain="markets",
             category="rates",
         )
 

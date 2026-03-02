@@ -11,12 +11,12 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 # (series_code, collector_name, display_name, frequency, domain, category)
 BOE_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── Policy rate ──
-    ("IUDBEDR", "boe_bank_rate", "BOE: Bank Rate", "daily", "financial", "rates"),
-    ("IUMABEDR", "boe_bank_rate_monthly", "BOE: Bank Rate (Monthly Avg)", "monthly", "financial", "rates"),
+    ("IUDBEDR", "boe_bank_rate", "BOE: Bank Rate", "daily", "markets", "rates"),
+    ("IUMABEDR", "boe_bank_rate_monthly", "BOE: Bank Rate (Monthly Avg)", "monthly", "markets", "rates"),
     # ── Gilt yields ──
-    ("IUMALNPY", "boe_long_yield", "BOE: Long Nominal Par Yield", "monthly", "financial", "rates"),
-    ("IUDSNPY", "boe_short_yield", "BOE: Short Nominal Par Yield (Daily)", "daily", "financial", "rates"),
-    ("IUMSNPY", "boe_short_yield_monthly", "BOE: Short Nominal Par Yield (Monthly)", "monthly", "financial", "rates"),
+    ("IUMALNPY", "boe_long_yield", "BOE: Long Nominal Par Yield", "monthly", "markets", "rates"),
+    ("IUDSNPY", "boe_short_yield", "BOE: Short Nominal Par Yield (Daily)", "daily", "markets", "rates"),
+    ("IUMSNPY", "boe_short_yield_monthly", "BOE: Short Nominal Par Yield (Monthly)", "monthly", "markets", "rates"),
 ]
 
 _BOE_URL = (

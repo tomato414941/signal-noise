@@ -53,7 +53,7 @@ class TestOFACSDN:
 
     def test_meta(self):
         assert OFACSDNCollector.meta.name == "ofac_sdn_count"
-        assert OFACSDNCollector.meta.domain == "macro"
+        assert OFACSDNCollector.meta.domain == "economy"
         assert OFACSDNCollector.meta.category == "trade"
         assert OFACSDNCollector.meta.update_frequency == "weekly"
 

@@ -484,9 +484,9 @@ priority. The list serves as a creative inventory, not a roadmap.
 - [ ] Specific online learning algorithm (EWA, Follow the Regularized Leader, etc.)
 - [ ] How to handle collector authentication (API keys) in service mode
 - [ ] Monitoring and alerting for collector failures
-- [ ] Domain taxonomy: current 10-domain classification has mixed axes
-  (object vs method vs actor). Revisit when collection spectrum expands
-  beyond L1/L2 — taxonomy should emerge from the data, not precede it.
+- [x] Domain taxonomy: consolidated from 17 ad-hoc domains to 6 subject-matter
+  domains (markets, economy, environment, technology, sentiment, society)
+  based on UN CSA 2.0 classification principles.
 - [ ] CollectorMeta: add `collection_level` field (L1–L7) so consumers
   can distinguish direct measurements from proxies
 - [ ] L5 active probing: design collector base class for self-originated

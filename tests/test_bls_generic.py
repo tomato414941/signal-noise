@@ -99,7 +99,7 @@ class TestBLSBatchFetch:
 
         cls = _make_bls_collector(
             "CUSR0000SA0", "test_cpi", "Test CPI",
-            "monthly", "macro", "inflation",
+            "monthly", "economy", "inflation",
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -115,11 +115,11 @@ class TestBLSBatchFetch:
 
         cpi_cls = _make_bls_collector(
             "CUSR0000SA0", "test_cpi", "Test CPI",
-            "monthly", "macro", "inflation",
+            "monthly", "economy", "inflation",
         )
         prod_cls = _make_bls_collector(
             "PRS85006092", "test_prod", "Test Productivity",
-            "quarterly", "macro", "economic",
+            "quarterly", "economy", "economic",
         )
         cpi_cls().fetch()
         prod_cls().fetch()
@@ -137,7 +137,7 @@ class TestBLSBatchFetch:
 
         cls = _make_bls_collector(
             "CUSR0000SA0", "test_cpi", "Test CPI",
-            "monthly", "macro", "inflation",
+            "monthly", "economy", "inflation",
         )
         with pytest.raises(RuntimeError, match="BLS API rejected"):
             cls().fetch()
@@ -151,7 +151,7 @@ class TestBLSBatchFetch:
 
         cls = _make_bls_collector(
             "CUSR0000SA0", "test_cpi", "Test CPI",
-            "monthly", "macro", "inflation",
+            "monthly", "economy", "inflation",
         )
         with pytest.raises(RuntimeError, match="No BLS data"):
             cls().fetch()
@@ -161,9 +161,9 @@ class TestBLSMeta:
     def test_domain_category(self):
         cls = _make_bls_collector(
             "LNS14000000", "test_unemp", "Test Unemployment",
-            "monthly", "macro", "labor",
+            "monthly", "economy", "labor",
         )
-        assert cls.meta.domain == "macro"
+        assert cls.meta.domain == "economy"
         assert cls.meta.category == "labor"
         assert cls.meta.requires_key is False
 

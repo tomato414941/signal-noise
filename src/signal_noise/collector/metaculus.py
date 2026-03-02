@@ -28,7 +28,7 @@ class MetaculusActiveQuestionsCollector(BaseCollector):
         update_frequency="daily",
         api_docs_url="https://www.metaculus.com/api/",
         requires_key=True,
-        domain="prediction",
+        domain="sentiment",
         category="prediction_market",
     )
 

@@ -18,7 +18,7 @@ class LightningCapacityCollector(BaseCollector):
         display_name="Lightning Network Capacity (BTC)",
         update_frequency="daily",
         api_docs_url="https://mempool.space/docs/api",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

@@ -21,67 +21,35 @@ log = logging.getLogger(__name__)
 # ── Taxonomy ──
 # domain: stable top-level grouping (rarely changes)
 DOMAINS = {
-    "financial",     # equities, FX, bonds, commodities, crypto
-    "macro",         # GDP, employment, inflation, trade, fiscal
-    "sentiment",     # fear/greed, social media, attention
-    "earth",         # weather, climate, ocean, air quality, hydrology
-    "geophysical",   # solar, geomagnetic, seismic, lunar, volcanic
-    "infrastructure",# logistics, aviation, shipping, internet
-    "real_estate",   # housing, property prices, REITs
-    "developer",     # GitHub, npm, StackOverflow, tech trends
-    "health",        # epidemiology, public health, disease surveillance
-    "computed",      # calculated features (temporal, etc.)
-    "mortality",     # excess deaths, cause-of-death, life expectancy
-    "conflict",      # armed conflict events, displacement, arms
-    "animal",        # wildlife, biodiversity, migration
-    "food",          # food prices, agriculture, dining trends
-    "prediction",    # prediction markets, forecasting
-    "urban",         # city-level data, transportation, complaints
-    "creativity",    # patents, trademarks, academic output
+    "markets",       # equities, FX, bonds, commodities, crypto, derivatives
+    "economy",       # GDP, employment, inflation, trade, housing, agriculture, energy
+    "environment",   # weather, climate, ocean, geology, space weather, biodiversity
+    "technology",    # software ecosystems, internet, logistics, aviation, R&D
+    "sentiment",     # fear/greed, social media, attention, prediction markets
+    "society",       # health, mortality, conflict, demographics
 }
 
 # category: concrete data classification
 CATEGORIES = {
-    # financial
+    # markets
     "equity", "crypto", "crypto_derivatives", "forex", "rates", "commodity",
-    # macro
+    "microstructure", "regulatory",
+    # economy
     "economic", "labor", "inflation", "trade", "fiscal",
-    # sentiment
-    "sentiment", "attention",
-    # earth
+    "real_estate", "food_price", "agriculture", "energy",
+    # environment
     "weather", "climate", "marine", "air_quality", "hydrology", "satellite",
-    # geophysical
     "space_weather", "seismic", "celestial",
-    # infrastructure
-    "logistics", "aviation", "internet", "space",
-    # real_estate
-    "real_estate",
-    # developer
-    "developer",
-    # health
-    "epidemiology", "public_health",
-    # market microstructure
-    "microstructure",
-    # mortality
-    "excess_deaths", "cause_of_death",
-    # conflict
-    "armed_conflict", "displacement",
-    # animal
     "wildlife", "biodiversity",
-    # food
-    "food_price", "agriculture",
-    # prediction
-    "prediction_market",
-    # urban
-    "city_stats", "transportation",
-    # creativity
-    "patents", "academic",
-    # energy
-    "energy",
-    # safety & regulatory
-    "safety", "regulatory",
-    # misc
-    "temporal",
+    # technology
+    "developer", "academic", "patents",
+    "logistics", "aviation", "internet", "space",
+    "transportation", "safety",
+    # sentiment
+    "sentiment", "attention", "prediction_market", "temporal",
+    # society
+    "epidemiology", "public_health", "excess_deaths", "cause_of_death",
+    "armed_conflict", "displacement", "city_stats",
 }
 
 # update_frequency: allowed values

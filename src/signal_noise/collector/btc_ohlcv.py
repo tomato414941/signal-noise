@@ -14,7 +14,7 @@ class BtcOhlcvCollector(BaseCollector):
         display_name="BTC/USDT OHLCV",
         update_frequency="hourly",
         api_docs_url="https://binance-docs.github.io/apidocs/spot/en/",
-        domain="financial",
+        domain="markets",
         category="crypto",
         signal_type="ohlcv",
     )

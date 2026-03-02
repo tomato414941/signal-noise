@@ -40,7 +40,7 @@ def _make_ccxt_collector(
             display_name=display_name,
             update_frequency="hourly",
             api_docs_url="https://binance-docs.github.io/apidocs/spot/en/",
-            domain="financial",
+            domain="markets",
             category="crypto",
             signal_type="ohlcv",
         )

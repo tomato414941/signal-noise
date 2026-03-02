@@ -14,7 +14,7 @@ class USPTOTrademarkAppsCollector(BaseCollector):
         display_name="USPTO Monthly Trademark Applications",
         update_frequency="monthly",
         api_docs_url="https://developer.uspto.gov/api-catalog",
-        domain="creativity",
+        domain="technology",
         category="patents",
     )
 

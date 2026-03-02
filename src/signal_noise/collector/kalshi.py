@@ -14,7 +14,7 @@ class KalshiActiveMarketsCollector(BaseCollector):
         display_name="Kalshi Active Markets Count",
         update_frequency="daily",
         api_docs_url="https://trading-api.readme.io/reference/getevents",
-        domain="prediction",
+        domain="sentiment",
         category="prediction_market",
     )
 

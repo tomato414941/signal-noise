@@ -19,7 +19,7 @@ class CosmicRayCollector(BaseCollector):
         display_name="Cosmic Ray Proton Flux (GOES >=100 MeV)",
         update_frequency="hourly",
         api_docs_url="https://www.swpc.noaa.gov/products/goes-proton-flux",
-        domain="geophysical",
+        domain="environment",
         category="space_weather",
     )
 

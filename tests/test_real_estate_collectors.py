@@ -45,7 +45,7 @@ class TestOECDHousePrices:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test OECD", "real_estate", "real_estate")
+        cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test OECD", "economy", "real_estate")
         assert cls.meta.name == "test_oecd"
         assert cls.meta.update_frequency == "quarterly"
         assert isinstance(cls.meta, CollectorMeta)
@@ -60,7 +60,7 @@ class TestOECDHousePrices:
 
     def test_all_domain_categories(self):
         for country, measure, name, display, dom, cat in OECD_HP_SERIES:
-            assert dom == "real_estate", f"{name} has unexpected domain: {dom}"
+            assert dom == "economy", f"{name} has unexpected domain: {dom}"
             assert cat == "real_estate", f"{name} has unexpected category: {cat}"
 
     @patch("signal_noise.collector.oecd_house_prices.requests.get")
@@ -70,7 +70,7 @@ class TestOECDHousePrices:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test", "real_estate", "real_estate")
+        cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test", "economy", "real_estate")
         df = cls().fetch()
         assert len(df) == 3
         assert "date" in df.columns
@@ -85,7 +85,7 @@ class TestOECDHousePrices:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test", "real_estate", "real_estate")
+        cls = _make_oecd_hp_collector("USA", "HPI", "test_oecd", "Test", "economy", "real_estate")
         df = cls().fetch()
         # Q1 -> Jan, Q2 -> Apr, Q3 -> Jul
         assert df["date"].iloc[0].month == 1
@@ -102,7 +102,7 @@ class TestBISPropertyPrices:
         assert len(names) == len(set(names))
 
     def test_factory_creates_collector(self):
-        cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test BIS", "real_estate", "real_estate")
+        cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test BIS", "economy", "real_estate")
         assert cls.meta.name == "test_bis"
         assert cls.meta.update_frequency == "quarterly"
         assert isinstance(cls.meta, CollectorMeta)
@@ -117,7 +117,7 @@ class TestBISPropertyPrices:
 
     def test_all_domain_categories(self):
         for country, vt, unit, name, display, dom, cat in BIS_PROPERTY_SERIES:
-            assert dom == "real_estate", f"{name} has unexpected domain: {dom}"
+            assert dom == "economy", f"{name} has unexpected domain: {dom}"
             assert cat == "real_estate", f"{name} has unexpected category: {cat}"
 
     @patch("signal_noise.collector.bis_property.requests.get")
@@ -127,7 +127,7 @@ class TestBISPropertyPrices:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test", "real_estate", "real_estate")
+        cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test", "economy", "real_estate")
         df = cls().fetch()
         assert len(df) == 3
         assert "date" in df.columns
@@ -142,7 +142,7 @@ class TestBISPropertyPrices:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test", "real_estate", "real_estate")
+        cls = _make_bis_pp_collector("US", "N", "628", "test_bis", "Test", "economy", "real_estate")
         df = cls().fetch()
         # Should only have 3 data rows, not include metadata
         assert len(df) == 3

@@ -172,7 +172,7 @@ class TestBlockchainCharts:
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        cls = _make_bc_collector("n-unique-addresses", "test_bc", "Test", "financial", "crypto")
+        cls = _make_bc_collector("n-unique-addresses", "test_bc", "Test", "markets", "crypto")
         df = cls().fetch()
         assert len(df) == 2
         assert df["value"].iloc[0] == 500000.0

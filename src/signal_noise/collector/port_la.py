@@ -21,7 +21,7 @@ class PortOfLACollector(BaseCollector):
         display_name="US Monthly Imports Volume (FRED)",
         update_frequency="monthly",
         api_docs_url="https://fred.stlouisfed.org/series/XTIMVA01USM667S",
-        domain="infrastructure",
+        domain="technology",
         category="logistics",
     )
 

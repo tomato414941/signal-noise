@@ -18,7 +18,7 @@ class RBACashRateCollector(BaseCollector):
         display_name="RBA Cash / Lending Rate (%)",
         update_frequency="yearly",
         api_docs_url="https://data.worldbank.org/indicator/FR.INR.LEND?locations=AU",
-        domain="financial",
+        domain="markets",
         category="rates",
     )
 

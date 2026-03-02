@@ -27,7 +27,7 @@ class OpenSkyTotalCollector(BaseCollector):
         display_name="OpenSky: Aircraft In Flight (Total)",
         update_frequency="hourly",
         api_docs_url="https://openskynetwork.github.io/opensky-api/",
-        domain="infrastructure",
+        domain="technology",
         category="aviation",
     )
 
@@ -45,7 +45,7 @@ class OpenSkyUSCollector(BaseCollector):
         display_name="OpenSky: US Aircraft In Flight",
         update_frequency="hourly",
         api_docs_url="https://openskynetwork.github.io/opensky-api/",
-        domain="infrastructure",
+        domain="technology",
         category="aviation",
     )
 
@@ -64,7 +64,7 @@ class FR24TotalCollector(BaseCollector):
         display_name="FlightRadar24: Total Aircraft Tracked",
         update_frequency="hourly",
         api_docs_url="https://www.flightradar24.com/",
-        domain="infrastructure",
+        domain="technology",
         category="aviation",
     )
 

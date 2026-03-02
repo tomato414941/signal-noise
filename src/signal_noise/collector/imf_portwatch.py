@@ -36,7 +36,7 @@ def _make_portwatch_collector(
             display_name=display_name,
             update_frequency="weekly",
             api_docs_url="https://portwatch.imf.org/",
-            domain="infrastructure",
+            domain="technology",
             category="logistics",
         )
 

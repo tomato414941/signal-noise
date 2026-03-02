@@ -11,7 +11,7 @@ class DayOfWeekCollector(BaseCollector):
         display_name="Day of Week (0=Mon)",
         update_frequency="daily",
         api_docs_url="N/A",
-        domain="computed",
+        domain="sentiment",
         category="temporal",
         collection_level="L4",
     )
@@ -27,7 +27,7 @@ class HourOfDayCollector(BaseCollector):
         display_name="Hour of Day (UTC)",
         update_frequency="daily",
         api_docs_url="N/A",
-        domain="computed",
+        domain="sentiment",
         category="temporal",
         collection_level="L4",
     )

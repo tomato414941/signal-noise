@@ -102,7 +102,7 @@ class TestSpreadBinanceBybit:
     def test_meta(self):
         m = CrossExchangeSpreadBinanceBybitCollector.meta
         assert m.name == "spread_binance_bybit_btc"
-        assert m.domain == "financial"
+        assert m.domain == "markets"
         assert m.category == "crypto"
         assert m.signal_type == "scalar"
         assert m.interval == 3600

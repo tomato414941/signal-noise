@@ -37,12 +37,12 @@ class TestUKCarbonIntensity:
 
     def test_actual_meta(self):
         assert UKCarbonActualCollector.meta.name == "uk_carbon_actual"
-        assert UKCarbonActualCollector.meta.domain == "earth"
+        assert UKCarbonActualCollector.meta.domain == "environment"
         assert isinstance(UKCarbonActualCollector.meta, CollectorMeta)
 
     def test_forecast_meta(self):
         assert UKCarbonForecastCollector.meta.name == "uk_carbon_forecast"
-        assert UKCarbonForecastCollector.meta.domain == "earth"
+        assert UKCarbonForecastCollector.meta.domain == "environment"
 
     @patch("signal_noise.collector.uk_carbon_intensity.requests.get")
     def test_fetch_actual(self, mock_get):
@@ -108,10 +108,10 @@ class TestBOCGeneric:
 
     def test_factory_creates_collector(self):
         cls = _make_boc_collector(
-            "FXUSDCAD", "test_boc", "Test", "daily", "financial", "forex",
+            "FXUSDCAD", "test_boc", "Test", "daily", "markets", "forex",
         )
         assert cls.meta.name == "test_boc"
-        assert cls.meta.domain == "financial"
+        assert cls.meta.domain == "markets"
         assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_collectors_returns_dict(self):
@@ -136,7 +136,7 @@ class TestBOCGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_boc_collector(
-            "FXUSDCAD", "test_boc_fx", "Test", "daily", "financial", "forex",
+            "FXUSDCAD", "test_boc_fx", "Test", "daily", "markets", "forex",
         )
         df = cls().fetch()
         assert len(df) == 2
@@ -150,7 +150,7 @@ class TestBOCGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_boc_collector(
-            "FXUSDCAD", "test_boc_empty", "Test", "daily", "financial", "forex",
+            "FXUSDCAD", "test_boc_empty", "Test", "daily", "markets", "forex",
         )
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
@@ -174,7 +174,7 @@ class TestBOEGeneric:
 
     def test_factory_creates_collector(self):
         cls = _make_boe_collector(
-            "IUDBEDR", "test_boe", "Test", "daily", "financial", "rates",
+            "IUDBEDR", "test_boe", "Test", "daily", "markets", "rates",
         )
         assert cls.meta.name == "test_boe"
         assert isinstance(cls.meta, CollectorMeta)
@@ -194,7 +194,7 @@ class TestBOEGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_boe_collector(
-            "IUDBEDR", "test_boe_rate", "Test", "daily", "financial", "rates",
+            "IUDBEDR", "test_boe_rate", "Test", "daily", "markets", "rates",
         )
         df = cls().fetch()
         assert len(df) == 3
@@ -210,7 +210,7 @@ class TestBOEGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_boe_collector(
-            "IUMALNPY", "test_boe_yield", "Test", "monthly", "financial", "rates",
+            "IUMALNPY", "test_boe_yield", "Test", "monthly", "markets", "rates",
         )
         df = cls().fetch()
         assert len(df) == 2  # Feb row dropped
@@ -223,7 +223,7 @@ class TestBOEGeneric:
         mock_get.return_value = mock_resp
 
         cls = _make_boe_collector(
-            "IUDBEDR", "test_boe_html", "Test", "daily", "financial", "rates",
+            "IUDBEDR", "test_boe_html", "Test", "daily", "markets", "rates",
         )
         with pytest.raises(RuntimeError, match="HTML instead of CSV"):
             cls().fetch()
@@ -250,7 +250,7 @@ class TestNOAACoops:
             "9414290", "water_level", "test_coops", "Test", "marine",
         )
         assert cls.meta.name == "test_coops"
-        assert cls.meta.domain == "earth"
+        assert cls.meta.domain == "environment"
         assert isinstance(cls.meta, CollectorMeta)
 
     def test_get_collectors_returns_dict(self):
@@ -318,7 +318,7 @@ class TestNOAACoops:
 
     def test_all_series_valid_domain_category(self):
         for _, _, name, _, category in NOAA_COOPS_SERIES:
-            assert "earth" in DOMAINS, f"{name}: earth not in DOMAINS"
+            assert "environment" in DOMAINS, f"{name}: earth not in DOMAINS"
             assert category in CATEGORIES, f"{name}: invalid category {category}"
 
 

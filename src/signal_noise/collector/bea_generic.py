@@ -86,22 +86,22 @@ def _fetch_bea_table(
 # (dataset, table, line_number, collector_name, display_name, frequency, domain, category)
 BEA_SERIES: list[tuple[str, str, str, str, str, str, str, str]] = [
     # ── GDP Components (NIPA T10106 - Real GDP levels) ──
-    ("NIPA", "T10106", "1", "bea_gdp_real", "BEA: Real GDP", "quarterly", "macro", "economic"),
-    ("NIPA", "T10106", "2", "bea_pce_real", "BEA: Real PCE", "quarterly", "macro", "economic"),
-    ("NIPA", "T10106", "7", "bea_fixed_investment", "BEA: Real Fixed Investment", "quarterly", "macro", "economic"),
-    ("NIPA", "T10106", "11", "bea_exports_real", "BEA: Real Exports", "quarterly", "macro", "trade"),
-    ("NIPA", "T10106", "12", "bea_imports_real", "BEA: Real Imports", "quarterly", "macro", "trade"),
-    ("NIPA", "T10106", "15", "bea_govt_spending", "BEA: Real Govt Spending", "quarterly", "macro", "fiscal"),
+    ("NIPA", "T10106", "1", "bea_gdp_real", "BEA: Real GDP", "quarterly", "economy", "economic"),
+    ("NIPA", "T10106", "2", "bea_pce_real", "BEA: Real PCE", "quarterly", "economy", "economic"),
+    ("NIPA", "T10106", "7", "bea_fixed_investment", "BEA: Real Fixed Investment", "quarterly", "economy", "economic"),
+    ("NIPA", "T10106", "11", "bea_exports_real", "BEA: Real Exports", "quarterly", "economy", "trade"),
+    ("NIPA", "T10106", "12", "bea_imports_real", "BEA: Real Imports", "quarterly", "economy", "trade"),
+    ("NIPA", "T10106", "15", "bea_govt_spending", "BEA: Real Govt Spending", "quarterly", "economy", "fiscal"),
     # ── GDP Growth (NIPA T10101 - Percent Change) ──
-    ("NIPA", "T10101", "1", "bea_gdp_growth", "BEA: Real GDP Growth (%)", "quarterly", "macro", "economic"),
+    ("NIPA", "T10101", "1", "bea_gdp_growth", "BEA: Real GDP Growth (%)", "quarterly", "economy", "economic"),
     # ── Personal Income (NIPA T20100) ──
-    ("NIPA", "T20100", "1", "bea_personal_income", "BEA: Personal Income", "quarterly", "macro", "economic"),
-    ("NIPA", "T20100", "27", "bea_disposable_income", "BEA: Disposable Personal Income", "quarterly", "macro", "economic"),
-    ("NIPA", "T20100", "34", "bea_saving_rate", "BEA: Personal Saving Rate (%)", "quarterly", "macro", "economic"),
+    ("NIPA", "T20100", "1", "bea_personal_income", "BEA: Personal Income", "quarterly", "economy", "economic"),
+    ("NIPA", "T20100", "27", "bea_disposable_income", "BEA: Disposable Personal Income", "quarterly", "economy", "economic"),
+    ("NIPA", "T20100", "34", "bea_saving_rate", "BEA: Personal Saving Rate (%)", "quarterly", "economy", "economic"),
     # ── GDI (NIPA T11000 - Gross Domestic Income by Type of Income) ──
-    ("NIPA", "T11000", "1", "bea_gdi", "BEA: Gross Domestic Income", "quarterly", "macro", "economic"),
+    ("NIPA", "T11000", "1", "bea_gdi", "BEA: Gross Domestic Income", "quarterly", "economy", "economic"),
     # ── Corporate Profits (NIPA T61600D - Corporate Profits by Industry) ──
-    ("NIPA", "T61600D", "1", "bea_corporate_profits", "BEA: Corporate Profits", "quarterly", "macro", "economic"),
+    ("NIPA", "T61600D", "1", "bea_corporate_profits", "BEA: Corporate Profits", "quarterly", "economy", "economic"),
 ]
 
 

@@ -51,7 +51,7 @@ class CG_TotalMarketCapCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko Total Market Cap (USD)",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -64,7 +64,7 @@ class CG_TotalVolumeCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko Total 24h Volume (USD)",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -77,7 +77,7 @@ class CG_BtcDominanceCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko BTC Dominance %",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -90,7 +90,7 @@ class CG_EthDominanceCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko ETH Dominance %",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -103,7 +103,7 @@ class CG_ActiveCryptosCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko Active Cryptocurrencies",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -116,7 +116,7 @@ class CG_OngoingICOsCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko Ongoing ICOs",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -129,7 +129,7 @@ class CG_MarketsCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko Number of Markets",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )
@@ -142,7 +142,7 @@ class CG_MarketCapChangePct24hCollector(_CoinGeckoGlobalCollector):
         display_name="CoinGecko Market Cap Change % 24h",
         update_frequency="hourly",
         api_docs_url="https://www.coingecko.com/en/api/documentation",
-        domain="financial",
+        domain="markets",
         category="crypto",
         collect_interval=900,
     )

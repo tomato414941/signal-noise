@@ -14,7 +14,7 @@ class CoinMetricsCollector(BaseCollector):
         display_name="BTC Daily Transaction Count (Coin Metrics)",
         update_frequency="daily",
         api_docs_url="https://docs.coinmetrics.io/api/v4/",
-        domain="financial",
+        domain="markets",
         category="crypto",
     )
 

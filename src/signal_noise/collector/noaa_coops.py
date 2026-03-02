@@ -37,7 +37,7 @@ def _make_coops_collector(
             display_name=display_name,
             update_frequency="hourly",
             api_docs_url="https://api.tidesandcurrents.noaa.gov/api/prod/",
-            domain="earth",
+            domain="environment",
             category=category,
         )
 
