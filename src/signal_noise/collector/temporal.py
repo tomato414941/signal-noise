@@ -33,5 +33,6 @@ class HourOfDayCollector(BaseCollector):
     )
 
     def fetch(self) -> pd.DataFrame:
-        times = pd.date_range(end=pd.Timestamp.now(tz="UTC"), periods=365 * 2 * 24, freq="h")
+        end = pd.Timestamp.now(tz="UTC").floor("h")
+        times = pd.date_range(end=end, periods=365 * 2 * 24, freq="h")
         return pd.DataFrame({"timestamp": times, "value": times.hour.astype(float)})
