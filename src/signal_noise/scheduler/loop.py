@@ -20,12 +20,12 @@ log = logging.getLogger(__name__)
 def _compute_jitter(name: str, interval: int) -> float:
     """Deterministic jitter from collector name. Same name = same offset.
 
-    Spread is proportional to the collection interval (10% of interval,
-    capped at half the interval) to avoid thundering herd at startup.
+    Spread is proportional to the collection interval (10% of interval),
+    capped so that even annual collectors run within a few hours of startup.
     """
     h = hashlib.md5(name.encode(), usedforsecurity=False).digest()
     frac = int.from_bytes(h[:4], "little") / (2**32)
-    max_jitter = min(interval * 0.1, interval / 2)
+    max_jitter = min(interval * 0.1, interval / 2, 7200.0)  # cap at 2h
     return frac * max_jitter
 
 
