@@ -69,6 +69,10 @@ def main(argv: list[str] | None = None) -> None:
         "--exclude", type=str, default="",
         help="Comma-separated collector names to disable",
     )
+    p_scheduler.add_argument(
+        "--fetch-timeout", type=float, default=90.0,
+        help="Per-collector fetch timeout in seconds (default: 90)",
+    )
 
     p_rollup = sub.add_parser("rollup-realtime", help="Roll up realtime signals to daily + purge")
     p_rollup.add_argument("--days", type=int, default=30, help="Retention days for realtime data")
@@ -380,7 +384,9 @@ def _cmd_scheduler(args: argparse.Namespace) -> None:
     if excludes:
         log.info("Excluded collectors: %s", ", ".join(sorted(excludes)))
 
-    asyncio.run(run_scheduler(store, collectors=targets))
+    asyncio.run(run_scheduler(
+        store, collectors=targets, fetch_timeout=args.fetch_timeout,
+    ))
 
 
 def _cmd_rebuild_manifest() -> None:
