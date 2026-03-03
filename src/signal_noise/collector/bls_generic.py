@@ -19,6 +19,7 @@ import requests
 from signal_noise.collector._auth import load_secret
 from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 log = logging.getLogger(__name__)
 
@@ -201,9 +202,7 @@ def _make_bls_collector(
             if not items:
                 raise RuntimeError(f"No BLS data for {series_id}")
             rows = _parse_bls_items(items)
-            if not rows:
-                raise RuntimeError(f"No parseable BLS data for {series_id}")
-            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"BLS {series_id}")
 
     _Collector.__name__ = f"BLS_{name}"
     _Collector.__qualname__ = f"BLS_{name}"

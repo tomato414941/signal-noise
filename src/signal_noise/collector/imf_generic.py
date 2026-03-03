@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 # ISO3 country codes for IMF API
 _COUNTRIES = {
@@ -80,11 +81,7 @@ def _make_imf_collector(
                 except (ValueError, TypeError):
                     continue
 
-            if not rows:
-                raise RuntimeError(f"No valid IMF data for {indicator}/{country}")
-
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"IMF {indicator}/{country}")
 
     _Collector.__name__ = f"IMF_{name}"
     _Collector.__qualname__ = f"IMF_{name}"

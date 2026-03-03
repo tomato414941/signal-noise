@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 # (indicator_id, country_code, collector_name, display_name, domain, category)
 WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
@@ -210,11 +211,7 @@ def _make_wb_collector(
                     "value": float(val),
                 })
 
-            if not rows:
-                raise RuntimeError(f"No data for WB {indicator}/{country}")
-
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"WB {indicator}/{country}")
 
     _Collector.__name__ = f"WB_{name}"
     _Collector.__qualname__ = f"WB_{name}"

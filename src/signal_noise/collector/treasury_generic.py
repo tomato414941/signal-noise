@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 _TREASURY_YIELD_URL = (
     "https://home.treasury.gov/resource-center/data-chart-center/interest-rates"
@@ -122,11 +123,7 @@ def _make_yield_collector(
                 except Exception:
                     continue
 
-            if not all_rows:
-                raise RuntimeError(f"No Treasury yield data for {col_name}")
-
-            result = pd.DataFrame(all_rows)
-            return result.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(all_rows, f"Treasury yield {col_name}")
 
     _Collector.__name__ = f"TSY_{name}"
     _Collector.__qualname__ = f"TSY_{name}"
@@ -169,11 +166,7 @@ def _make_fiscal_collector(
                     "value": val,
                 })
 
-            if not rows:
-                raise RuntimeError(f"No data for Treasury {endpoint}")
-
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Treasury {endpoint}")
 
     _Collector.__name__ = f"TSY_{name}"
     _Collector.__qualname__ = f"TSY_{name}"
@@ -241,11 +234,7 @@ def _make_tips_collector(
                 except Exception:
                     continue
 
-            if not all_rows:
-                raise RuntimeError(f"No TIPS data for {col_name}")
-
-            result = pd.DataFrame(all_rows)
-            return result.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(all_rows, f"TIPS {col_name}")
 
     _Collector.__name__ = f"TSY_{name}"
     _Collector.__qualname__ = f"TSY_{name}"

@@ -137,7 +137,7 @@ class TestEIABatchFetch:
             "value", "daily",
             "test_wti", "Test WTI", "markets", "commodity",
         )
-        with pytest.raises(RuntimeError, match="No EIA data"):
+        with pytest.raises(RuntimeError, match="No data for EIA"):
             cls().fetch()
 
     def test_no_key_raises(self):

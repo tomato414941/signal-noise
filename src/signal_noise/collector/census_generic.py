@@ -13,6 +13,7 @@ import pandas as pd
 import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 _BASE_URL = "https://api.census.gov/data/timeseries"
 _GET_FIELDS = "data_type_code,time_slot_id,seasonally_adj,category_code,cell_value,error_data"
@@ -133,9 +134,7 @@ def _make_census_collector(
                 except (ValueError, TypeError, IndexError):
                     continue
 
-            if not rows:
-                raise RuntimeError(f"No Census data for {name}")
-            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Census {name}")
 
     _Collector.__name__ = f"Census_{name}"
     _Collector.__qualname__ = f"Census_{name}"

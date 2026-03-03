@@ -17,6 +17,7 @@ import requests
 from signal_noise.collector._auth import load_secret
 from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 log = logging.getLogger(__name__)
 
@@ -254,9 +255,7 @@ def _make_eia_collector(
                 timeout=self.config.request_timeout,
             )
             rows = group_data.get((facet_value, data_col), [])
-            if not rows:
-                raise RuntimeError(f"No EIA data for {name} ({facet_value})")
-            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"EIA {name} ({facet_value})")
 
     _Collector.__name__ = f"EIA_{name}"
     _Collector.__qualname__ = f"EIA_{name}"

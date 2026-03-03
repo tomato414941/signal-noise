@@ -10,6 +10,7 @@ import pandas as pd
 import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 _BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 
@@ -182,9 +183,7 @@ def _make_eurostat_collector(
                 except (ValueError, TypeError):
                     continue
 
-            if not rows:
-                raise RuntimeError(f"No Eurostat data for {name}")
-            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Eurostat {name}")
 
     _Collector.__name__ = f"Eurostat_{name}"
     _Collector.__qualname__ = f"Eurostat_{name}"

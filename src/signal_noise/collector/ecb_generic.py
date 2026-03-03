@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 # (flow_key, collector_name, display_name, frequency, domain, category)
 # flow_key = "{dataflow}/{series_key}" for ECB SDMX API
@@ -83,11 +84,7 @@ def _make_ecb_collector(
                     "value": val,
                 })
 
-            if not rows:
-                raise RuntimeError(f"No data for ECB {flow_key}")
-
-            result = pd.DataFrame(rows)
-            return result.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"ECB {flow_key}")
 
     _Collector.__name__ = f"ECB_{name}"
     _Collector.__qualname__ = f"ECB_{name}"

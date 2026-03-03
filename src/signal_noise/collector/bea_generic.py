@@ -8,6 +8,7 @@ import pandas as pd
 from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._cache import SharedAPICache
+from signal_noise.collector._utils import build_timeseries_df
 
 _BASE_URL = "https://apps.bea.gov/api/data"
 _bea_cache = SharedAPICache(ttl=3600)
@@ -131,11 +132,7 @@ def _make_bea_collector(
                 except (ValueError, TypeError):
                     continue
 
-            if not rows:
-                raise RuntimeError(f"No data for BEA {dataset}/{table} line {line_number}")
-
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"BEA {dataset}/{table} line {line_number}")
 
     _Collector.__name__ = f"BEA_{name}"
     _Collector.__qualname__ = f"BEA_{name}"

@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 
 # (series_code, collector_name, display_name, frequency, domain, category)
 BOC_SERIES: list[tuple[str, str, str, str, str, str]] = [
@@ -70,11 +71,7 @@ def _make_boc_collector(
                 except (ValueError, TypeError):
                     continue
 
-            if not rows:
-                raise RuntimeError(f"No data for BOC series {series_code}")
-
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"BOC series {series_code}")
 
     _Collector.__name__ = f"BOC_{name}"
     _Collector.__qualname__ = f"BOC_{name}"

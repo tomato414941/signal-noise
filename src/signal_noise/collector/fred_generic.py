@@ -7,6 +7,7 @@ import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._auth import load_secret
+from signal_noise.collector._utils import build_timeseries_df
 
 
 def _get_fred_key() -> str:
@@ -162,11 +163,7 @@ def _make_fred_collector(
                     "value": float(val),
                 })
 
-            if not rows:
-                raise RuntimeError(f"No data for FRED series {series_id}")
-
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"FRED series {series_id}")
 
     _Collector.__name__ = f"FRED_{name}"
     _Collector.__qualname__ = f"FRED_{name}"

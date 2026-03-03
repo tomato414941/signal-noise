@@ -5,6 +5,7 @@ import pandas as pd
 
 from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._utils import build_timeseries_df
 from signal_noise.collector._cache import SharedAPICache
 
 _BASE_URL = "https://finnhub.io/api/v1"
@@ -188,12 +189,7 @@ def _make_metric_collector(
                     rows.append({"date": dt, "value": val})
                 except (KeyError, ValueError, TypeError):
                     continue
-            if not rows:
-                raise RuntimeError(
-                    f"No valid {metric_key} data for Finnhub {symbol}"
-                )
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Finnhub {symbol} {metric_key}")
 
     _Collector.__name__ = f"Finnhub_{name}"
     _Collector.__qualname__ = f"Finnhub_{name}"
@@ -250,12 +246,7 @@ def _make_rec_collector(
                     rows.append({"date": dt, "value": round(score, 4)})
                 except (KeyError, ValueError, TypeError):
                     continue
-            if not rows:
-                raise RuntimeError(
-                    f"No valid recommendation data for Finnhub {symbol}"
-                )
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Finnhub {symbol} recommendation")
 
     _Collector.__name__ = f"Finnhub_{name}"
     _Collector.__qualname__ = f"Finnhub_{name}"
@@ -302,12 +293,7 @@ def _make_insider_collector(
                     rows.append({"date": dt, "value": float(mspr)})
                 except (ValueError, TypeError):
                     continue
-            if not rows:
-                raise RuntimeError(
-                    f"No valid insider data for Finnhub {symbol}"
-                )
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Finnhub {symbol} insider")
 
     _Collector.__name__ = f"Finnhub_{name}"
     _Collector.__qualname__ = f"Finnhub_{name}"
@@ -348,12 +334,7 @@ def _make_earnings_collector(
                     rows.append({"date": dt, "value": val})
                 except (KeyError, ValueError, TypeError):
                     continue
-            if not rows:
-                raise RuntimeError(
-                    f"No valid earnings data for Finnhub {symbol}"
-                )
-            df = pd.DataFrame(rows)
-            return df.sort_values("date").reset_index(drop=True)
+            return build_timeseries_df(rows, f"Finnhub {symbol} earnings")
 
     _Collector.__name__ = f"Finnhub_{name}"
     _Collector.__qualname__ = f"Finnhub_{name}"
