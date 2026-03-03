@@ -18,7 +18,6 @@ def main(argv: list[str] | None = None) -> None:
     p_collect.add_argument("--collector", "-s", help="Specific collector name")
     p_collect.add_argument("--frequency", "-f", help="Filter by update frequency (hourly/daily/weekly/monthly)")
     p_collect.add_argument("--force", action="store_true", help="Ignore cache")
-    p_collect.add_argument("--parquet", action="store_true", help="Use legacy Parquet storage")
 
     sub.add_parser("list", help="List available collectors with status")
     sub.add_parser("count", help="Show collector count")
@@ -128,7 +127,7 @@ def _cmd_collect(args: argparse.Namespace) -> None:
     from signal_noise.config import CACHE_DIR, DB_PATH
     from signal_noise.store.sqlite_store import SignalStore
 
-    store = None if args.parquet else SignalStore(DB_PATH)
+    store = SignalStore(DB_PATH)
 
     if args.collector:
         collectors = [args.collector]

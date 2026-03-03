@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from signal_noise.config import CACHE_DIR, RAW_DIR, DEFAULT_COLLECTOR, CollectorConfig
+from signal_noise.config import CACHE_DIR, DEFAULT_COLLECTOR, CollectorConfig
 
 if TYPE_CHECKING:
     from signal_noise.store.sqlite_store import SignalStore
@@ -111,9 +111,6 @@ class BaseCollector(ABC):
     def cache_path(self) -> Path:
         return CACHE_DIR / f"{self.meta.name}.json"
 
-    def parquet_path(self) -> Path:
-        return RAW_DIR / f"{self.meta.name}.parquet"
-
     def collect(self, store: SignalStore | None = None) -> pd.DataFrame:
         cache = self.cache_path()
         if cache.exists():
@@ -124,7 +121,7 @@ class BaseCollector(ABC):
                     df = store.get_data(self.meta.name)
                     if not df.empty:
                         return df
-                return self._read_parquet()
+                return pd.DataFrame()
 
         df = self._fetch_with_retry()
         self._save_cache(df)
@@ -135,8 +132,6 @@ class BaseCollector(ABC):
                 self.meta.category, self.meta.interval,
                 self.meta.signal_type,
             )
-        else:
-            self._save_parquet(df)
         return df
 
     def _fetch_with_retry(self) -> pd.DataFrame:
@@ -164,36 +159,11 @@ class BaseCollector(ABC):
             records[col] = records[col].astype(str)
         self.cache_path().write_text(json.dumps(records.to_dict(orient="records")))
 
-    def _save_parquet(self, df: pd.DataFrame) -> None:
-        RAW_DIR.mkdir(parents=True, exist_ok=True)
-        path = self.parquet_path()
-        if path.exists():
-            existing = pd.read_parquet(path)
-            ts_col = "timestamp" if "timestamp" in df.columns else "date"
-            combined = pd.concat([existing, df]).drop_duplicates(subset=[ts_col], keep="last")
-            combined = combined.sort_values(ts_col).reset_index(drop=True)
-            combined.to_parquet(path, index=False)
-        else:
-            df.to_parquet(path, index=False)
-        log.info("Saved %s: %d rows -> %s", self.meta.name, len(df), path)
-
-    def _read_parquet(self) -> pd.DataFrame:
-        path = self.parquet_path()
-        if path.exists():
-            return pd.read_parquet(path)
-        return pd.DataFrame()
-
     def status(self) -> dict:
-        parquet = self.parquet_path()
         cache = self.cache_path()
-        rows = 0
-        if parquet.exists():
-            rows = len(pd.read_parquet(parquet))
         return {
             "name": self.meta.name,
             "display_name": self.meta.display_name,
-            "has_data": parquet.exists(),
-            "rows": rows,
             "cache_age_hours": (
                 (time.time() - cache.stat().st_mtime) / 3600 if cache.exists() else None
             ),

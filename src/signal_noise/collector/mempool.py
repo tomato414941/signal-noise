@@ -50,7 +50,7 @@ class MempoolFeeCollector(BaseCollector):
     """Bitcoin recommended fee rate (sat/vB) for next-block confirmation.
 
     Spikes = urgency / FOMO. mempool.space provides current snapshot;
-    data accumulates across runs via parquet append.
+    data accumulates across runs via SQLite store.
     """
 
     meta = CollectorMeta(

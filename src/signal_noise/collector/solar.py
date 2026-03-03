@@ -10,7 +10,7 @@ class SolarXrayCollector(BaseCollector):
     """GOES satellite X-ray flux (1-8 Angstrom), hourly average.
 
     Higher flux = stronger solar activity.  7-day rolling window from SWPC;
-    data accumulates across collection runs via parquet append.
+    data accumulates across collection runs via SQLite store.
     """
 
     meta = CollectorMeta(

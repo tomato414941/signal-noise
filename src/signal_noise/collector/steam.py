@@ -11,7 +11,7 @@ class SteamPlayersCollector(BaseCollector):
 
     Hypothesis: when people are gaming, they're not trading.
     Inversely, market panic might drive people away from gaming.
-    Data accumulates across runs via parquet append.
+    Data accumulates across runs via SQLite store.
     """
 
     meta = CollectorMeta(
