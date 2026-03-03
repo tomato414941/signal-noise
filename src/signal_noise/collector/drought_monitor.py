@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-import requests
+import io
+from datetime import datetime
+
 import pandas as pd
+import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
@@ -14,6 +17,9 @@ DROUGHT_LEVELS: list[tuple[str, str, str, str]] = [
     ("D3", "drought_d3_pct", "US Drought: D3 (Extreme) %", "Extreme drought area"),
     ("D4", "drought_d4_pct", "US Drought: D4 (Exceptional) %", "Exceptional drought area"),
 ]
+
+# New REST API (old usdm.unl.edu domain is dead)
+_API_BASE = "https://usdmdataservices.unl.edu/api/USStatistics/GetDroughtSeverityStatisticsByArea"
 
 
 def _make_drought_collector(
@@ -30,42 +36,28 @@ def _make_drought_collector(
         )
 
         def fetch(self) -> pd.DataFrame:
-            url = (
-                "https://usdm.unl.edu/DmData/TimeSeries.aspx/"
-                "GetDroughtSeverityStatisticsByAreaPercent?"
-                "aession=GetStatisticsByAreaPercent"
-                "&areatype=total&area=conus"
-                "&statisticstype=1"
-            )
-            headers = {
-                "Content-Type": "application/json",
-                "User-Agent": "signal-noise/0.1",
+            end = datetime.now()
+            start = datetime(end.year - 2, end.month, end.day)
+            params = {
+                "aoi": "us",
+                "startdate": start.strftime("%-m/%-d/%Y"),
+                "enddate": end.strftime("%-m/%-d/%Y"),
+                "statisticsType": "1",
             }
-            resp = requests.get(url, headers=headers, timeout=self.config.request_timeout)
+            resp = requests.get(
+                _API_BASE, params=params,
+                timeout=self.config.request_timeout,
+            )
             resp.raise_for_status()
-            data = resp.json()
-            if isinstance(data, dict) and "d" in data:
-                import json
-                data = json.loads(data["d"])
 
-            rows = []
-            for entry in data:
-                try:
-                    date_str = entry.get("MapDate") or entry.get("ReleaseDate")
-                    if not date_str:
-                        continue
-                    date = pd.Timestamp(date_str, tz="UTC")
-                    val = float(entry.get(level, 0))
-                    rows.append({"date": date, "value": val})
-                except (ValueError, TypeError, KeyError):
-                    continue
+            df = pd.read_csv(io.StringIO(resp.text), thousands=",")
+            if level not in df.columns:
+                raise RuntimeError(f"Column {level} not in response")
 
-            if not rows:
-                raise RuntimeError(f"No drought data for {level}")
-            df = pd.DataFrame(rows)
-            cutoff = pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=365 * 2)
-            df = df[df["date"] >= cutoff]
-            return df.sort_values("date").reset_index(drop=True)
+            df["date"] = pd.to_datetime(df["MapDate"], format="%Y%m%d", utc=True)
+            result = df[["date", level]].rename(columns={level: "value"})
+            result = result.dropna(subset=["value"])
+            return result.sort_values("date").reset_index(drop=True)
 
     _Collector.__name__ = f"Drought_{name}"
     _Collector.__qualname__ = f"Drought_{name}"

@@ -16,7 +16,7 @@ class BtcDominanceCollector(BaseCollector):
         category="crypto",
     )
 
-    URL = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=730"
+    URL = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365"
 
     def fetch(self) -> pd.DataFrame:
         resp = requests.get(self.URL, timeout=self.config.request_timeout)

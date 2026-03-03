@@ -31,7 +31,7 @@ def _make_nsidc_collector(
         def fetch(self) -> pd.DataFrame:
             url = (
                 f"{_NSIDC_BASE}/{hemisphere}/daily/data/"
-                f"{prefix}_seaice_extent_daily_v3.0.csv"
+                f"{prefix}_seaice_extent_daily_v4.0.csv"
             )
             resp = requests.get(url, timeout=self.config.request_timeout)
             resp.raise_for_status()
