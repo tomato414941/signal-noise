@@ -49,10 +49,15 @@ Streaming Collectors ──→ signals_realtime ──→ EventBus ──→ Web
 |--------|------|
 | `collector/base.py` | `BaseCollector` ABC, `CollectorMeta`, taxonomy constants |
 | `collector/__init__.py` | Collector registry (`COLLECTORS` dict), `collect_all()` |
+| `collector/_auth.py` | Unified API key loading (`load_secret`, `load_secrets`) |
+| `collector/_utils.py` | Shared utilities (`build_timeseries_df`) |
+| `collector/_cache.py` | `SharedAPICache` — thread-safe TTL cache with stampede prevention |
 | `collector/streaming.py` | `StreamingCollector` ABC for WebSocket-based collectors |
 | `collector/binance_ws.py` | Binance WS collectors (orderbook, trade flow, liquidation, funding rate) |
 | `collector/*.py` | Individual polling collector implementations |
 | `store/sqlite_store.py` | `SignalStore` — `signals` + `signals_realtime` tables |
+| `store/_health.py` | Pure functions for signal health classification |
+| `store/_anomaly.py` | Pure functions for anomaly detection (robust MAD statistics) |
 | `store/event_bus.py` | `EventBus` — in-process pub/sub for signal updates |
 | `store/migration.py` | Parquet → SQLite migration |
 | `analysis/quality.py` | Signal health scoring (completeness, freshness, stability, independence) |
@@ -119,6 +124,9 @@ L2 collectors require API keys stored in `~/.secrets/`:
 
 Secret file format: `export KEY_NAME=value`
 
+All key loading is handled by `collector/_auth.py` (`load_secret` / `load_secrets`).
+Pattern: env var → `~/.secrets/{provider}` file → raise RuntimeError with signup URL.
+
 ## Adding a New Collector
 
 ### Polling collector (BaseCollector)
@@ -138,7 +146,7 @@ Secret file format: `export KEY_NAME=value`
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v                      # 765 tests
+pytest tests/ -v                      # 764 tests
 ruff check src/ tests/
 python -m signal_noise count          # Show collector count
 ```
