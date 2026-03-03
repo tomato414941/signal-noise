@@ -6,7 +6,7 @@ import pandas as pd
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._cache import SharedAPICache
 
-_cg_cache = SharedAPICache(ttl=60)
+_cg_cache = SharedAPICache(ttl=840)
 
 
 def _get_global_data(timeout: int = 30) -> dict:
