@@ -1,56 +1,35 @@
 from __future__ import annotations
 
-import os
-
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secrets
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _TOKEN_URL = "https://id.twitch.tv/oauth2/token"
 _HELIX_URL = "https://api.twitch.tv/helix"
 
-_TWITCH_CLIENT_ID: str | None = None
 _TWITCH_TOKEN: str | None = None
 
 
 def _get_credentials() -> tuple[str, str]:
     """Return (client_id, access_token). Obtain token via client credentials."""
-    global _TWITCH_CLIENT_ID, _TWITCH_TOKEN
-    if _TWITCH_CLIENT_ID and _TWITCH_TOKEN:
-        return _TWITCH_CLIENT_ID, _TWITCH_TOKEN
+    global _TWITCH_TOKEN
+    creds = load_secrets("twitch", ["TWITCH_CLIENT_ID", "TWITCH_CLIENT_SECRET"],
+                         signup_url="https://dev.twitch.tv/")
+    client_id = creds["TWITCH_CLIENT_ID"]
 
-    client_id = os.environ.get("TWITCH_CLIENT_ID")
-    client_secret = os.environ.get("TWITCH_CLIENT_SECRET")
+    if _TWITCH_TOKEN:
+        return client_id, _TWITCH_TOKEN
 
-    if not client_id or not client_secret:
-        secret_path = os.path.expanduser("~/.secrets/twitch")
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("export TWITCH_CLIENT_ID="):
-                        client_id = line.split("=", 1)[1].strip().strip("'\"")
-                    elif line.startswith("export TWITCH_CLIENT_SECRET="):
-                        client_secret = line.split("=", 1)[1].strip().strip("'\"")
-
-    if not client_id or not client_secret:
-        raise RuntimeError(
-            "TWITCH_CLIENT_ID/SECRET not set — register at https://dev.twitch.tv/"
-        )
-
-    # Client credentials flow
     resp = requests.post(_TOKEN_URL, params={
         "client_id": client_id,
-        "client_secret": client_secret,
+        "client_secret": creds["TWITCH_CLIENT_SECRET"],
         "grant_type": "client_credentials",
     }, timeout=15)
     resp.raise_for_status()
-    token = resp.json()["access_token"]
-
-    _TWITCH_CLIENT_ID = client_id
-    _TWITCH_TOKEN = token
-    return client_id, token
+    _TWITCH_TOKEN = resp.json()["access_token"]
+    return client_id, _TWITCH_TOKEN
 
 
 # Top games to track viewer counts for

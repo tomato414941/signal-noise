@@ -9,41 +9,23 @@ request and cached via SharedAPICache to minimize API calls.
 from __future__ import annotations
 
 import logging
-import os
 from collections import defaultdict
-from pathlib import Path
 
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 log = logging.getLogger(__name__)
 
-_EIA_API_KEY: str | None = None
 _eia_cache = SharedAPICache(ttl=3600)  # cache for 1 hour
 
 
 def _get_eia_key() -> str:
-    global _EIA_API_KEY
-    if _EIA_API_KEY:
-        return _EIA_API_KEY
-
-    key = os.environ.get("EIA_API_KEY")
-    if not key:
-        secret = Path.home() / ".secrets" / "eia"
-        if secret.exists():
-            for line in secret.read_text().splitlines():
-                if line.startswith("export EIA_API_KEY="):
-                    key = line.split("=", 1)[1].strip().strip("'\"")
-                    break
-    if not key:
-        raise RuntimeError(
-            "EIA_API_KEY not set. Get a free key at https://www.eia.gov/opendata/register.php"
-        )
-    _EIA_API_KEY = key
-    return key
+    return load_secret("eia", "EIA_API_KEY",
+                       signup_url="https://www.eia.gov/opendata/register.php")
 
 
 _BASE_URL = "https://api.eia.gov/v2"

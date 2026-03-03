@@ -1,43 +1,20 @@
 from __future__ import annotations
 
-import os
 from datetime import datetime, timedelta, UTC
-from pathlib import Path
 
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secrets
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _BASE_URL = "https://data.smartdublin.ie/sonitus-api/api"
 
-_sonitus_auth: tuple[str, str] | None = None
-
 
 def _get_sonitus_auth() -> tuple[str, str]:
-    global _sonitus_auth
-    if _sonitus_auth:
-        return _sonitus_auth
-
-    user = os.environ.get("SONITUS_USER")
-    pw = os.environ.get("SONITUS_PASSWORD")
-
-    if not user or not pw:
-        secret_file = Path.home() / ".secrets" / "sonitus"
-        if secret_file.exists():
-            for line in secret_file.read_text().splitlines():
-                if line.startswith("export SONITUS_USER="):
-                    user = line.split("=", 1)[1].strip().strip("'\"")
-                elif line.startswith("export SONITUS_PASSWORD="):
-                    pw = line.split("=", 1)[1].strip().strip("'\"")
-
-    if not user or not pw:
-        raise RuntimeError(
-            "SONITUS_USER / SONITUS_PASSWORD not set. "
-            "Store in ~/.secrets/sonitus"
-        )
-    _sonitus_auth = (user, pw)
-    return _sonitus_auth
+    creds = load_secrets("sonitus", ["SONITUS_USER", "SONITUS_PASSWORD"],
+                         signup_url="https://data.smartdublin.ie/")
+    return creds["SONITUS_USER"], creds["SONITUS_PASSWORD"]
 
 
 # Dublin City Council noise monitors with known serial numbers

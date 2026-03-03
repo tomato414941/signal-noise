@@ -1,22 +1,10 @@
 from __future__ import annotations
 
-import os
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
-
-
-def _load_metaculus_token() -> str:
-    token = os.environ.get("METACULUS_API_TOKEN", "")
-    if not token:
-        secrets = os.path.expanduser("~/.secrets/metaculus")
-        if os.path.exists(secrets):
-            for line in open(secrets):
-                line = line.strip()
-                if line.startswith("export METACULUS_API_TOKEN="):
-                    token = line.split("=", 1)[1].strip("'\"")
-    return token
 
 
 class MetaculusActiveQuestionsCollector(BaseCollector):
@@ -35,12 +23,8 @@ class MetaculusActiveQuestionsCollector(BaseCollector):
     URL = "https://www.metaculus.com/api/questions/?status=open&limit=1&offset=0"
 
     def fetch(self) -> pd.DataFrame:
-        token = _load_metaculus_token()
-        if not token:
-            raise RuntimeError(
-                "Metaculus API token not found. Set METACULUS_API_TOKEN env var "
-                "or create ~/.secrets/metaculus"
-            )
+        token = load_secret("metaculus", "METACULUS_API_TOKEN",
+                            signup_url="https://www.metaculus.com/api/")
         headers = {
             "Authorization": f"Token {token}",
             "Accept": "application/json",

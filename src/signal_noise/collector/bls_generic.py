@@ -11,12 +11,12 @@ Docs: https://www.bls.gov/developers/
 from __future__ import annotations
 
 import logging
-import os
 from datetime import UTC, datetime
 
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
@@ -110,7 +110,7 @@ def _fetch_bls_batch(series_ids: list[str], timeout: int = 30) -> dict[str, list
         "startyear": str(start_year),
         "endyear": str(end_year),
     }
-    api_key = os.environ.get("BLS_API_KEY")
+    api_key = load_secret("bls", "BLS_API_KEY", optional=True)
     if api_key:
         payload["registrationkey"] = api_key
 
@@ -132,7 +132,7 @@ def _fetch_bls_batch(series_ids: list[str], timeout: int = 30) -> dict[str, list
 
 def _get_all_bls_data(timeout: int = 30) -> dict[str, list[dict]]:
     """Fetch all BLS series using batched requests, cached for 1 hour."""
-    api_key = os.environ.get("BLS_API_KEY")
+    api_key = load_secret("bls", "BLS_API_KEY", optional=True)
     batch_size = 50 if api_key else 25
 
     def _fetch() -> dict[str, list[dict]]:

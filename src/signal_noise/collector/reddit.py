@@ -1,50 +1,26 @@
 from __future__ import annotations
 
 import logging
-import os
 import time
-from pathlib import Path
 
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secrets
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 log = logging.getLogger(__name__)
 
 _USER_AGENT = "signal-noise/0.1 (https://github.com/tomato414941/signal-noise)"
 
-_reddit_client_id: str | None = None
-_reddit_client_secret: str | None = None
 _token: str | None = None
 _token_expires: float = 0.0
 
 
 def _get_reddit_credentials() -> tuple[str, str]:
-    global _reddit_client_id, _reddit_client_secret
-    if _reddit_client_id and _reddit_client_secret:
-        return _reddit_client_id, _reddit_client_secret
-
-    cid = os.environ.get("REDDIT_CLIENT_ID")
-    secret = os.environ.get("REDDIT_CLIENT_SECRET")
-
-    if not cid or not secret:
-        secret_file = Path.home() / ".secrets" / "reddit"
-        if secret_file.exists():
-            for line in secret_file.read_text().splitlines():
-                if line.startswith("export REDDIT_CLIENT_ID="):
-                    cid = line.split("=", 1)[1].strip().strip("'\"")
-                elif line.startswith("export REDDIT_CLIENT_SECRET="):
-                    secret = line.split("=", 1)[1].strip().strip("'\"")
-
-    if not cid or not secret:
-        raise RuntimeError(
-            "REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET not set. "
-            "Create an app at https://www.reddit.com/prefs/apps"
-        )
-    _reddit_client_id = cid
-    _reddit_client_secret = secret
-    return cid, secret
+    creds = load_secrets("reddit", ["REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET"],
+                         signup_url="https://www.reddit.com/prefs/apps")
+    return creds["REDDIT_CLIENT_ID"], creds["REDDIT_CLIENT_SECRET"]
 
 
 def _get_oauth_token() -> str:

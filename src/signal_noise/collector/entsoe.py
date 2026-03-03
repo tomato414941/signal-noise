@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import os
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, UTC
 
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _API_URL = "https://web-api.tp.entsoe.eu/api"
-_ENTSOE_TOKEN: str | None = None
 
 # Area EIC codes for major bidding zones
 _AREAS = {
@@ -22,22 +21,8 @@ _AREAS = {
 
 
 def _get_token() -> str:
-    global _ENTSOE_TOKEN
-    if _ENTSOE_TOKEN:
-        return _ENTSOE_TOKEN
-    key = os.environ.get("ENTSOE_API_KEY")
-    if not key:
-        secret_path = os.path.expanduser("~/.secrets/entsoe")
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
-                for line in f:
-                    if line.startswith("export ENTSOE_API_KEY="):
-                        key = line.split("=", 1)[1].strip().strip("'\"")
-                        break
-    if not key:
-        raise RuntimeError("ENTSOE_API_KEY not set")
-    _ENTSOE_TOKEN = key
-    return key
+    return load_secret("entsoe", "ENTSOE_API_KEY",
+                       signup_url="https://transparency.entsoe.eu/")
 
 
 def _parse_prices_xml(xml_text: str) -> list[dict]:

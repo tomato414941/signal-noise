@@ -146,10 +146,11 @@ class TestEIABatchFetch:
             "value", "daily",
             "test_wti", "Test WTI", "markets", "commodity",
         )
-        with patch("signal_noise.collector.eia_generic._EIA_API_KEY", None):
-            with patch.dict("os.environ", {}, clear=True):
-                with pytest.raises(RuntimeError, match="EIA_API_KEY"):
-                    cls().fetch()
+        from signal_noise.collector import _auth
+        _auth._cache.pop("EIA_API_KEY", None)
+        with patch.dict("os.environ", {}, clear=True):
+            with pytest.raises(RuntimeError, match="EIA_API_KEY"):
+                cls().fetch()
 
 
 class TestEIAMeta:

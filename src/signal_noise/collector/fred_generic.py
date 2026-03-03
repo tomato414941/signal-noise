@@ -1,38 +1,17 @@
 from __future__ import annotations
 
-import os
 from datetime import UTC, datetime, timedelta
 
 import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
-
-# FRED API key: set FRED_API_KEY env var or place in ~/.secrets/fred
-_FRED_API_KEY: str | None = None
+from signal_noise.collector._auth import load_secret
 
 
 def _get_fred_key() -> str:
-    global _FRED_API_KEY
-    if _FRED_API_KEY:
-        return _FRED_API_KEY
-
-    key = os.environ.get("FRED_API_KEY")
-    if not key:
-        secret_path = os.path.expanduser("~/.secrets/fred")
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("export FRED_API_KEY="):
-                        key = line.split("=", 1)[1].strip().strip("'\"")
-                        break
-    if not key:
-        raise RuntimeError(
-            "FRED_API_KEY not set. Get a free key at https://fred.stlouisfed.org/docs/api/api_key.html"
-        )
-    _FRED_API_KEY = key
-    return key
+    return load_secret("fred", "FRED_API_KEY",
+                       signup_url="https://fred.stlouisfed.org/docs/api/api_key.html")
 
 
 # (series_id, collector_name, display_name, frequency, domain, category)

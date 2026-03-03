@@ -1,22 +1,10 @@
 from __future__ import annotations
 
-import os
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
-
-
-def _load_iucn_token() -> str:
-    token = os.environ.get("IUCN_API_TOKEN", "")
-    if not token:
-        secrets = os.path.expanduser("~/.secrets/iucn")
-        if os.path.exists(secrets):
-            for line in open(secrets):
-                line = line.strip()
-                if line.startswith("export IUCN_API_TOKEN="):
-                    token = line.split("=", 1)[1].strip("'\"")
-    return token
 
 
 class IUCNThreatenedSpeciesCollector(BaseCollector):
@@ -33,12 +21,8 @@ class IUCNThreatenedSpeciesCollector(BaseCollector):
     )
 
     def fetch(self) -> pd.DataFrame:
-        token = _load_iucn_token()
-        if not token:
-            raise RuntimeError(
-                "IUCN API token not found. Set IUCN_API_TOKEN env var "
-                "or create ~/.secrets/iucn"
-            )
+        token = load_secret("iucn", "IUCN_API_TOKEN",
+                            signup_url="https://www.iucnredlist.org/")
         url = f"https://apiv3.iucnredlist.org/api/v3/speciescount?token={token}"
         resp = requests.get(url, timeout=self.config.request_timeout)
         resp.raise_for_status()

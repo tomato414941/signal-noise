@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import os
-
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._cache import SharedAPICache
 
-_FINNHUB_API_KEY: str | None = None
 _BASE_URL = "https://finnhub.io/api/v1"
 _finnhub_cache = SharedAPICache(ttl=3600)
 
@@ -21,26 +19,8 @@ _STOCK_NAMES = {
 
 
 def _get_finnhub_key() -> str:
-    global _FINNHUB_API_KEY
-    if _FINNHUB_API_KEY:
-        return _FINNHUB_API_KEY
-
-    key = os.environ.get("FINNHUB_API_KEY")
-    if not key:
-        secret_path = os.path.expanduser("~/.secrets/finnhub")
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("export FINNHUB_API_KEY="):
-                        key = line.split("=", 1)[1].strip().strip("'\"")
-                        break
-    if not key:
-        raise RuntimeError(
-            "FINNHUB_API_KEY not set. Get a free key at https://finnhub.io/register"
-        )
-    _FINNHUB_API_KEY = key
-    return key
+    return load_secret("finnhub", "FINNHUB_API_KEY",
+                       signup_url="https://finnhub.io/register")
 
 
 # ── Fetch helpers (shared cache per symbol) ──

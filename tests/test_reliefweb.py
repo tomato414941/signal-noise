@@ -58,13 +58,13 @@ class TestReliefWeb:
 
     @patch.dict("os.environ", {}, clear=True)
     def test_missing_appname_uses_default(self):
+        from signal_noise.collector import _auth
         from signal_noise.collector.reliefweb import _get_appname
 
-        with patch("signal_noise.collector.reliefweb.Path") as mock_path:
+        _auth._cache.pop("RELIEFWEB_APPNAME", None)
+        with patch("signal_noise.collector._auth.Path") as mock_path:
             mock_file = MagicMock()
             mock_file.exists.return_value = False
-            mock_path.home.return_value.__truediv__ = lambda s, k: MagicMock(
-                __truediv__=lambda s, k: mock_file
-            )
+            mock_path.home.return_value.__truediv__ = lambda s, k: mock_file
             result = _get_appname()
             assert result == "signal-noise-research"

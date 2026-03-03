@@ -1,35 +1,17 @@
 from __future__ import annotations
 
-import os
-
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _API_BASE = "https://api.congress.gov/v3"
-_CONGRESS_API_KEY: str | None = None
 
 
 def _get_key() -> str:
-    global _CONGRESS_API_KEY
-    if _CONGRESS_API_KEY:
-        return _CONGRESS_API_KEY
-    key = os.environ.get("CONGRESS_API_KEY")
-    if not key:
-        secret_path = os.path.expanduser("~/.secrets/congress")
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
-                for line in f:
-                    if line.startswith("export CONGRESS_API_KEY="):
-                        key = line.split("=", 1)[1].strip().strip("'\"")
-                        break
-    if not key:
-        raise RuntimeError(
-            "CONGRESS_API_KEY not set — get one at https://api.congress.gov/sign-up/"
-        )
-    _CONGRESS_API_KEY = key
-    return key
+    return load_secret("congress", "CONGRESS_API_KEY",
+                       signup_url="https://api.congress.gov/sign-up/")
 
 
 # Congress numbers and their start years (each congress = 2 years)

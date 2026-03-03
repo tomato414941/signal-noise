@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import os
 import re
 
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._cache import SharedAPICache
 
-_BEA_API_KEY: str | None = None
 _BASE_URL = "https://apps.bea.gov/api/data"
 _bea_cache = SharedAPICache(ttl=3600)
 
@@ -18,26 +17,8 @@ _Q_TO_MONTH = {"Q1": "01", "Q2": "04", "Q3": "07", "Q4": "10"}
 
 
 def _get_bea_key() -> str:
-    global _BEA_API_KEY
-    if _BEA_API_KEY:
-        return _BEA_API_KEY
-
-    key = os.environ.get("BEA_API_KEY")
-    if not key:
-        secret_path = os.path.expanduser("~/.secrets/bea")
-        if os.path.exists(secret_path):
-            with open(secret_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("export BEA_API_KEY="):
-                        key = line.split("=", 1)[1].strip().strip("'\"")
-                        break
-    if not key:
-        raise RuntimeError(
-            "BEA_API_KEY not set. Get a free key at https://apps.bea.gov/api/signup/"
-        )
-    _BEA_API_KEY = key
-    return key
+    return load_secret("bea", "BEA_API_KEY",
+                       signup_url="https://apps.bea.gov/api/signup/")
 
 
 def _parse_period(period: str) -> pd.Timestamp | None:

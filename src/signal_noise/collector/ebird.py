@@ -1,22 +1,10 @@
 from __future__ import annotations
 
-import os
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
-
-
-def _load_ebird_key() -> str:
-    key = os.environ.get("EBIRD_API_KEY", "")
-    if not key:
-        secrets = os.path.expanduser("~/.secrets/ebird")
-        if os.path.exists(secrets):
-            for line in open(secrets):
-                line = line.strip()
-                if line.startswith("export EBIRD_API_KEY="):
-                    key = line.split("=", 1)[1].strip("'\"")
-    return key
 
 
 class EBirdObservationsCollector(BaseCollector):
@@ -35,12 +23,8 @@ class EBirdObservationsCollector(BaseCollector):
     URL = "https://api.ebird.org/v2/data/obs/US/recent/notable"
 
     def fetch(self) -> pd.DataFrame:
-        key = _load_ebird_key()
-        if not key:
-            raise RuntimeError(
-                "eBird API key not found. Set EBIRD_API_KEY env var "
-                "or create ~/.secrets/ebird"
-            )
+        key = load_secret("ebird", "EBIRD_API_KEY",
+                          signup_url="https://ebird.org/api/keygen")
         resp = requests.get(
             self.URL,
             headers={"X-eBirdApiToken": key},

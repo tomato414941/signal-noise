@@ -4,25 +4,17 @@ Docs: https://apidoc.rwlabs.org/
 """
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
 import pandas as pd
 import requests
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 _API_URL = "https://api.reliefweb.int/v2/reports"
 
 
 def _get_appname() -> str:
-    appname = os.environ.get("RELIEFWEB_APPNAME")
-    if appname:
-        return appname
-    secrets_file = Path.home() / ".secrets" / "reliefweb"
-    if secrets_file.exists():
-        return secrets_file.read_text().strip()
-    return "signal-noise-research"
+    return load_secret("reliefweb", "RELIEFWEB_APPNAME", optional=True) or "signal-noise-research"
 
 
 class ReliefWebCollector(BaseCollector):

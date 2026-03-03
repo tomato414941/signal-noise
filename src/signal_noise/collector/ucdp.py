@@ -1,34 +1,18 @@
 from __future__ import annotations
 
-import os
 import requests
 import pandas as pd
 
+from signal_noise.collector._auth import load_secret
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
 
 _UCDP_BASE = "https://ucdpapi.pcr.uu.se/api"
 
 
-def _load_ucdp_token() -> str:
-    token = os.environ.get("UCDP_API_TOKEN", "")
-    if not token:
-        secrets = os.path.expanduser("~/.secrets/ucdp")
-        if os.path.exists(secrets):
-            for line in open(secrets):
-                line = line.strip()
-                if line.startswith("export UCDP_API_TOKEN="):
-                    token = line.split("=", 1)[1].strip("'\"")
-    return token
-
-
 def _ucdp_headers() -> dict[str, str]:
-    token = _load_ucdp_token()
-    if not token:
-        raise RuntimeError(
-            "UCDP API token not found. Set UCDP_API_TOKEN env var "
-            "or create ~/.secrets/ucdp. Register at https://ucdp.uu.se/"
-        )
+    token = load_secret("ucdp", "UCDP_API_TOKEN",
+                        signup_url="https://ucdp.uu.se/")
     return {"x-ucdp-access-token": token}
 
 
