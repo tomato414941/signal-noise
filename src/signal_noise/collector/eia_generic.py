@@ -171,9 +171,13 @@ def _fetch_eia_group(
     facet_values = list({fv for fv, _, _ in members})
     data_cols = list({dc for _, dc, _ in members})
 
+    # Limit to last 3 years to avoid fetching entire history (slow from EU)
+    start_date = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=365 * 3)).strftime("%Y-%m-%d")
+
     params: list[tuple[str, str]] = [
         ("api_key", api_key),
         ("frequency", frequency),
+        ("start", start_date),
         ("sort[0][column]", "period"),
         ("sort[0][direction]", "asc"),
         ("length", "5000"),
