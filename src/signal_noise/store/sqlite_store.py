@@ -271,6 +271,8 @@ class SignalStore:
 
     def check_freshness(self, threshold_factor: float = 2.0) -> list[dict]:
         """Return signals that haven't been updated within threshold_factor * interval."""
+        from signal_noise.store._health import filter_stale
+
         rows = self._conn.execute("""
             SELECT name, signal_type, interval, last_updated, consecutive_failures,
                    CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)
@@ -278,16 +280,12 @@ class SignalStore:
             FROM signal_meta
             WHERE last_updated IS NOT NULL
         """).fetchall()
-        stale = []
-        for r in rows:
-            d = dict(r)
-            if d["age_seconds"] > d["interval"] * threshold_factor:
-                d["expected_interval"] = d["interval"]
-                stale.append(d)
-        return stale
+        return filter_stale([dict(r) for r in rows], threshold_factor)
 
     def check_health(self, threshold_factor: float = 2.0) -> dict:
         """Classify all signals into 4 states: never_seen, fresh, stale, failing."""
+        from signal_noise.store._health import classify_signals
+
         rows = self._conn.execute("""
             SELECT name, domain, category, signal_type, interval,
                    last_updated, consecutive_failures,
@@ -296,67 +294,33 @@ class SignalStore:
                    END AS age_seconds
             FROM signal_meta
         """).fetchall()
-        result: dict[str, list[dict]] = {
-            "never_seen": [], "fresh": [], "stale": [], "failing": [],
-        }
-        for r in rows:
-            d = dict(r)
-            if d["consecutive_failures"] > 0:
-                result["failing"].append(d)
-            elif d["last_updated"] is None:
-                result["never_seen"].append(d)
-            elif d["age_seconds"] > d["interval"] * threshold_factor:
-                result["stale"].append(d)
-            else:
-                result["fresh"].append(d)
-        return result
+        return classify_signals([dict(r) for r in rows], threshold_factor)
 
     def check_anomalies(
         self, name: str, df: pd.DataFrame, *, z_threshold: float = 4.0,
         lookback: int = 100,
     ) -> list[dict]:
-        """Detect outliers in new data against recent history.
+        """Detect outliers in new data against recent history."""
+        from signal_noise.store._anomaly import detect_anomalies
 
-        Uses robust median/MAD instead of mean/std to prevent baseline
-        contamination from prior outliers in the lookback window.
-        Returns list of anomaly dicts. Does NOT modify data.
-        """
         val_col = "value" if "value" in df.columns else df.columns[-1]
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
         new_values = df[val_col].dropna()
         if new_values.empty:
             return []
 
-        # Fetch recent history for comparison, skipping the newest values
-        # to prevent the values being tested from contaminating the baseline.
         skip = len(new_values)
         rows = self._conn.execute(
             "SELECT value FROM signals WHERE name = ? AND value IS NOT NULL"
             " ORDER BY timestamp DESC LIMIT ? OFFSET ?",
             (name, lookback, skip),
         ).fetchall()
-        if len(rows) < 10:
-            return []  # Not enough history to judge
+        history = [r[0] for r in rows]
 
-        hist = pd.Series([r[0] for r in rows], dtype=float)
-        median = hist.median()
-        mad = (hist - median).abs().median() * 1.4826  # MAD → std scale
-        if mad == 0 or pd.isna(mad):
-            return []
-
-        ts_col = "timestamp" if "timestamp" in df.columns else "date"
-        anomalies = []
-        for idx, val in new_values.items():
-            z = abs((val - median) / mad)
-            if z > z_threshold:
-                ts = str(df[ts_col].loc[idx]) if ts_col in df.columns else ""
-                anomalies.append({
-                    "timestamp": ts,
-                    "value": float(val),
-                    "z_score": round(float(z), 2),
-                    "median": round(float(median), 4),
-                    "mad": round(float(mad), 4),
-                })
-        return anomalies
+        return detect_anomalies(
+            new_values, df[ts_col] if ts_col in df.columns else pd.Series(),
+            history, z_threshold=z_threshold,
+        )
 
     def save_collection_result(
         self, name: str, df: pd.DataFrame,
