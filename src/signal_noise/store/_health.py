@@ -18,6 +18,9 @@ def classify_signals(
             result["failing"].append(d)
         elif d["last_updated"] is None:
             result["never_seen"].append(d)
+        elif d["age_seconds"] is None:
+            # last_updated set but julianday() failed (corrupted timestamp)
+            result["stale"].append(d)
         elif d["age_seconds"] > d["interval"] * threshold_factor:
             result["stale"].append(d)
         else:

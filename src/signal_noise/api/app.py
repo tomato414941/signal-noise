@@ -148,15 +148,11 @@ class BatchRequest(BaseModel):
 @app.post("/signals/batch")
 def signal_batch(req: BatchRequest) -> dict[str, list[dict]]:
     store = get_store()
-    result: dict[str, list[dict]] = {}
     col_list = req.columns if req.columns else None
-    for name in req.names:
-        meta = store.get_meta(name)
-        if not meta:
-            continue
-        df = store.get_data(name, since=req.since, columns=col_list, resolution=req.resolution)
-        result[name] = df.to_dict(orient="records")
-    return result
+    batch = store.get_batch_data(
+        req.names, since=req.since, columns=col_list, resolution=req.resolution,
+    )
+    return {name: df.to_dict(orient="records") for name, df in batch.items()}
 
 
 @app.get("/health/events")

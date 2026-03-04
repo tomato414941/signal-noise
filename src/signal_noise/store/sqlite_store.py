@@ -437,6 +437,74 @@ class SignalStore:
         rows = self._conn.execute(sql, params).fetchall()
         return [dict(r) for r in rows]
 
+    def get_batch_data(
+        self, names: list[str], *, since: str | None = None,
+        columns: list[str] | None = None, resolution: str | None = None,
+    ) -> dict[str, pd.DataFrame]:
+        """Fetch data for multiple signals in a single query."""
+        if not names:
+            return {}
+
+        all_cols = ["timestamp", "value", "open", "high", "low", "volume"]
+        if columns:
+            selected = ["name", "timestamp"] + [
+                c for c in columns if c in all_cols and c not in ("name", "timestamp")
+            ]
+        else:
+            selected = ["name"] + all_cols
+
+        col_sql = ", ".join(selected)
+        placeholders = ",".join("?" for _ in names)
+        params: list[str] = list(names)
+        where = f"name IN ({placeholders})"
+        if since:
+            where += " AND timestamp >= ?"
+            params.append(_normalize_ts(since))
+
+        rows = self._conn.execute(
+            f"SELECT {col_sql} FROM signals WHERE {where} ORDER BY name, timestamp",
+            params,
+        ).fetchall()
+
+        # Group rows by signal name
+        empty_df = pd.DataFrame(columns=["timestamp", "value"])
+        result: dict[str, pd.DataFrame] = {}
+        if not rows:
+            return result
+
+        current_name = None
+        current_rows: list[dict] = []
+        for r in rows:
+            d = dict(r)
+            name = d.pop("name")
+            if name != current_name:
+                if current_name is not None and current_rows:
+                    result[current_name] = self._finish_batch_df(
+                        current_rows, columns, resolution,
+                    )
+                current_name = name
+                current_rows = [d]
+            else:
+                current_rows.append(d)
+        if current_name is not None and current_rows:
+            result[current_name] = self._finish_batch_df(
+                current_rows, columns, resolution,
+            )
+        return result
+
+    def _finish_batch_df(
+        self, rows: list[dict], columns: list[str] | None,
+        resolution: str | None,
+    ) -> pd.DataFrame:
+        df = pd.DataFrame(rows)
+        if not columns:
+            for col in _OHLCV_COLS:
+                if col in df.columns and df[col].isna().all():
+                    df = df.drop(columns=[col])
+        if resolution and not df.empty:
+            df = self._resample(df, resolution)
+        return df
+
     def get_signal_matrix(self, names: list[str]) -> pd.DataFrame:
         """Load daily date x value matrix for multiple signals (for analysis).
 
