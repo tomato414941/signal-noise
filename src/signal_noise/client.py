@@ -110,7 +110,7 @@ class SignalClient:
         if resolution:
             body["resolution"] = resolution
 
-        data = self._post("/signals/batch", json=body)
+        data = self._post("/signals/batch", json=body, timeout=max(self._timeout, 90))
         result: dict[str, pd.DataFrame] = {}
         for name, records in data.items():
             if not records:
@@ -202,10 +202,11 @@ class SignalClient:
 
     def _post(self, path: str, **kwargs) -> dict | list:
         url = f"{self._base_url}{path}"
+        timeout = kwargs.pop("timeout", self._timeout)
         last_err: Exception | None = None
         for attempt in range(self._retry_count):
             try:
-                r = self._session.post(url, timeout=self._timeout, **kwargs)
+                r = self._session.post(url, timeout=timeout, **kwargs)
                 r.raise_for_status()
                 return r.json()
             except requests.HTTPError as e:
