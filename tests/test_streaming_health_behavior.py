@@ -93,6 +93,35 @@ async def test_liquidation_stream_emits_heartbeat_without_events():
 
 
 @pytest.mark.asyncio
+async def test_liquidation_stream_emits_heartbeat_after_recv_timeout():
+    collector = BinanceLiquidationStreamCollector()
+    real_wait_for = asyncio.wait_for
+    t0 = datetime(2026, 3, 1, 10, 0, 0, tzinfo=timezone.utc)
+    t0_mid = datetime(2026, 3, 1, 10, 0, 30, tzinfo=timezone.utc)
+    t1 = datetime(2026, 3, 1, 10, 1, 0, tzinfo=timezone.utc)
+    now_values = iter([t0, t0_mid, t1, t1])
+
+    def fake_now(tz=None):
+        return next(now_values)
+
+    async def fake_wait_for(coro, timeout):
+        coro.close()
+        raise asyncio.TimeoutError
+
+    with patch("signal_noise.collector.binance_ws.websockets") as mock_ws:
+        mock_ws.connect.return_value = IdleWebSocket()
+        with patch("signal_noise.collector.binance_ws.asyncio.wait_for", side_effect=fake_wait_for):
+            with patch("signal_noise.collector.binance_ws.datetime") as mock_dt:
+                mock_dt.now = fake_now
+                mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
+
+                df = await real_wait_for(anext(collector.stream()), timeout=0.5)
+
+    assert df.iloc[0]["timestamp"] == t0.isoformat()
+    assert df.iloc[0]["value"] == 0.5
+
+
+@pytest.mark.asyncio
 async def test_liquidation_stream_flushes_accumulated_bucket_on_minute_boundary():
     collector = BinanceLiquidationStreamCollector()
     message = json.dumps({"o": {"S": "SELL", "p": "100", "q": "2"}})

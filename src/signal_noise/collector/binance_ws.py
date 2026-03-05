@@ -72,7 +72,10 @@ def _make_liquidation_stream_collector(
                         continue
 
                     timeout = (deadline - now).total_seconds()
-                    msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
+                    try:
+                        msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
+                    except asyncio.TimeoutError:
+                        continue
                     data = json.loads(msg)
                     order = data.get("o", {})
                     price = float(order.get("p", 0))
