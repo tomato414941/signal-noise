@@ -219,7 +219,7 @@ class TestWBFoodSecurity:
     def test_registered(self):
         from signal_noise.collector import COLLECTORS
         for name in ["wb_undernourish_world", "wb_undernourish_in",
-                     "wb_food_insec_world", "wb_food_insec_ssa"]:
+                     "wb_undernourish_ng", "wb_undernourish_bd"]:
             assert name in COLLECTORS, f"{name} not registered"
             cls = COLLECTORS[name]
             assert cls.meta.category == "food_security"

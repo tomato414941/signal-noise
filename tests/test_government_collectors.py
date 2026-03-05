@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
 import pytest
 
 from signal_noise.collector.worldbank_generic import (
@@ -23,7 +22,6 @@ from signal_noise.collector.treasury_generic import (
     get_treasury_collectors,
     _make_yield_collector,
     _make_fiscal_collector,
-    _make_tips_collector,
 )
 from signal_noise.collector.imf_generic import (
     IMF_SERIES,

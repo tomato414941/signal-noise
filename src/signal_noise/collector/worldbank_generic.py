@@ -74,9 +74,7 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("BX.KLT.DINV.WD.GD.ZS", "BR", "wb_fdi_br", "FDI Inflows % GDP: Brazil", "markets", "trade"),
     # ── Domestic credit to private sector (% of GDP) ──
     ("FS.AST.DOMS.GD.ZS", "US", "wb_credit_us", "Private Credit % GDP: US", "markets", "rates"),
-    ("FS.AST.DOMS.GD.ZS", "CN", "wb_credit_cn", "Private Credit % GDP: China", "markets", "rates"),
     ("FS.AST.DOMS.GD.ZS", "JP", "wb_credit_jp", "Private Credit % GDP: Japan", "markets", "rates"),
-    ("FS.AST.DOMS.GD.ZS", "DE", "wb_credit_de", "Private Credit % GDP: Germany", "markets", "rates"),
     # ── Stock market capitalization (% of GDP) ──
     ("CM.MKT.LCAP.GD.ZS", "US", "wb_mktcap_us", "Market Cap % GDP: US", "markets", "equity"),
     ("CM.MKT.LCAP.GD.ZS", "JP", "wb_mktcap_jp", "Market Cap % GDP: Japan", "markets", "equity"),
@@ -84,7 +82,6 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("CM.MKT.LCAP.GD.ZS", "KR", "wb_mktcap_kr", "Market Cap % GDP: S.Korea", "markets", "equity"),
     # ── Government debt (% of GDP) ──
     ("GC.DOD.TOTL.GD.ZS", "US", "wb_govdebt_us", "Govt Debt % GDP: US", "economy", "fiscal"),
-    ("GC.DOD.TOTL.GD.ZS", "JP", "wb_govdebt_jp", "Govt Debt % GDP: Japan", "economy", "fiscal"),
     ("GC.DOD.TOTL.GD.ZS", "GB", "wb_govdebt_gb", "Govt Debt % GDP: UK", "economy", "fiscal"),
     ("GC.DOD.TOTL.GD.ZS", "BR", "wb_govdebt_br", "Govt Debt % GDP: Brazil", "economy", "fiscal"),
     # ── Population growth (annual %) ──
@@ -154,7 +151,6 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SE.TER.ENRR", "IN", "wb_ter_enrollment_in", "Tertiary Enrollment: India", "society", "education"),
     ("SE.TER.ENRR", "BR", "wb_ter_enrollment_br", "Tertiary Enrollment: Brazil", "society", "education"),
     # ── Literacy rate, adult total (% ages 15+) ──
-    ("SE.ADT.LITR.ZS", "US", "wb_literacy_us", "Adult Literacy Rate: US", "society", "education"),
     ("SE.ADT.LITR.ZS", "CN", "wb_literacy_cn", "Adult Literacy Rate: China", "society", "education"),
     ("SE.ADT.LITR.ZS", "IN", "wb_literacy_in", "Adult Literacy Rate: India", "society", "education"),
     ("SE.ADT.LITR.ZS", "BR", "wb_literacy_br", "Adult Literacy Rate: Brazil", "society", "education"),
@@ -184,9 +180,6 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SN.ITK.DEFC.ZS", "BD", "wb_undernourish_bd", "Undernourishment: Bangladesh", "society", "food_security"),
     ("SN.ITK.DEFC.ZS", "ET", "wb_undernourish_et", "Undernourishment: Ethiopia", "society", "food_security"),
     # ── Prevalence of severe food insecurity (% of population) ──
-    ("SN.ITK.SVFI.ZS", "WLD", "wb_food_insec_world", "Severe Food Insecurity: World", "society", "food_security"),
-    ("SN.ITK.SVFI.ZS", "SSF", "wb_food_insec_ssa", "Severe Food Insecurity: Sub-Saharan Africa", "society", "food_security"),
-    ("SN.ITK.SVFI.ZS", "SAS", "wb_food_insec_sa", "Severe Food Insecurity: South Asia", "society", "food_security"),
     # ── Displacement / forced movement ──
     ("SM.POP.FDIP", "WLD", "wb_forced_displaced_world", "Forcibly Displaced People: World", "society", "displacement"),
     ("SM.POP.FDIP", "US", "wb_forced_displaced_us", "Forcibly Displaced People: US", "society", "displacement"),

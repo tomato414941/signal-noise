@@ -71,7 +71,7 @@ def test_registered_new_society_collectors():
         "congress_sres_count",
         "wb_sec_enrollment_us",
         "wb_ter_enrollment_us",
-        "wb_literacy_us",
+        "wb_literacy_in",
         "acled_battles_global",
         "acled_violence_civilians_global",
         "acled_explosions_global",

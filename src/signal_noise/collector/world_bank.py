@@ -10,7 +10,6 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 WB_INDICATORS: list[tuple[str, str, str]] = [
     ("NY.GDP.MKTP.KD.ZG", "wb_gdp_growth", "World Bank: Global GDP Growth %"),
     ("SP.POP.GROW", "wb_population_growth", "World Bank: Global Population Growth %"),
-    ("EN.ATM.CO2E.KT", "wb_co2_emissions", "World Bank: Global CO2 Emissions (kt)"),
     ("IT.NET.USER.ZS", "wb_internet_users_pct", "World Bank: Internet Users %"),
     ("SE.ADT.LITR.ZS", "wb_literacy_rate", "World Bank: Adult Literacy Rate %"),
     ("SL.UEM.TOTL.ZS", "wb_unemployment_rate", "World Bank: Global Unemployment %"),
