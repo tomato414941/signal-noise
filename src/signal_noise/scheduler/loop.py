@@ -93,6 +93,20 @@ def _save_stream_data(
     return rows
 
 
+def _sync_streaming_meta(
+    store: SignalStore,
+    collector: StreamingCollector,
+) -> None:
+    names = collector.registered_meta_names()
+    if collector.meta.name not in names:
+        store.delete_meta(collector.meta.name)
+    for name in names:
+        store.save_meta(
+            name, collector.meta.domain, collector.meta.category,
+            collector.meta.interval, collector.meta.signal_type,
+        )
+
+
 async def _publish_events(
     bus: EventBus, name: str, df: pd.DataFrame, anomalies: list[dict],
 ) -> None:
@@ -208,10 +222,7 @@ async def run_scheduler(
             log.warning("Skipping stream %s: failed to load", name)
             continue
         collector = cls()
-        store.save_meta(
-            name, collector.meta.domain, collector.meta.category,
-            collector.meta.interval, collector.meta.signal_type,
-        )
+        _sync_streaming_meta(store, collector)
         tasks.append(asyncio.create_task(
             run_streaming_collector(collector, store, event_bus=event_bus),
             name=f"stream:{name}",

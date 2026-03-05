@@ -298,6 +298,10 @@ class SignalStore:
             return None
         return dict(row)
 
+    def delete_meta(self, name: str) -> None:
+        self._conn.execute("DELETE FROM signal_meta WHERE name = ?", (name,))
+        self._conn.commit()
+
     def list_signals(self) -> list[dict]:
         rows = self._conn.execute(
             "SELECT * FROM signal_meta ORDER BY name"

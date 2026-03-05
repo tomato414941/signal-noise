@@ -6,10 +6,11 @@ via WebSocket. Data is aggregated into 1-minute buckets before yielding.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from collections import deque
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import AsyncIterator
 
 import pandas as pd
@@ -55,7 +56,23 @@ def _make_liquidation_stream_collector(
                 bucket_short = 0.0
                 bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
 
-                async for msg in ws:
+                while True:
+                    deadline = bucket_ts + timedelta(minutes=1)
+                    now = datetime.now(timezone.utc)
+                    if now >= deadline:
+                        total = bucket_long + bucket_short
+                        ratio = bucket_long / total if total > 0 else 0.5
+                        yield pd.DataFrame([{
+                            "timestamp": bucket_ts.isoformat(),
+                            "value": ratio,
+                        }])
+                        bucket_long = 0.0
+                        bucket_short = 0.0
+                        bucket_ts = now.replace(second=0, microsecond=0)
+                        continue
+
+                    timeout = (deadline - now).total_seconds()
+                    msg = await asyncio.wait_for(ws.recv(), timeout=timeout)
                     data = json.loads(msg)
                     order = data.get("o", {})
                     price = float(order.get("p", 0))
@@ -67,18 +84,6 @@ def _make_liquidation_stream_collector(
                         bucket_long += notional
                     else:
                         bucket_short += notional
-
-                    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-                    if now > bucket_ts:
-                        total = bucket_long + bucket_short
-                        ratio = bucket_long / total if total > 0 else 0.5
-                        yield pd.DataFrame([{
-                            "timestamp": bucket_ts.isoformat(),
-                            "value": ratio,
-                        }])
-                        bucket_long = 0.0
-                        bucket_short = 0.0
-                        bucket_ts = now
 
     if key == "btc":
         _Collector.__name__ = "BinanceLiquidationStreamCollector"
@@ -155,6 +160,9 @@ def _make_orderbook_collector(
             collect_interval=60,
         )
         use_realtime_store = True
+
+        def registered_meta_names(self) -> list[str]:
+            return []
 
         async def stream(self) -> AsyncIterator[pd.DataFrame]:
             url = f"{_WS_BASE}/{stream_symbol}@depth20@100ms"

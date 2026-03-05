@@ -28,6 +28,10 @@ class StreamingCollector(BaseCollector):
         """Not used for streaming collectors."""
         return pd.DataFrame(columns=["timestamp", "value"])
 
+    def registered_meta_names(self) -> list[str]:
+        """Signal names that should appear in signal_meta before first data."""
+        return [self.meta.name]
+
     @abstractmethod
     async def stream(self) -> AsyncIterator[pd.DataFrame]:
         """Yield DataFrames as data arrives from the stream."""
