@@ -31,6 +31,24 @@ class SignalClient:
         self._cache: dict[str, pd.DataFrame] = {}
         self._last_seen: dict[str, str] = {}
 
+    def _normalize_timestamp_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Parse mixed ISO8601 timestamps without failing the whole response."""
+        if "timestamp" not in df.columns:
+            return df
+
+        out = df.copy()
+        out["timestamp"] = pd.to_datetime(
+            out["timestamp"],
+            format="mixed",
+            utc=True,
+            errors="coerce",
+        )
+        invalid = int(out["timestamp"].isna().sum())
+        if invalid:
+            log.warning("Dropped %d rows with invalid timestamps", invalid)
+            out = out.dropna(subset=["timestamp"])
+        return out
+
     @property
     def base_url(self) -> str:
         return self._base_url
@@ -81,7 +99,7 @@ class SignalClient:
         df = pd.DataFrame(data)
         if "date" in df.columns and "timestamp" not in df.columns:
             df = df.rename(columns={"date": "timestamp"})
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df = self._normalize_timestamp_column(df)
 
         if name in self._cache:
             combined = pd.concat([self._cache[name], df])
@@ -119,8 +137,7 @@ class SignalClient:
             df = pd.DataFrame(records)
             if "date" in df.columns and "timestamp" not in df.columns:
                 df = df.rename(columns={"date": "timestamp"})
-            if "timestamp" in df.columns:
-                df["timestamp"] = pd.to_datetime(df["timestamp"])
+            df = self._normalize_timestamp_column(df)
             result[name] = df.sort_values("timestamp").reset_index(drop=True)
         return result
 
