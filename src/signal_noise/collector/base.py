@@ -84,7 +84,7 @@ class CollectorMeta:
     requires_key: bool = False
     domain: str = ""       # top-level grouping
     category: str = ""     # concrete classification
-    signal_type: str = "scalar"  # "scalar" or "ohlcv"
+    signal_type: str = "scalar"  # scalar | ohlcv | state | distribution
     collection_level: str = ""   # L1-L7 (empty = auto-detect)
     collect_interval: int = 0    # seconds (0 = auto from level/frequency)
 

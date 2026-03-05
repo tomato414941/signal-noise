@@ -102,6 +102,27 @@ WIKIPEDIA_PAGES: list[tuple[str, str, str, str, str]] = [
     ("Aviation", "wiki_aviation", "Wikipedia: Aviation", "technology", "logistics"),
     ("Freight_transport", "wiki_freight", "Wikipedia: Freight Transport", "technology", "logistics"),
     ("Shipping_container", "wiki_shipping_container", "Wikipedia: Shipping Container", "technology", "logistics"),
+    # ── Weird / anomaly attention ──
+    ("Area_51", "wiki_area_51", "Wikipedia: Area 51", "sentiment", "attention"),
+    ("Bermuda_Triangle", "wiki_bermuda_triangle", "Wikipedia: Bermuda Triangle", "sentiment", "attention"),
+    ("Bigfoot", "wiki_bigfoot", "Wikipedia: Bigfoot", "sentiment", "attention"),
+    ("Loch_Ness_Monster", "wiki_loch_ness", "Wikipedia: Loch Ness Monster", "sentiment", "attention"),
+    ("Mothman", "wiki_mothman", "Wikipedia: Mothman", "sentiment", "attention"),
+    ("Alien_abduction", "wiki_alien_abduction", "Wikipedia: Alien Abduction", "sentiment", "attention"),
+    ("Conspiracy_theory", "wiki_conspiracy", "Wikipedia: Conspiracy Theory", "sentiment", "attention"),
+    ("Mandela_Effect", "wiki_mandela_effect", "Wikipedia: Mandela Effect", "sentiment", "attention"),
+    ("Simulation_hypothesis", "wiki_simulation_hypothesis", "Wikipedia: Simulation Hypothesis", "sentiment", "attention"),
+    ("Fermi_paradox", "wiki_fermi_paradox", "Wikipedia: Fermi Paradox", "sentiment", "attention"),
+    ("Doomsday_Clock", "wiki_doomsday_clock", "Wikipedia: Doomsday Clock", "sentiment", "attention"),
+    ("Zombie", "wiki_zombie", "Wikipedia: Zombie", "sentiment", "attention"),
+    ("Time_travel", "wiki_time_travel", "Wikipedia: Time Travel", "sentiment", "attention"),
+    ("Internet_meme", "wiki_internet_meme", "Wikipedia: Internet Meme", "sentiment", "attention"),
+    ("Creepypasta", "wiki_creepypasta", "Wikipedia: Creepypasta", "sentiment", "attention"),
+    ("Backrooms", "wiki_backrooms", "Wikipedia: Backrooms", "sentiment", "attention"),
+    ("Cicada_3301", "wiki_cicada_3301", "Wikipedia: Cicada 3301", "sentiment", "attention"),
+    ("QAnon", "wiki_qanon", "Wikipedia: QAnon", "sentiment", "attention"),
+    ("Flat_Earth", "wiki_flat_earth", "Wikipedia: Flat Earth", "sentiment", "attention"),
+    ("Ghost", "wiki_ghost", "Wikipedia: Ghost", "sentiment", "attention"),
 ]
 
 

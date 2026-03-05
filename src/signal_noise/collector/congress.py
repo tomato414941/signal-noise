@@ -65,6 +65,10 @@ _BILL_TYPES = [
     ("s", "congress_s_count", "US Congress: Senate Bills (current)"),
     ("hjres", "congress_hjres_count", "US Congress: House Joint Resolutions (current)"),
     ("sjres", "congress_sjres_count", "US Congress: Senate Joint Resolutions (current)"),
+    ("hres", "congress_hres_count", "US Congress: House Resolutions (current)"),
+    ("sres", "congress_sres_count", "US Congress: Senate Resolutions (current)"),
+    ("hconres", "congress_hconres_count", "US Congress: House Concurrent Resolutions (current)"),
+    ("sconres", "congress_sconres_count", "US Congress: Senate Concurrent Resolutions (current)"),
 ]
 
 

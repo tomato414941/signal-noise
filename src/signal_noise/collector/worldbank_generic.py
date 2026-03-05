@@ -142,6 +142,22 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SE.PRM.ENRR", "IN", "wb_enrollment_in", "Primary Enrollment: India", "society", "education"),
     ("SE.PRM.ENRR", "BR", "wb_enrollment_br", "Primary Enrollment: Brazil", "society", "education"),
     ("SE.PRM.ENRR", "NG", "wb_enrollment_ng", "Primary Enrollment: Nigeria", "society", "education"),
+    # ── School enrollment, secondary (% gross) ──
+    ("SE.SEC.ENRR", "US", "wb_sec_enrollment_us", "Secondary Enrollment: US", "society", "education"),
+    ("SE.SEC.ENRR", "CN", "wb_sec_enrollment_cn", "Secondary Enrollment: China", "society", "education"),
+    ("SE.SEC.ENRR", "IN", "wb_sec_enrollment_in", "Secondary Enrollment: India", "society", "education"),
+    ("SE.SEC.ENRR", "BR", "wb_sec_enrollment_br", "Secondary Enrollment: Brazil", "society", "education"),
+    ("SE.SEC.ENRR", "NG", "wb_sec_enrollment_ng", "Secondary Enrollment: Nigeria", "society", "education"),
+    # ── School enrollment, tertiary (% gross) ──
+    ("SE.TER.ENRR", "US", "wb_ter_enrollment_us", "Tertiary Enrollment: US", "society", "education"),
+    ("SE.TER.ENRR", "CN", "wb_ter_enrollment_cn", "Tertiary Enrollment: China", "society", "education"),
+    ("SE.TER.ENRR", "IN", "wb_ter_enrollment_in", "Tertiary Enrollment: India", "society", "education"),
+    ("SE.TER.ENRR", "BR", "wb_ter_enrollment_br", "Tertiary Enrollment: Brazil", "society", "education"),
+    # ── Literacy rate, adult total (% ages 15+) ──
+    ("SE.ADT.LITR.ZS", "US", "wb_literacy_us", "Adult Literacy Rate: US", "society", "education"),
+    ("SE.ADT.LITR.ZS", "CN", "wb_literacy_cn", "Adult Literacy Rate: China", "society", "education"),
+    ("SE.ADT.LITR.ZS", "IN", "wb_literacy_in", "Adult Literacy Rate: India", "society", "education"),
+    ("SE.ADT.LITR.ZS", "BR", "wb_literacy_br", "Adult Literacy Rate: Brazil", "society", "education"),
     # ── Control of Corruption (governance, -2.5 to 2.5) ──
     ("CC.EST", "US", "wb_corruption_us", "Control of Corruption: US", "society", "governance"),
     ("CC.EST", "CN", "wb_corruption_cn", "Control of Corruption: China", "society", "governance"),
@@ -171,6 +187,18 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SN.ITK.SVFI.ZS", "WLD", "wb_food_insec_world", "Severe Food Insecurity: World", "society", "food_security"),
     ("SN.ITK.SVFI.ZS", "SSF", "wb_food_insec_ssa", "Severe Food Insecurity: Sub-Saharan Africa", "society", "food_security"),
     ("SN.ITK.SVFI.ZS", "SAS", "wb_food_insec_sa", "Severe Food Insecurity: South Asia", "society", "food_security"),
+    # ── Displacement / forced movement ──
+    ("SM.POP.FDIP", "WLD", "wb_forced_displaced_world", "Forcibly Displaced People: World", "society", "displacement"),
+    ("SM.POP.FDIP", "US", "wb_forced_displaced_us", "Forcibly Displaced People: US", "society", "displacement"),
+    ("SM.POP.FDIP", "DE", "wb_forced_displaced_de", "Forcibly Displaced People: Germany", "society", "displacement"),
+    ("SM.POP.IDPC", "WLD", "wb_idp_world", "Internally Displaced People: World", "society", "displacement"),
+    ("SM.POP.ASYS.EA", "WLD", "wb_asylum_world", "Asylum Seekers: World", "society", "displacement"),
+    # ── Cause-of-death structure ──
+    ("SP.DYN.AMRT.FE", "WLD", "wb_adult_mort_female_world", "Adult Mortality Female: World", "society", "cause_of_death"),
+    ("SP.DYN.AMRT.MA", "WLD", "wb_adult_mort_male_world", "Adult Mortality Male: World", "society", "cause_of_death"),
+    ("SH.DTH.NCOM.ZS", "US", "wb_death_ncd_share_us", "Deaths by NCD (%): US", "society", "cause_of_death"),
+    ("SH.DTH.COMM.ZS", "US", "wb_death_comm_share_us", "Deaths by Communicable Diseases (%): US", "society", "cause_of_death"),
+    ("SH.DTH.INJR.ZS", "US", "wb_death_injury_share_us", "Deaths by Injury (%): US", "society", "cause_of_death"),
 ]
 
 

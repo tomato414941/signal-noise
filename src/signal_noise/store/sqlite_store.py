@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import sqlite3
 from pathlib import Path
@@ -24,6 +25,19 @@ def _normalize_ts(ts) -> str:
     return s
 
 
+def _parse_payload(raw):
+    if raw is None:
+        return None
+    if isinstance(raw, (dict, list)):
+        return raw
+    if not isinstance(raw, str):
+        return raw
+    try:
+        return json.loads(raw)
+    except Exception:
+        return raw
+
+
 class SignalStore:
     """SQLite-backed storage for time-series signals (WAL mode)."""
 
@@ -46,6 +60,7 @@ class SignalStore:
                 high      REAL,
                 low       REAL,
                 volume    REAL,
+                payload   TEXT,
                 PRIMARY KEY (name, timestamp)
             );
             CREATE TABLE IF NOT EXISTS signal_meta (
@@ -78,6 +93,8 @@ class SignalStore:
         for col in _OHLCV_COLS:
             if col not in sig_cols:
                 self._conn.execute(f"ALTER TABLE signals ADD COLUMN {col} REAL")
+        if "payload" not in sig_cols:
+            self._conn.execute("ALTER TABLE signals ADD COLUMN payload TEXT")
 
         meta_cols = {r[1] for r in self._conn.execute("PRAGMA table_info(signal_meta)")}
         if "signal_type" not in meta_cols:
@@ -110,10 +127,19 @@ class SignalStore:
         ts_col = "timestamp" if "timestamp" in df.columns else "date"
         val_col = "value" if "value" in df.columns else df.columns[-1]
         has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
+        has_payload = "payload" in df.columns
         rows = []
         for row in df.itertuples(index=False):
             ts = _normalize_ts(getattr(row, ts_col))
             val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
+            payload = None
+            if has_payload:
+                raw_payload = getattr(row, "payload")
+                if pd.notna(raw_payload):
+                    if isinstance(raw_payload, str):
+                        payload = raw_payload
+                    else:
+                        payload = json.dumps(raw_payload, ensure_ascii=True)
             if has_ohlcv:
                 rows.append((
                     name, ts, val,
@@ -121,9 +147,10 @@ class SignalStore:
                     float(row.high) if pd.notna(row.high) else None,
                     float(row.low) if pd.notna(row.low) else None,
                     float(row.volume) if pd.notna(row.volume) else None,
+                    payload,
                 ))
             else:
-                rows.append((name, ts, val, None, None, None, None))
+                rows.append((name, ts, val, None, None, None, None, payload))
         return rows
 
     def save(self, name: str, df: pd.DataFrame) -> int:
@@ -133,8 +160,8 @@ class SignalStore:
         rows = self._build_rows(name, df)
 
         self._conn.executemany(
-            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume, payload)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
         )
         self._conn.execute(
@@ -178,7 +205,7 @@ class SignalStore:
         columns: list[str] | None = None,
         resolution: str | None = None,
     ) -> pd.DataFrame:
-        all_cols = ["timestamp", "value", "open", "high", "low", "volume"]
+        all_cols = ["timestamp", "value", "open", "high", "low", "volume", "payload"]
         if columns:
             selected = ["timestamp"] + [c for c in columns if c in all_cols and c != "timestamp"]
         else:
@@ -200,12 +227,16 @@ class SignalStore:
             return pd.DataFrame(columns=["timestamp", "value"])
 
         df = pd.DataFrame([dict(r) for r in rows])
+        if "payload" in df.columns:
+            df["payload"] = df["payload"].apply(_parse_payload)
 
         # Drop all-NULL OHLCV columns when no explicit column selection
         if not columns:
             for col in _OHLCV_COLS:
                 if col in df.columns and df[col].isna().all():
                     df = df.drop(columns=[col])
+            if "payload" in df.columns and df["payload"].isna().all():
+                df = df.drop(columns=["payload"])
 
         if resolution and not df.empty:
             df = self._resample(df, resolution)
@@ -218,6 +249,8 @@ class SignalStore:
             return df
 
         df = df.copy()
+        if "payload" in df.columns:
+            df = df.drop(columns=["payload"])
         df["timestamp"] = pd.to_datetime(df["timestamp"], format="ISO8601")
         df = df.set_index("timestamp")
 
@@ -245,13 +278,15 @@ class SignalStore:
 
     def get_latest(self, name: str) -> dict | None:
         row = self._conn.execute(
-            "SELECT timestamp, value, open, high, low, volume"
+            "SELECT timestamp, value, open, high, low, volume, payload"
             " FROM signals WHERE name = ? ORDER BY timestamp DESC LIMIT 1",
             (name,),
         ).fetchone()
         if row is None:
             return None
         result = dict(row)
+        if result.get("payload") is not None:
+            result["payload"] = _parse_payload(result["payload"])
         # Strip NULL OHLCV fields for scalar signals
         return {k: v for k, v in result.items() if v is not None or k in ("timestamp", "value")}
 
@@ -334,8 +369,8 @@ class SignalStore:
         rows = self._build_rows(name, df)
 
         self._conn.executemany(
-            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume, payload)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
         )
         self._conn.execute(
@@ -445,7 +480,7 @@ class SignalStore:
         if not names:
             return {}
 
-        all_cols = ["timestamp", "value", "open", "high", "low", "volume"]
+        all_cols = ["timestamp", "value", "open", "high", "low", "volume", "payload"]
         if columns:
             selected = ["name", "timestamp"] + [
                 c for c in columns if c in all_cols and c not in ("name", "timestamp")
@@ -467,7 +502,6 @@ class SignalStore:
         ).fetchall()
 
         # Group rows by signal name
-        empty_df = pd.DataFrame(columns=["timestamp", "value"])
         result: dict[str, pd.DataFrame] = {}
         if not rows:
             return result
@@ -497,10 +531,14 @@ class SignalStore:
         resolution: str | None,
     ) -> pd.DataFrame:
         df = pd.DataFrame(rows)
+        if "payload" in df.columns:
+            df["payload"] = df["payload"].apply(_parse_payload)
         if not columns:
             for col in _OHLCV_COLS:
                 if col in df.columns and df[col].isna().all():
                     df = df.drop(columns=[col])
+            if "payload" in df.columns and df["payload"].isna().all():
+                df = df.drop(columns=["payload"])
         if resolution and not df.empty:
             df = self._resample(df, resolution)
         return df
@@ -633,8 +671,8 @@ class SignalStore:
         if not rows:
             return 0
         self._conn.executemany(
-            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume)"
-            " VALUES (?, ?, ?, NULL, NULL, NULL, NULL)",
+            "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume, payload)"
+            " VALUES (?, ?, ?, NULL, NULL, NULL, NULL, NULL)",
             [(name, r["timestamp"], r["value"]) for r in rows],
         )
         self._conn.commit()

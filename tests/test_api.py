@@ -225,6 +225,14 @@ class TestFilters:
         assert len(data) == 1
         assert data[0]["name"] == "btc"
 
+    def test_filter_by_new_signal_type(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("probe_network_state", "technology", "internet", 300, "state")
+        store.save_meta("probe_ping_distribution_core", "technology", "internet", 300, "distribution")
+        r = client.get("/signals?signal_type=state")
+        data = r.json()
+        assert len(data) == 1
+        assert data[0]["name"] == "probe_network_state"
+
     def test_filter_combined(self, client: TestClient, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
         store.save_meta("sp500", "markets", "equity", 86400, "ohlcv")

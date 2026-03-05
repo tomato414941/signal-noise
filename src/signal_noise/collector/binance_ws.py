@@ -21,137 +21,170 @@ from signal_noise.collector.streaming import StreamingCollector
 log = logging.getLogger(__name__)
 
 _WS_BASE = "wss://fstream.binance.com/ws"
+_STREAM_ASSETS: list[tuple[str, str, str]] = [
+    ("BTCUSDT", "btc", "BTC"),
+    ("ETHUSDT", "eth", "ETH"),
+    ("SOLUSDT", "sol", "SOL"),
+    ("BNBUSDT", "bnb", "BNB"),
+    ("XRPUSDT", "xrp", "XRP"),
+]
+
+def _make_liquidation_stream_collector(
+    symbol: str, key: str, display: str,
+) -> type[StreamingCollector]:
+    stream_symbol = symbol.lower()
+
+    class _Collector(StreamingCollector):
+        """Real-time liquidation stream from Binance Futures."""
+
+        meta = CollectorMeta(
+            name=f"liq_stream_{key}",
+            display_name=f"{display} Liquidation Stream",
+            update_frequency="hourly",
+            api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams",
+            domain="markets",
+            category="crypto_derivatives",
+            signal_type="scalar",
+            collect_interval=60,
+        )
+
+        async def stream(self) -> AsyncIterator[pd.DataFrame]:
+            url = f"{_WS_BASE}/{stream_symbol}@forceOrder"
+            async with websockets.connect(url, ping_interval=20) as ws:
+                bucket_long = 0.0
+                bucket_short = 0.0
+                bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+
+                async for msg in ws:
+                    data = json.loads(msg)
+                    order = data.get("o", {})
+                    price = float(order.get("p", 0))
+                    qty = float(order.get("q", 0))
+                    notional = price * qty
+                    side = order.get("S", "")
+
+                    if side == "SELL":
+                        bucket_long += notional
+                    else:
+                        bucket_short += notional
+
+                    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                    if now > bucket_ts:
+                        total = bucket_long + bucket_short
+                        ratio = bucket_long / total if total > 0 else 0.5
+                        yield pd.DataFrame([{
+                            "timestamp": bucket_ts.isoformat(),
+                            "value": ratio,
+                        }])
+                        bucket_long = 0.0
+                        bucket_short = 0.0
+                        bucket_ts = now
+
+    if key == "btc":
+        _Collector.__name__ = "BinanceLiquidationStreamCollector"
+        _Collector.__qualname__ = "BinanceLiquidationStreamCollector"
+    else:
+        _Collector.__name__ = f"BinanceLiquidationStreamCollector_{key}"
+        _Collector.__qualname__ = f"BinanceLiquidationStreamCollector_{key}"
+    return _Collector
 
 
-class BinanceLiquidationStreamCollector(StreamingCollector):
-    """Real-time BTC liquidation events from Binance Futures WebSocket.
+def _make_funding_rate_stream_collector(
+    symbol: str, key: str, display: str,
+) -> type[StreamingCollector]:
+    stream_symbol = symbol.lower()
 
-    Accumulates liquidation events into 1-minute buckets and yields
-    liq_ratio (long_liq / total_liq) per bucket.
-    """
+    class _Collector(StreamingCollector):
+        """Real-time funding rate stream from Binance Futures."""
 
-    meta = CollectorMeta(
-        name="liq_stream_btc",
-        display_name="BTC Liquidation Stream",
-        update_frequency="hourly",
-        api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams",
-        domain="markets",
-        category="crypto_derivatives",
-        signal_type="scalar",
-        collect_interval=60,
-    )
+        meta = CollectorMeta(
+            name=f"funding_rate_stream_{key}",
+            display_name=f"{display} Funding Rate Stream",
+            update_frequency="hourly",
+            api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#mark-price-stream",
+            domain="markets",
+            category="crypto_derivatives",
+            signal_type="scalar",
+            collect_interval=60,
+        )
 
-    async def stream(self) -> AsyncIterator[pd.DataFrame]:
-        url = f"{_WS_BASE}/btcusdt@forceOrder"
-        async with websockets.connect(url, ping_interval=20) as ws:
-            bucket_long = 0.0
-            bucket_short = 0.0
-            bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+        async def stream(self) -> AsyncIterator[pd.DataFrame]:
+            url = f"{_WS_BASE}/{stream_symbol}@markPrice@1s"
+            async with websockets.connect(url, ping_interval=20) as ws:
+                last_minute = None
 
-            async for msg in ws:
-                data = json.loads(msg)
-                order = data.get("o", {})
-                price = float(order.get("p", 0))
-                qty = float(order.get("q", 0))
-                notional = price * qty
-                side = order.get("S", "")
+                async for msg in ws:
+                    data = json.loads(msg)
+                    ts = pd.Timestamp(data["E"], unit="ms", tz="UTC")
+                    minute = ts.floor("min")
 
-                if side == "SELL":
-                    bucket_long += notional
-                else:
-                    bucket_short += notional
+                    if last_minute is not None and minute <= last_minute:
+                        continue
+                    last_minute = minute
 
-                now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-                if now > bucket_ts:
-                    total = bucket_long + bucket_short
-                    ratio = bucket_long / total if total > 0 else 0.5
                     yield pd.DataFrame([{
-                        "timestamp": bucket_ts.isoformat(),
-                        "value": ratio,
+                        "timestamp": minute.isoformat(),
+                        "value": float(data["r"]),
                     }])
-                    bucket_long = 0.0
-                    bucket_short = 0.0
-                    bucket_ts = now
+
+    if key == "btc":
+        _Collector.__name__ = "BinanceFundingRateStreamCollector"
+        _Collector.__qualname__ = "BinanceFundingRateStreamCollector"
+    else:
+        _Collector.__name__ = f"BinanceFundingRateStreamCollector_{key}"
+        _Collector.__qualname__ = f"BinanceFundingRateStreamCollector_{key}"
+    return _Collector
 
 
-class BinanceFundingRateStreamCollector(StreamingCollector):
-    """Real-time BTC funding rate from Binance Futures WebSocket.
+def _make_orderbook_collector(
+    symbol: str, key: str, display: str,
+) -> type[StreamingCollector]:
+    stream_symbol = symbol.lower()
 
-    Samples the predicted funding rate once per minute from
-    the markPrice stream (~3s updates).
-    """
+    class _Collector(StreamingCollector):
+        """Orderbook depth stream from Binance Futures."""
 
-    meta = CollectorMeta(
-        name="funding_rate_stream_btc",
-        display_name="BTC Funding Rate Stream",
-        update_frequency="hourly",
-        api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#mark-price-stream",
-        domain="markets",
-        category="crypto_derivatives",
-        signal_type="scalar",
-        collect_interval=60,
-    )
+        meta = CollectorMeta(
+            name=f"orderbook_{key}",
+            display_name=f"{display} Orderbook Depth",
+            update_frequency="hourly",
+            api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#partial-book-depth-streams",
+            domain="markets",
+            category="microstructure",
+            signal_type="scalar",
+            collect_interval=60,
+        )
+        use_realtime_store = True
 
-    async def stream(self) -> AsyncIterator[pd.DataFrame]:
-        url = f"{_WS_BASE}/btcusdt@markPrice@1s"
-        async with websockets.connect(url, ping_interval=20) as ws:
-            last_minute = None
+        async def stream(self) -> AsyncIterator[pd.DataFrame]:
+            url = f"{_WS_BASE}/{stream_symbol}@depth20@100ms"
+            async with websockets.connect(url, ping_interval=20) as ws:
+                bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                last_snapshot: dict | None = None
 
-            async for msg in ws:
-                data = json.loads(msg)
-                ts = pd.Timestamp(data["E"], unit="ms", tz="UTC")
-                minute = ts.floor("min")
+                async for msg in ws:
+                    data = json.loads(msg)
+                    last_snapshot = data
 
-                if last_minute is not None and minute <= last_minute:
-                    continue
-                last_minute = minute
+                    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                    if now > bucket_ts and last_snapshot is not None:
+                        rows = _compute_orderbook_signals(bucket_ts, last_snapshot, key)
+                        if rows:
+                            yield pd.DataFrame(rows)
+                        last_snapshot = None
+                        bucket_ts = now
 
-                yield pd.DataFrame([{
-                    "timestamp": minute.isoformat(),
-                    "value": float(data["r"]),
-                }])
-
-
-class BinanceOrderbookCollector(StreamingCollector):
-    """BTC orderbook depth from Binance Futures WebSocket.
-
-    Aggregates 100ms snapshots into 1-minute buckets, yielding three
-    derived signals: book_imbalance, book_depth_ratio, spread_bps.
-    """
-
-    meta = CollectorMeta(
-        name="orderbook_btc",
-        display_name="BTC Orderbook Depth",
-        update_frequency="hourly",
-        api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#partial-book-depth-streams",
-        domain="markets",
-        category="microstructure",
-        signal_type="scalar",
-        collect_interval=60,
-    )
-    use_realtime_store = True
-
-    async def stream(self) -> AsyncIterator[pd.DataFrame]:
-        url = f"{_WS_BASE}/btcusdt@depth20@100ms"
-        async with websockets.connect(url, ping_interval=20) as ws:
-            bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-            last_snapshot: dict | None = None
-
-            async for msg in ws:
-                data = json.loads(msg)
-                last_snapshot = data
-
-                now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-                if now > bucket_ts and last_snapshot is not None:
-                    rows = _compute_orderbook_signals(bucket_ts, last_snapshot)
-                    if rows:
-                        yield pd.DataFrame(rows)
-                    last_snapshot = None
-                    bucket_ts = now
+    if key == "btc":
+        _Collector.__name__ = "BinanceOrderbookCollector"
+        _Collector.__qualname__ = "BinanceOrderbookCollector"
+    else:
+        _Collector.__name__ = f"BinanceOrderbookCollector_{key}"
+        _Collector.__qualname__ = f"BinanceOrderbookCollector_{key}"
+    return _Collector
 
 
 def _compute_orderbook_signals(
-    ts: datetime, snapshot: dict,
+    ts: datetime, snapshot: dict, key: str = "btc",
 ) -> list[dict]:
     """Compute derived signals from an orderbook snapshot."""
     bids = snapshot.get("b") or snapshot.get("bids", [])
@@ -182,9 +215,9 @@ def _compute_orderbook_signals(
     spread_bps = (best_ask - best_bid) / mid * 10_000 if mid > 0 else 0.0
 
     return [
-        {"timestamp": ts_str, "value": imbalance, "name": "book_imbalance_btc"},
-        {"timestamp": ts_str, "value": depth_ratio, "name": "book_depth_ratio_btc"},
-        {"timestamp": ts_str, "value": spread_bps, "name": "spread_bps_btc"},
+        {"timestamp": ts_str, "value": imbalance, "name": f"book_imbalance_{key}"},
+        {"timestamp": ts_str, "value": depth_ratio, "name": f"book_depth_ratio_{key}"},
+        {"timestamp": ts_str, "value": spread_bps, "name": f"spread_bps_{key}"},
     ]
 
 
@@ -234,73 +267,106 @@ class VPINCalculator:
         return total / len(self._buckets)
 
 
-class BinanceTradeFlowCollector(StreamingCollector):
-    """BTC trade flow from Binance Futures aggTrade WebSocket.
+def _make_trade_flow_collector(
+    symbol: str, key: str, display: str,
+) -> type[StreamingCollector]:
+    stream_symbol = symbol.lower()
 
-    Aggregates trades into 1-minute buckets, yielding:
-    - trade_flow_btc: net taker buy volume
-    - large_trade_count_btc: trades > $100k
-    - vpin_btc: VPIN (once 50 volume buckets are filled)
-    """
+    class _Collector(StreamingCollector):
+        """Trade flow stream from Binance Futures aggTrade."""
 
-    meta = CollectorMeta(
-        name="trade_flow_btc",
-        display_name="BTC Trade Flow",
-        update_frequency="hourly",
-        api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#aggregate-trade-streams",
-        domain="markets",
-        category="microstructure",
-        signal_type="scalar",
-        collect_interval=60,
-    )
-    use_realtime_store = True
+        meta = CollectorMeta(
+            name=f"trade_flow_{key}",
+            display_name=f"{display} Trade Flow",
+            update_frequency="hourly",
+            api_docs_url="https://binance-docs.github.io/apidocs/futures/en/#aggregate-trade-streams",
+            domain="markets",
+            category="microstructure",
+            signal_type="scalar",
+            collect_interval=60,
+        )
+        use_realtime_store = True
 
-    _LARGE_TRADE_USD = 100_000.0
+        _LARGE_TRADE_USD = 100_000.0
 
-    async def stream(self) -> AsyncIterator[pd.DataFrame]:
-        url = f"{_WS_BASE}/btcusdt@aggTrade"
-        vpin_calc = VPINCalculator(bucket_size=1.0, n_buckets=50)
+        async def stream(self) -> AsyncIterator[pd.DataFrame]:
+            url = f"{_WS_BASE}/{stream_symbol}@aggTrade"
+            vpin_calc = VPINCalculator(bucket_size=1.0, n_buckets=50)
 
-        async with websockets.connect(url, ping_interval=20) as ws:
-            bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-            buy_vol = 0.0
-            sell_vol = 0.0
-            large_count = 0
+            async with websockets.connect(url, ping_interval=20) as ws:
+                bucket_ts = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                buy_vol = 0.0
+                sell_vol = 0.0
+                large_count = 0
 
-            async for msg in ws:
-                data = json.loads(msg)
-                qty = float(data["q"])
-                price = float(data["p"])
-                # m=True means maker is buyer → taker is seller
-                is_buy = not data["m"]
+                async for msg in ws:
+                    data = json.loads(msg)
+                    qty = float(data["q"])
+                    price = float(data["p"])
+                    # m=True means maker is buyer → taker is seller
+                    is_buy = not data["m"]
 
-                if is_buy:
-                    buy_vol += qty
-                else:
-                    sell_vol += qty
+                    if is_buy:
+                        buy_vol += qty
+                    else:
+                        sell_vol += qty
 
-                if price * qty >= self._LARGE_TRADE_USD:
-                    large_count += 1
+                    if price * qty >= self._LARGE_TRADE_USD:
+                        large_count += 1
 
-                vpin_calc.update(qty, is_buy)
+                    vpin_calc.update(qty, is_buy)
 
-                now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
-                if now > bucket_ts:
-                    ts_str = bucket_ts.isoformat()
-                    rows: list[dict] = [
-                        {"timestamp": ts_str, "value": buy_vol - sell_vol,
-                         "name": "trade_flow_btc"},
-                        {"timestamp": ts_str, "value": large_count,
-                         "name": "large_trade_count_btc"},
-                    ]
-                    vpin_val = vpin_calc.value
-                    if vpin_val is not None:
-                        rows.append({
-                            "timestamp": ts_str, "value": vpin_val,
-                            "name": "vpin_btc",
-                        })
-                    yield pd.DataFrame(rows)
-                    buy_vol = 0.0
-                    sell_vol = 0.0
-                    large_count = 0
-                    bucket_ts = now
+                    now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+                    if now > bucket_ts:
+                        ts_str = bucket_ts.isoformat()
+                        rows: list[dict] = [
+                            {"timestamp": ts_str, "value": buy_vol - sell_vol,
+                             "name": f"trade_flow_{key}"},
+                            {"timestamp": ts_str, "value": large_count,
+                             "name": f"large_trade_count_{key}"},
+                        ]
+                        vpin_val = vpin_calc.value
+                        if vpin_val is not None:
+                            rows.append({
+                                "timestamp": ts_str, "value": vpin_val,
+                                "name": f"vpin_{key}",
+                            })
+                        yield pd.DataFrame(rows)
+                        buy_vol = 0.0
+                        sell_vol = 0.0
+                        large_count = 0
+                        bucket_ts = now
+
+    if key == "btc":
+        _Collector.__name__ = "BinanceTradeFlowCollector"
+        _Collector.__qualname__ = "BinanceTradeFlowCollector"
+    else:
+        _Collector.__name__ = f"BinanceTradeFlowCollector_{key}"
+        _Collector.__qualname__ = f"BinanceTradeFlowCollector_{key}"
+    return _Collector
+
+
+BinanceLiquidationStreamCollector = _make_liquidation_stream_collector("BTCUSDT", "btc", "BTC")
+BinanceFundingRateStreamCollector = _make_funding_rate_stream_collector("BTCUSDT", "btc", "BTC")
+BinanceOrderbookCollector = _make_orderbook_collector("BTCUSDT", "btc", "BTC")
+BinanceTradeFlowCollector = _make_trade_flow_collector("BTCUSDT", "btc", "BTC")
+
+
+def get_binance_ws_collectors() -> dict[str, type[StreamingCollector]]:
+    out: dict[str, type[StreamingCollector]] = {}
+    for symbol, key, display in _STREAM_ASSETS:
+        if key == "btc":
+            liq = BinanceLiquidationStreamCollector
+            funding = BinanceFundingRateStreamCollector
+            orderbook = BinanceOrderbookCollector
+            trade = BinanceTradeFlowCollector
+        else:
+            liq = _make_liquidation_stream_collector(symbol, key, display)
+            funding = _make_funding_rate_stream_collector(symbol, key, display)
+            orderbook = _make_orderbook_collector(symbol, key, display)
+            trade = _make_trade_flow_collector(symbol, key, display)
+        out[f"liq_stream_{key}"] = liq
+        out[f"funding_rate_stream_{key}"] = funding
+        out[f"orderbook_{key}"] = orderbook
+        out[f"trade_flow_{key}"] = trade
+    return out

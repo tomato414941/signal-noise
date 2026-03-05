@@ -163,6 +163,30 @@ class TestOHLCV:
         assert "high" not in latest
 
 
+class TestPayload:
+    def test_save_and_get_payload(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00+00:00"],
+            "value": [10.0],
+            "payload": [{"p50": 8.0, "p95": 12.0, "n": 50}],
+        })
+        store.save("dist_sig", df)
+        result = store.get_data("dist_sig")
+        assert "payload" in result.columns
+        assert result.iloc[0]["payload"]["p95"] == 12.0
+
+    def test_get_latest_with_payload(self, store: SignalStore) -> None:
+        df = pd.DataFrame({
+            "timestamp": ["2024-01-01T00:00:00+00:00"],
+            "value": [2.0],
+            "payload": [{"state": "degraded", "ok_count": 2}],
+        })
+        store.save("state_sig", df)
+        latest = store.get_latest("state_sig")
+        assert latest is not None
+        assert latest["payload"]["state"] == "degraded"
+
+
 class TestSignalType:
     def test_save_meta_with_signal_type(self, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600, "ohlcv")
