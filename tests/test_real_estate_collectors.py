@@ -3,9 +3,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import requests
 
 from signal_noise.collector.oecd_house_prices import (
     OECD_HP_SERIES,
+    _fetch_oecd_csv,
     get_oecd_hp_collectors,
     _make_oecd_hp_collector,
 )
@@ -88,6 +90,21 @@ class TestOECDHousePrices:
         assert df["date"].iloc[0].month == 1
         assert df["date"].iloc[1].month == 4
         assert df["date"].iloc[2].month == 7
+
+    @patch("signal_noise.collector.oecd_house_prices.requests.get")
+    def test_fetch_retries_timeout(self, mock_get):
+        timeout_error = requests.exceptions.ReadTimeout("slow")
+        success = MagicMock()
+        success.text = OECD_CSV_RESPONSE
+        success.raise_for_status = MagicMock()
+        mock_get.side_effect = [timeout_error, success]
+
+        body = _fetch_oecd_csv("https://example.com", timeout=30)
+
+        assert body == OECD_CSV_RESPONSE
+        assert mock_get.call_count == 2
+        _, kwargs = mock_get.call_args
+        assert kwargs["timeout"] == (10, 60)
 
 
 class TestBISPropertyPrices:

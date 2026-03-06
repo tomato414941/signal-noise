@@ -43,7 +43,6 @@ OECD_HP_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("JPN", "HPI_YDH", "oecd_pti_jp", "OECD Price-to-Income: Japan", "economy", "real_estate"),
     ("GBR", "HPI_YDH", "oecd_pti_gb", "OECD Price-to-Income: UK", "economy", "real_estate"),
     ("DEU", "HPI_YDH", "oecd_pti_de", "OECD Price-to-Income: Germany", "economy", "real_estate"),
-    ("CHN", "HPI_YDH", "oecd_pti_cn", "OECD Price-to-Income: China", "economy", "real_estate"),
     ("AUS", "HPI_YDH", "oecd_pti_au", "OECD Price-to-Income: Australia", "economy", "real_estate"),
     ("CAN", "HPI_YDH", "oecd_pti_ca", "OECD Price-to-Income: Canada", "economy", "real_estate"),
     ("KOR", "HPI_YDH", "oecd_pti_kr", "OECD Price-to-Income: Korea", "economy", "real_estate"),
@@ -62,6 +61,25 @@ _BASE_URL = (
     "{country}.Q.{measure}.IX"
     "?format=csvfilewithlabels&startPeriod={start}"
 )
+
+_OECD_HEADERS = {"User-Agent": "signal-noise/0.1 (research)"}
+
+
+def _fetch_oecd_csv(url: str, *, timeout: int) -> str:
+    timeout_tuple = (10, max(timeout, 60))
+    last_error: Exception | None = None
+
+    for _ in range(2):
+        try:
+            resp = requests.get(url, headers=_OECD_HEADERS, timeout=timeout_tuple)
+            resp.raise_for_status()
+            return resp.text
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError) as exc:
+            last_error = exc
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Unexpected OECD request failure")
 
 
 def _make_oecd_hp_collector(
@@ -84,10 +102,9 @@ def _make_oecd_hp_collector(
                 measure=measure,
                 start="2015-Q1",
             )
-            resp = requests.get(url, timeout=self.config.request_timeout)
-            resp.raise_for_status()
-
-            df_raw = pd.read_csv(io.StringIO(resp.text))
+            df_raw = pd.read_csv(
+                io.StringIO(_fetch_oecd_csv(url, timeout=self.config.request_timeout))
+            )
             time_col = "TIME_PERIOD"
             val_col = "OBS_VALUE"
 
