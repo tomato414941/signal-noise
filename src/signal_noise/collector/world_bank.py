@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector.worldbank_generic import _fetch_worldbank_json
 
 # (indicator_code, collector_name, display_name)
 # WLD = World aggregate
@@ -36,9 +36,7 @@ def _make_wb_collector(
                 f"https://api.worldbank.org/v2/country/WLD/indicator/{indicator}"
                 f"?date=2000:2025&format=json&per_page=100"
             )
-            resp = requests.get(url, timeout=self.config.request_timeout)
-            resp.raise_for_status()
-            result = resp.json()
+            result = _fetch_worldbank_json(url, timeout=self.config.request_timeout)
             if not isinstance(result, list) or len(result) < 2:
                 raise RuntimeError(f"Unexpected WB response for {indicator}")
             entries = result[1]

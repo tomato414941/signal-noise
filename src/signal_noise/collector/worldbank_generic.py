@@ -6,6 +6,8 @@ import pandas as pd
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._utils import build_timeseries_df
 
+_WB_HEADERS = {"User-Agent": "signal-noise/0.1 (research)"}
+
 # (indicator_id, country_code, collector_name, display_name, domain, category)
 WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── GDP growth (annual %) ──
@@ -215,9 +217,7 @@ def _make_wb_collector(
                 f"/indicator/{indicator}?format=json&per_page=50"
                 f"&date=2000:2026"
             )
-            resp = requests.get(url, timeout=self.config.request_timeout)
-            resp.raise_for_status()
-            data = resp.json()
+            data = _fetch_worldbank_json(url, timeout=self.config.request_timeout)
 
             if not isinstance(data, list) or len(data) < 2:
                 raise RuntimeError(f"Unexpected WB response for {indicator}/{country}")
@@ -237,6 +237,26 @@ def _make_wb_collector(
     _Collector.__name__ = f"WB_{name}"
     _Collector.__qualname__ = f"WB_{name}"
     return _Collector
+
+
+def _fetch_worldbank_json(url: str, *, timeout: int) -> list:
+    timeout_tuple = (10, max(timeout, 45))
+    last_error: Exception | None = None
+
+    for _ in range(2):
+        try:
+            resp = requests.get(url, headers=_WB_HEADERS, timeout=timeout_tuple)
+            resp.raise_for_status()
+            data = resp.json()
+            if not isinstance(data, list):
+                raise RuntimeError("Unexpected World Bank response payload")
+            return data
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError) as exc:
+            last_error = exc
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Unexpected World Bank request failure")
 
 
 def get_wb_collectors() -> dict[str, type[BaseCollector]]:

@@ -4,9 +4,11 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from signal_noise.collector.worldbank_generic import (
     WORLDBANK_SERIES,
+    _fetch_worldbank_json,
     get_wb_collectors,
     _make_wb_collector,
 )
@@ -94,6 +96,28 @@ class TestWorldBankFetch:
         cls = _make_wb_collector("X", "US", "test_wb", "Test", "economy", "economic")
         with pytest.raises(RuntimeError, match="No data"):
             cls().fetch()
+
+    @patch("signal_noise.collector.worldbank_generic.requests.get")
+    def test_fetch_worldbank_json_retries_timeout(self, mock_get):
+        timeout_error = requests.exceptions.ReadTimeout("slow")
+        success = MagicMock()
+        success.raise_for_status = MagicMock()
+        success.json.return_value = WB_API_RESPONSE
+        mock_get.side_effect = [timeout_error, success]
+
+        data = _fetch_worldbank_json("https://example.com", timeout=30)
+
+        assert data == WB_API_RESPONSE
+        assert mock_get.call_count == 2
+        _, kwargs = mock_get.call_args
+        assert kwargs["timeout"] == (10, 45)
+
+    @patch("signal_noise.collector.worldbank_generic.requests.get")
+    def test_fetch_worldbank_json_raises_after_retries(self, mock_get):
+        mock_get.side_effect = requests.exceptions.ReadTimeout("slow")
+
+        with pytest.raises(requests.exceptions.ReadTimeout):
+            _fetch_worldbank_json("https://example.com", timeout=30)
 
 
 # ── ECB ─────────────────────────────────────────────────────
