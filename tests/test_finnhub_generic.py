@@ -25,8 +25,8 @@ class TestFinnhubMetric:
         _finnhub_cache.clear()
 
     def test_metric_series_count(self):
-        # 7 stocks x 3 metrics = 21
-        assert len(FINNHUB_METRIC_SERIES) == 21
+        # 18 stocks x 3 metrics = 54
+        assert len(FINNHUB_METRIC_SERIES) == 54
 
     def test_no_duplicate_metric_names(self):
         names = [t[2] for t in FINNHUB_METRIC_SERIES]
@@ -129,7 +129,7 @@ class TestFinnhubRecommendation:
         _finnhub_cache.clear()
 
     def test_rec_series_count(self):
-        assert len(FINNHUB_REC_SERIES) == 7
+        assert len(FINNHUB_REC_SERIES) == 18
 
     @patch("signal_noise.collector.finnhub_generic._get_finnhub_key", return_value="fake")
     @patch("signal_noise.collector.finnhub_generic.requests.get")
@@ -210,7 +210,7 @@ class TestFinnhubInsider:
         _finnhub_cache.clear()
 
     def test_insider_series_count(self):
-        assert len(FINNHUB_INSIDER_SERIES) == 7
+        assert len(FINNHUB_INSIDER_SERIES) == 18
 
     @patch("signal_noise.collector.finnhub_generic._get_finnhub_key", return_value="fake")
     @patch("signal_noise.collector.finnhub_generic.requests.get")
@@ -255,7 +255,7 @@ class TestFinnhubEarnings:
         _finnhub_cache.clear()
 
     def test_earnings_series_count(self):
-        assert len(FINNHUB_EARNINGS_SERIES) == 7
+        assert len(FINNHUB_EARNINGS_SERIES) == 18
 
     @patch("signal_noise.collector.finnhub_generic._get_finnhub_key", return_value="fake")
     @patch("signal_noise.collector.finnhub_generic.requests.get")
@@ -332,7 +332,7 @@ class TestFinnhubValidation:
 
     def test_total_collector_count(self):
         collectors = get_finnhub_collectors()
-        assert len(collectors) == 42  # 21 metric + 7 rec + 7 insider + 7 earnings
+        assert len(collectors) == 108  # 54 metric + 18 rec + 18 insider + 18 earnings
 
 
 class TestFinnhubRegistration:
@@ -342,5 +342,7 @@ class TestFinnhubRegistration:
         for name in [
             "finnhub_aapl_eps", "finnhub_aapl_rec",
             "finnhub_aapl_insider", "finnhub_aapl_earnings",
+            "finnhub_amd_eps", "finnhub_gs_rec",
+            "finnhub_fdx_insider", "finnhub_len_earnings",
         ]:
             assert name in COLLECTORS, f"{name} not registered"

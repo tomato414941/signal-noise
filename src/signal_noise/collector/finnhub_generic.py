@@ -11,11 +11,19 @@ from signal_noise.collector._cache import SharedAPICache
 _BASE_URL = "https://finnhub.io/api/v1"
 _finnhub_cache = SharedAPICache(ttl=3600)
 
-# Stocks to track — Magnificent 7 + sector leaders
-_STOCKS = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA", "META"]
+# Stocks to track — Magnificent 7 + liquid cross-sector leaders
+_STOCKS = [
+    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA", "META",
+    "AMD", "AVGO", "GS", "XOM", "CVX", "CAT", "DE", "UNP",
+    "FDX", "DHI", "LEN",
+]
 _STOCK_NAMES = {
     "AAPL": "Apple", "MSFT": "Microsoft", "GOOGL": "Alphabet",
     "AMZN": "Amazon", "NVDA": "NVIDIA", "TSLA": "Tesla", "META": "Meta",
+    "AMD": "AMD", "AVGO": "Broadcom", "GS": "Goldman Sachs",
+    "XOM": "Exxon Mobil", "CVX": "Chevron", "CAT": "Caterpillar",
+    "DE": "Deere", "UNP": "Union Pacific", "FDX": "FedEx",
+    "DHI": "D.R. Horton", "LEN": "Lennar",
 }
 
 
