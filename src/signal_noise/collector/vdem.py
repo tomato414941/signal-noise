@@ -27,7 +27,7 @@ _VDEM_INDICATORS = [
         "V-Dem Electoral Democracy",
     ),
     (
-        "human-rights-scores",
+        "human-rights-index-vdem",
         "human_rights_score",
         {"USA": "us", "CHN": "cn", "JPN": "jp", "RUS": "ru",
          "BRA": "br", "IND": "in"},
@@ -38,11 +38,10 @@ _VDEM_INDICATORS = [
 
 
 def _fetch_owid_csv(slug: str) -> pd.DataFrame:
-    url = f"{_OWID_BASE}/{slug}"
+    url = f"{_OWID_BASE}/{slug}.csv"
     resp = requests.get(
         url,
-        params={"v": "1", "csvType": "full", "useColumnShortNames": "false"},
-        headers={"Accept": "text/csv"},
+        headers={"Accept": "text/csv", "User-Agent": "signal-noise/0.1"},
         timeout=60,
     )
     resp.raise_for_status()

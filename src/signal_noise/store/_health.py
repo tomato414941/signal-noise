@@ -5,16 +5,18 @@ from __future__ import annotations
 def classify_signals(
     meta_rows: list[dict], threshold_factor: float = 2.0,
 ) -> dict[str, list[dict]]:
-    """Classify signals into 4 states based on metadata.
+    """Classify signals into 5 states based on metadata.
 
     Each row must have: consecutive_failures, last_updated, age_seconds, interval.
-    Returns dict with keys: never_seen, fresh, stale, failing.
+    Returns dict with keys: suppressed, never_seen, fresh, stale, failing.
     """
     result: dict[str, list[dict]] = {
-        "never_seen": [], "fresh": [], "stale": [], "failing": [],
+        "suppressed": [], "never_seen": [], "fresh": [], "stale": [], "failing": [],
     }
     for d in meta_rows:
-        if d["consecutive_failures"] > 0:
+        if d.get("suppressed"):
+            result["suppressed"].append(d)
+        elif d["consecutive_failures"] > 0:
             result["failing"].append(d)
         elif d["last_updated"] is None:
             result["never_seen"].append(d)

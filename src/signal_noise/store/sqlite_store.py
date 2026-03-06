@@ -88,6 +88,7 @@ class SignalStore:
                 category     TEXT NOT NULL DEFAULT '',
                 interval     INTEGER NOT NULL DEFAULT 86400,
                 signal_type  TEXT NOT NULL DEFAULT 'scalar',
+                suppressed   INTEGER NOT NULL DEFAULT 0,
                 last_updated TEXT
             );
             CREATE TABLE IF NOT EXISTS signals_realtime (
@@ -123,6 +124,10 @@ class SignalStore:
         if "consecutive_failures" not in meta_cols:
             self._conn.execute(
                 "ALTER TABLE signal_meta ADD COLUMN consecutive_failures INTEGER NOT NULL DEFAULT 0"
+            )
+        if "suppressed" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed INTEGER NOT NULL DEFAULT 0"
             )
 
         # Normalize existing space-separated timestamps to ISO 8601 T-separator
@@ -193,22 +198,33 @@ class SignalStore:
 
     def save_meta(
         self, name: str, domain: str, category: str, interval: int,
-        signal_type: str = "scalar",
+        signal_type: str = "scalar", *, suppressed: bool = False,
     ) -> None:
         """Upsert signal metadata without touching last_updated.
 
         last_updated is only set by save() when actual data is written.
         """
         self._conn.execute(
-            """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
-               VALUES (?, ?, ?, ?, ?)
+            """INSERT INTO signal_meta (name, domain, category, interval, signal_type, suppressed)
+               VALUES (?, ?, ?, ?, ?, ?)
                ON CONFLICT(name) DO UPDATE SET
                    domain = excluded.domain,
                    category = excluded.category,
                    interval = excluded.interval,
-                   signal_type = excluded.signal_type""",
-            (name, domain, category, interval, signal_type),
+                   signal_type = excluded.signal_type,
+                   suppressed = excluded.suppressed""",
+            (name, domain, category, interval, signal_type, int(suppressed)),
         )
+        self._conn.commit()
+
+    def sync_suppressed(self, names: set[str]) -> None:
+        self._conn.execute("UPDATE signal_meta SET suppressed = 0")
+        if names:
+            placeholders = ", ".join("?" for _ in names)
+            self._conn.execute(
+                f"UPDATE signal_meta SET suppressed = 1 WHERE name IN ({placeholders})",
+                tuple(sorted(names)),
+            )
         self._conn.commit()
 
     _RESOLUTION_MAP = {
@@ -341,11 +357,11 @@ class SignalStore:
         return filter_stale([dict(r) for r in rows], threshold_factor)
 
     def check_health(self, threshold_factor: float = 2.0) -> dict:
-        """Classify all signals into 4 states: never_seen, fresh, stale, failing."""
+        """Classify all signals into 5 states: suppressed, never_seen, fresh, stale, failing."""
         from signal_noise.store._health import classify_signals
 
         rows = self._conn.execute("""
-            SELECT name, domain, category, signal_type, interval,
+            SELECT name, domain, category, signal_type, interval, suppressed,
                    last_updated, consecutive_failures,
                    CASE WHEN last_updated IS NOT NULL THEN
                        CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)

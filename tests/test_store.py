@@ -495,13 +495,27 @@ class TestAnomalies:
 class TestCheckHealth:
     def test_empty_store(self, store: SignalStore) -> None:
         h = store.check_health()
-        assert h == {"never_seen": [], "fresh": [], "stale": [], "failing": []}
+        assert h == {
+            "suppressed": [],
+            "never_seen": [],
+            "fresh": [],
+            "stale": [],
+            "failing": [],
+        }
 
     def test_never_seen(self, store: SignalStore) -> None:
         store.save_meta("s", "markets", "crypto", 3600)
         h = store.check_health()
         assert len(h["never_seen"]) == 1
         assert h["never_seen"][0]["name"] == "s"
+
+    def test_suppressed_hidden_from_active_states(self, store: SignalStore) -> None:
+        store.save_meta("s", "markets", "crypto", 3600, suppressed=True)
+        h = store.check_health()
+        assert [s["name"] for s in h["suppressed"]] == ["s"]
+        assert h["never_seen"] == []
+        assert h["stale"] == []
+        assert h["failing"] == []
 
     def test_fresh(self, store: SignalStore) -> None:
         store.save_meta("s", "markets", "crypto", 3600)
@@ -554,6 +568,7 @@ class TestCheckHealth:
         assert [s["name"] for s in h["never_seen"]] == ["b"]
         assert [s["name"] for s in h["stale"]] == ["c"]
         assert [s["name"] for s in h["failing"]] == ["d"]
+        assert h["suppressed"] == []
 
 
 class TestBatchMethods:

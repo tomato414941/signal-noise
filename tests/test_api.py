@@ -38,6 +38,7 @@ class TestHealth:
         assert data["stale"] == 0
         assert data["failing"] == 0
         assert data["never_seen"] == 0
+        assert data["suppressed"] == 0
 
     def test_health_degraded_stale(self, client: TestClient, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600)
@@ -66,6 +67,14 @@ class TestHealth:
         assert data["status"] == "ok"
         assert data["never_seen"] == 1
 
+    def test_health_suppressed(self, client: TestClient, store: SignalStore) -> None:
+        store.save_meta("btc", "markets", "crypto", 3600, suppressed=True)
+        r = client.get("/health")
+        data = r.json()
+        assert data["status"] == "ok"
+        assert data["suppressed"] == 1
+        assert data["never_seen"] == 0
+
     def test_health_fresh(self, client: TestClient, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600)
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
@@ -88,9 +97,12 @@ class TestHealth:
         # failing
         store.save_meta("broken", "markets", "crypto", 3600)
         store.increment_failures("broken")
+        # suppressed
+        store.save_meta("ignored", "society", "legislation", 86400, suppressed=True)
         r = client.get("/health/signals")
         assert r.status_code == 200
         data = r.json()
+        assert data["suppressed"] == ["ignored"]
         assert len(data["stale"]) == 1
         assert data["stale"][0]["name"] == "btc"
         assert "new_sig" in data["never_seen"]
@@ -102,6 +114,7 @@ class TestHealth:
         assert r.status_code == 200
         data = r.json()
         assert data["fresh"] == 0
+        assert data["suppressed"] == []
         assert data["stale"] == []
         assert data["failing"] == []
         assert data["never_seen"] == []

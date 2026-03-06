@@ -246,6 +246,40 @@ def _parse_excludes(raw: str | None) -> set[str]:
     return {v.strip() for v in raw.split(",") if v.strip()}
 
 
+def _sync_suppressed_meta(store, registry: object, suppressed: set[str]) -> None:
+    if not suppressed:
+        store.sync_suppressed(set())
+        return
+
+    for name in suppressed:
+        entry = registry.get_manifest_entry(name) if hasattr(registry, "get_manifest_entry") else None
+        if entry:
+            meta = entry["meta"]
+            store.save_meta(
+                name,
+                meta["domain"],
+                meta["category"],
+                meta["interval"],
+                meta.get("signal_type", "scalar"),
+                suppressed=True,
+            )
+            continue
+
+        cls = registry.get(name) if hasattr(registry, "get") else registry[name]
+        if cls is None:
+            continue
+        collector = cls()
+        store.save_meta(
+            name,
+            collector.meta.domain,
+            collector.meta.category,
+            collector.meta.interval,
+            collector.meta.signal_type,
+            suppressed=True,
+        )
+    store.sync_suppressed(suppressed)
+
+
 def _select_collectors(
     *,
     frequency: str | None = None,
@@ -365,6 +399,7 @@ def _cmd_scheduler(args: argparse.Namespace) -> None:
     import asyncio
 
     from signal_noise.config import DB_PATH
+    from signal_noise.collector import COLLECTORS
     from signal_noise.scheduler.loop import run_scheduler
     from signal_noise.store.sqlite_store import SignalStore
 
@@ -372,6 +407,7 @@ def _cmd_scheduler(args: argparse.Namespace) -> None:
     env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
     cli_excludes = _parse_excludes(args.exclude)
     excludes = env_excludes | cli_excludes
+    _sync_suppressed_meta(store, COLLECTORS, excludes)
     targets = _select_collectors(
         frequency=args.frequency,
         level=args.level,
@@ -512,13 +548,13 @@ def _cmd_serve(args: argparse.Namespace) -> None:
 
     import uvicorn
 
+    from signal_noise.collector import COLLECTORS
     from signal_noise.config import DB_PATH, RAW_DIR
     from signal_noise.store.sqlite_store import SignalStore
 
     store = SignalStore(DB_PATH)
 
     if args.migrate:
-        from signal_noise.collector import COLLECTORS
         from signal_noise.store.migration import migrate_parquet_to_sqlite
 
         count = migrate_parquet_to_sqlite(RAW_DIR, store, COLLECTORS)
@@ -537,6 +573,7 @@ def _cmd_serve(args: argparse.Namespace) -> None:
             env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
             cli_excludes = _parse_excludes(args.exclude)
             excludes = env_excludes | cli_excludes
+            _sync_suppressed_meta(store, COLLECTORS, excludes)
             targets = _select_collectors(exclude=excludes)
             log.info(
                 "Serve scheduler: %d collectors selected (%d excluded)",

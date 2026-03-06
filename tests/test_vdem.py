@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 
 from signal_noise.collector.base import CATEGORIES, DOMAINS, CollectorMeta
-from signal_noise.collector.vdem import get_vdem_collectors
+from signal_noise.collector.vdem import _fetch_owid_csv, get_vdem_collectors
 
 
 _SAMPLE_CSV = """\
@@ -21,6 +21,18 @@ Japan,JPN,2020,0.80
 
 
 class TestVdemFactory:
+    @patch("signal_noise.collector.vdem.requests.get")
+    def test_fetch_owid_csv_uses_csv_endpoint(self, mock_get):
+        mock_resp = MagicMock()
+        mock_resp.text = _SAMPLE_CSV
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        df = _fetch_owid_csv("electoral-democracy-index")
+
+        assert not df.empty
+        assert mock_get.call_args.args[0].endswith("/electoral-democracy-index.csv")
+
     def test_creates_collectors(self):
         collectors = get_vdem_collectors()
         assert len(collectors) >= 14  # 8 democracy + 6 human rights
