@@ -1,13 +1,12 @@
 """Tests for cross-exchange BTC intelligence collectors."""
 from __future__ import annotations
 
+import warnings
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pandas as pd
 import pytest
 
-from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import CATEGORIES, DOMAINS
 from signal_noise.collector.cross_exchange import (
     CrossExchangeSpreadBinanceBybitCollector,
@@ -66,7 +65,9 @@ class TestComputeLeadLag:
 
     def test_constant_returns_zero(self):
         r = np.array([0.01, 0.01, 0.01, 0.01, 0.01])
-        assert _compute_lead_lag(r, r) == 0.0
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
+            assert _compute_lead_lag(r, r) == 0.0
 
 
 # ── Spread collectors ──

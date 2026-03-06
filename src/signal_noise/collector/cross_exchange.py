@@ -55,9 +55,22 @@ def _compute_lead_lag(returns_a: np.ndarray, returns_b: np.ndarray) -> float:
         return 0.0
     a = returns_a[:n]
     b = returns_b[:n]
+    a_prev = a[:-1]
+    b_next = b[1:]
+    b_prev = b[:-1]
+    a_next = a[1:]
+
+    if (
+        np.ptp(a_prev) == 0.0
+        or np.ptp(b_next) == 0.0
+        or np.ptp(b_prev) == 0.0
+        or np.ptp(a_next) == 0.0
+    ):
+        return 0.0
+
     # corr(a[t], b[t+1]) - corr(b[t], a[t+1])
-    corr_ab = np.corrcoef(a[:-1], b[1:])[0, 1]
-    corr_ba = np.corrcoef(b[:-1], a[1:])[0, 1]
+    corr_ab = np.corrcoef(a_prev, b_next)[0, 1]
+    corr_ba = np.corrcoef(b_prev, a_next)[0, 1]
     if np.isnan(corr_ab) or np.isnan(corr_ba):
         return 0.0
     return float(corr_ab - corr_ba)
