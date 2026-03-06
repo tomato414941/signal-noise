@@ -30,7 +30,7 @@ Collect worldwide time series and deliver via REST API + WebSocket.
 
 - **Domains**: 6
 - **Categories**: 61
-- **Collectors**: ~1,629 time series
+- **Collectors**: ~1.7k time series
 
 ## Architecture
 

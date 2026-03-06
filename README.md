@@ -4,7 +4,7 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,629+ signals** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**1,700+ collectors** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
