@@ -22,11 +22,13 @@ class SignalClient:
         timeout: int = 30,
         retry_count: int = 2,
         retry_backoff: float = 1.0,
+        batch_chunk_size: int = 250,
     ):
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout
         self._retry_count = retry_count
         self._retry_backoff = retry_backoff
+        self._batch_chunk_size = max(int(batch_chunk_size), 1)
         self._session = requests.Session()
         self._cache: dict[str, pd.DataFrame] = {}
         self._last_seen: dict[str, str] = {}
@@ -120,6 +122,20 @@ class SignalClient:
         columns: list[str] | None = None,
         resolution: str | None = None,
     ) -> dict[str, pd.DataFrame]:
+        if len(names) > self._batch_chunk_size:
+            result: dict[str, pd.DataFrame] = {}
+            for start in range(0, len(names), self._batch_chunk_size):
+                chunk = names[start:start + self._batch_chunk_size]
+                result.update(
+                    self.get_batch(
+                        chunk,
+                        since=since,
+                        columns=columns,
+                        resolution=resolution,
+                    )
+                )
+            return result
+
         body: dict = {"names": names}
         if since:
             body["since"] = since

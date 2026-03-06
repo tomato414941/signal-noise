@@ -45,3 +45,24 @@ def test_get_batch_parses_mixed_timestamps_and_drops_invalid_rows(monkeypatch):
     assert list(df["value"]) == [1.0, 2.0]
     assert str(df["timestamp"].dtype).endswith(", UTC]")
     assert df["timestamp"].iloc[0] == pd.Timestamp("2025-12-25T08:00:00+00:00")
+
+
+def test_get_batch_chunks_large_requests(monkeypatch):
+    client = SignalClient(base_url="http://localhost:8000", batch_chunk_size=2)
+    seen_chunks: list[list[str]] = []
+
+    def fake_post(path: str, **kwargs):
+        assert path == "/signals/batch"
+        names = kwargs["json"]["names"]
+        seen_chunks.append(names)
+        return {
+            name: [{"timestamp": "2025-12-25T08:00:00+00:00", "value": float(i)}]
+            for i, name in enumerate(names, start=1)
+        }
+
+    monkeypatch.setattr(client, "_post", fake_post)
+
+    batch = client.get_batch(["a", "b", "c", "d", "e"])
+
+    assert seen_chunks == [["a", "b"], ["c", "d"], ["e"]]
+    assert sorted(batch.keys()) == ["a", "b", "c", "d", "e"]
