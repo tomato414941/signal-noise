@@ -74,6 +74,25 @@ class TestSignalStore:
         assert signals[0]["domain"] == "markets"
         assert signals[0]["interval"] == 3600
 
+    def test_get_signal_row_counts_combines_regular_and_realtime(self, store: SignalStore) -> None:
+        store.save(
+            "btc",
+            pd.DataFrame({"timestamp": ["2024-01-01", "2024-01-02"], "value": [1.0, 2.0]}),
+        )
+        store.save_realtime(
+            "btc",
+            pd.DataFrame({"timestamp": ["2024-01-02T00:00:00Z"], "value": [3.0]}),
+        )
+        store.save_realtime(
+            "eth",
+            pd.DataFrame({"timestamp": ["2024-01-02T00:01:00Z"], "value": [4.0]}),
+        )
+
+        counts = store.get_signal_row_counts()
+
+        assert counts["btc"] == 3
+        assert counts["eth"] == 1
+
     def test_get_meta(self, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600)
         meta = store.get_meta("btc")

@@ -39,6 +39,7 @@ def build_manifest() -> dict:
             "class": cls.__qualname__,
             "is_streaming": issubclass(cls, StreamingCollector),
             "meta": {
+                "display_name": m.display_name,
                 "domain": m.domain,
                 "category": m.category,
                 "update_frequency": m.update_frequency,

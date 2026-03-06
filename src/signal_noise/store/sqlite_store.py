@@ -343,6 +343,22 @@ class SignalStore:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    def get_signal_row_counts(self) -> dict[str, int]:
+        rows = self._conn.execute("""
+            SELECT name, SUM(row_count) AS total_rows
+            FROM (
+                SELECT name, COUNT(*) AS row_count
+                FROM signals
+                GROUP BY name
+                UNION ALL
+                SELECT name, COUNT(*) AS row_count
+                FROM signals_realtime
+                GROUP BY name
+            )
+            GROUP BY name
+        """).fetchall()
+        return {str(row["name"]): int(row["total_rows"]) for row in rows}
+
     def check_freshness(self, threshold_factor: float = 2.0) -> list[dict]:
         """Return signals that haven't been updated within threshold_factor * interval."""
         from signal_noise.store._health import filter_stale
