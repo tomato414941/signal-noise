@@ -10,16 +10,14 @@ from signal_noise.collector.base import BaseCollector, CollectorMeta
 from signal_noise.collector._cache import SharedAPICache
 
 _ember_cache = SharedAPICache(ttl=3600)
+_EMBER_CSV_URL = "https://files.ember-energy.org/public-downloads/yearly_full_release_long_format.csv"
 
 
 def _get_ember_data(timeout: int = 30) -> list[dict]:
     """Fetch Ember yearly electricity data for World aggregate."""
     def _fetch() -> list[dict]:
-        url = (
-            "https://ember-data.org/data/yearly-electricity-data.csv"
-        )
         headers = {"User-Agent": "signal-noise/0.1 (research)"}
-        resp = requests.get(url, headers=headers, timeout=timeout)
+        resp = requests.get(_EMBER_CSV_URL, headers=headers, timeout=timeout)
         resp.raise_for_status()
         reader = csv.DictReader(io.StringIO(resp.text))
         return [row for row in reader if row.get("Area") == "World"]
