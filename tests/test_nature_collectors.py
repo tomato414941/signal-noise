@@ -6,7 +6,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from signal_noise.collector.moon import MoonPhaseCollector
-from signal_noise.collector.earthquake import EarthquakeCountCollector
+from signal_noise.collector.earthquake import (
+    EarthquakeCountCollector,
+    USGSQuakeCount24hCollector,
+    USGSQuakeFeltReports24hCollector,
+    USGSQuakeM45Count24hCollector,
+    _usgs_feed_cache,
+)
 from signal_noise.collector.solar import SolarXrayCollector
 from signal_noise.collector.sunspot import SunspotCollector
 from signal_noise.collector.climate_indices import (
@@ -48,6 +54,9 @@ USGS_RESPONSE = {
 
 
 class TestEarthquake:
+    def setup_method(self):
+        _usgs_feed_cache.clear()
+
     @patch("signal_noise.collector.earthquake.requests.get")
     def test_fetch_parses_usgs(self, mock_get):
         mock_resp = MagicMock()
@@ -64,6 +73,42 @@ class TestEarthquake:
 
     def test_meta(self):
         assert EarthquakeCountCollector.meta.name == "earthquake_count"
+
+    @patch("signal_noise.collector.earthquake.requests.get")
+    def test_usgs_quake_count_24h(self, mock_get):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = USGS_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        df = USGSQuakeCount24hCollector().fetch()
+        assert df["value"].iloc[0] == 3.0
+
+    @patch("signal_noise.collector.earthquake.requests.get")
+    def test_usgs_quake_m45_count_24h(self, mock_get):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = USGS_RESPONSE
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        df = USGSQuakeM45Count24hCollector().fetch()
+        assert df["value"].iloc[0] == 3.0
+
+    @patch("signal_noise.collector.earthquake.requests.get")
+    def test_usgs_quake_felt_reports_24h(self, mock_get):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {
+            "features": [
+                {"properties": {"felt": 10}},
+                {"properties": {"felt": None}},
+                {"properties": {"felt": 4}},
+            ]
+        }
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        df = USGSQuakeFeltReports24hCollector().fetch()
+        assert df["value"].iloc[0] == 14.0
 
 
 # ── Solar X-ray ─────────────────────────────────────────────

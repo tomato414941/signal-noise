@@ -98,6 +98,26 @@ class USGSQuakeCount24hCollector(_USGSHourlyBase):
         return pd.DataFrame({"timestamp": [ts], "value": [float(len(features))]})
 
 
+class USGSQuakeM45Count24hCollector(_USGSHourlyBase):
+    """Count of M4.5+ earthquakes worldwide in the last 24h."""
+
+    _feed_url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson"
+
+    meta = CollectorMeta(
+        name="usgs_quake_m45_count_24h",
+        display_name="USGS M4.5+ Quakes (24h)",
+        update_frequency="hourly",
+        api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
+        domain="environment",
+        category="seismic",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        features = self._get_features()
+        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        return pd.DataFrame({"timestamp": [ts], "value": [float(len(features))]})
+
+
 class USGSQuakeMaxMag24hCollector(_USGSHourlyBase):
     """Maximum earthquake magnitude worldwide in the last 24h.
 
@@ -124,6 +144,31 @@ class USGSQuakeMaxMag24hCollector(_USGSHourlyBase):
             if mag is not None and mag > max_mag:
                 max_mag = float(mag)
         return pd.DataFrame({"timestamp": [ts], "value": [max_mag]})
+
+
+class USGSQuakeFeltReports24hCollector(_USGSHourlyBase):
+    """Total felt reports across all earthquakes in the last 24h."""
+
+    _feed_url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+
+    meta = CollectorMeta(
+        name="usgs_quake_felt_reports_24h",
+        display_name="USGS Felt Reports (24h)",
+        update_frequency="hourly",
+        api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
+        domain="environment",
+        category="seismic",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        features = self._get_features()
+        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        total_felt = 0.0
+        for f in features:
+            felt = f.get("properties", {}).get("felt")
+            if felt is not None:
+                total_felt += float(felt)
+        return pd.DataFrame({"timestamp": [ts], "value": [total_felt]})
 
 
 class USGSQuakeSignificantCollector(_USGSHourlyBase):

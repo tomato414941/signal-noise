@@ -21,7 +21,7 @@ from signal_noise.collector.worldbank_generic import WORLDBANK_SERIES
 def test_unhcr_collectors_count_and_category():
     collectors = get_unhcr_collectors()
     assert len(collectors) == len(UNHCR_SERIES)
-    for _, name, _ in UNHCR_SERIES:
+    for _, name, _, _ in UNHCR_SERIES:
         assert name in collectors
         assert collectors[name].meta.category == "displacement"
 
@@ -41,6 +41,42 @@ def test_unhcr_fetch_parses_fields(mock_get):
     df = cls().fetch()
     assert len(df) == 2
     assert df["value"].iloc[0] == 345.0
+
+
+@patch("signal_noise.collector.unhcr.requests.get")
+def test_unhcr_forced_total_handles_dash_values(mock_get):
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {
+        "items": [
+            {"year": 2023, "refugees": 10, "idps": 20, "asylum_seekers": 5, "ooc": 1, "oip": "-"},
+        ]
+    }
+    mock_resp.raise_for_status = MagicMock()
+    mock_get.return_value = mock_resp
+
+    cls = get_unhcr_collectors()["unhcr_ukraine_displaced"]
+    df = cls().fetch()
+    assert df["value"].iloc[0] == 36.0
+
+
+@patch("signal_noise.collector.unhcr.requests.get")
+def test_unhcr_country_filter_sets_params(mock_get):
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {
+        "items": [
+            {"year": 2023, "refugees": 10, "idps": 20, "asylum_seekers": 5, "ooc": 0, "oip": 0},
+        ]
+    }
+    mock_resp.raise_for_status = MagicMock()
+    mock_get.return_value = mock_resp
+
+    cls = get_unhcr_collectors()["unhcr_ukraine_displaced"]
+    df = cls().fetch()
+
+    assert len(df) == 1
+    params = mock_get.call_args.kwargs["params"]
+    assert params["coo"] == "UKR"
+    assert params["cf_type"] == "ISO"
 
 
 def test_owid_excess_collectors_count_and_category():
@@ -111,6 +147,8 @@ def test_society_collectors_registered():
     expected = [
         "unhcr_refugees",
         "unhcr_idps",
+        "unhcr_returned_refugees",
+        "unhcr_ukraine_displaced",
         "owid_excess_mortality_us",
         "owid_excess_mortality_jp",
         "nyc_311_noise",
@@ -120,4 +158,3 @@ def test_society_collectors_registered():
     ]
     for name in expected:
         assert name in COLLECTORS, f"{name} not registered"
-
