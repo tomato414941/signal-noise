@@ -3,10 +3,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
 import pytest
 
-from signal_noise.collector._cache import SharedAPICache
 from signal_noise.collector.base import CATEGORIES, DOMAINS
 from signal_noise.collector.deribit_options import (
     _bs_delta,

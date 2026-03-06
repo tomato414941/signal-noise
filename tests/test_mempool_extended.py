@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
 
 from signal_noise.collector.mempool_extended import (
     MINING_POOLS,
@@ -12,7 +10,6 @@ from signal_noise.collector.mempool_extended import (
     MempoolNetworkHashrateCollector,
     MempoolTxCountCollector,
     MempoolBlockSizeCollector,
-    MempoolBlockWeightCollector,
     _make_pool_hashrate_collector,
     get_mempool_extended_collectors,
 )

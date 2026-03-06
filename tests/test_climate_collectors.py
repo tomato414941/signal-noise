@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
 
 from signal_noise.collector.open_meteo_weather import (
     WEATHER_CITIES,
@@ -23,7 +21,6 @@ from signal_noise.collector.open_meteo_air import (
 )
 from signal_noise.collector.noaa_climate import (
     GlobalTempAnomalyCollector,
-    LandTempAnomalyCollector,
     CO2DailyCollector,
     NASAGlobalTempCollector,
 )

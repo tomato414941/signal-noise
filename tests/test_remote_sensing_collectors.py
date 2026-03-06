@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
 
 from signal_noise.collector.nasa_eonet import (
     EONETWildfireCollector,
@@ -22,7 +20,6 @@ from signal_noise.collector.usgs_water import (
     get_water_collectors,
     _make_water_collector,
 )
-from signal_noise.collector.base import CollectorMeta
 
 
 EONET_RESPONSE = {

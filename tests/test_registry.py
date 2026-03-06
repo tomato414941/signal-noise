@@ -1,5 +1,4 @@
 """Tests for auto-discovery, manifest, and lazy loading."""
-import pytest
 
 from signal_noise.collector.base import BaseCollector, DOMAINS, CATEGORIES, FREQUENCIES
 
@@ -39,9 +38,8 @@ class TestAutoDiscover:
     def test_no_duplicate_names(self):
         from signal_noise.collector._loader import _discover
         result = _discover()
-        # _discover returns a dict so duplicates are last-wins,
-        # but all meta.name values should be unique across classes
-        seen: dict[str, str] = {}
+        meta_names = [cls.meta.name for cls in result.values()]
+        assert len(meta_names) == len(set(meta_names))
         for name, cls in result.items():
             assert name == cls.meta.name, f"Key '{name}' != meta.name '{cls.meta.name}'"
 

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import asyncio
 
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
 from signal_noise.api.app import app
-from signal_noise.store.event_bus import EventBus, SignalEvent
+from signal_noise.store.event_bus import EventBus
 
 import signal_noise.api.app as api_mod
 
@@ -45,8 +44,6 @@ def test_health_events_active(_setup_bus):
 
 @pytest.mark.asyncio
 async def test_ws_signals_receives_events(_setup_bus):
-    bus = _setup_bus
-
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
@@ -56,7 +53,7 @@ async def test_ws_signals_receives_events(_setup_bus):
     # Use TestClient's websocket support
     def _ws_test():
         client = TestClient(app)
-        with client.websocket_connect("/ws/signals?names=test_*") as ws:
+        with client.websocket_connect("/ws/signals?names=test_*"):
             # Publish from another thread won't work with sync TestClient.
             # Instead, test the endpoint accepts connection.
             # Full integration test would need a real async server.

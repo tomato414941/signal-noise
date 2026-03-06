@@ -40,6 +40,13 @@ class FakeWebSocket:
         self._idx += 1
         return msg
 
+    async def recv(self):
+        if self._idx >= len(self._messages):
+            await asyncio.sleep(3600)
+        msg = self._messages[self._idx]
+        self._idx += 1
+        return msg
+
 
 def _liq_msg(side: str, price: float, qty: float) -> str:
     return json.dumps({
@@ -82,7 +89,7 @@ async def test_liquidation_collector_processes_messages():
 
         # With fake data in the same second, bucket won't flush.
         # Just verify no errors.
-        results = await _collect_stream(c.stream(), timeout=0.5)
+        await _collect_stream(c.stream(), timeout=0.5)
 
 
 @pytest.mark.asyncio
@@ -204,7 +211,6 @@ async def test_orderbook_stream_yields_multi_signal_df():
         t1 = datetime(2026, 3, 1, 10, 1, tzinfo=timezone.utc)
 
         call_count = 0
-        orig_now = datetime.now
 
         def fake_now(tz=None):
             nonlocal call_count

@@ -1,11 +1,8 @@
 """Tests for real estate / housing collectors (OECD, BIS, tuples)."""
 from __future__ import annotations
 
-import io
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
 
 from signal_noise.collector.oecd_house_prices import (
     OECD_HP_SERIES,

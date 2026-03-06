@@ -4,12 +4,34 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
-import pytest
-
+from signal_noise.collector.blockchain_charts import (
+    BLOCKCHAIN_CHARTS,
+    _make_bc_collector,
+    get_blockchain_collectors,
+)
+from signal_noise.collector.coingecko_global import (
+    CG_BtcDominanceCollector,
+    CG_TotalMarketCapCollector,
+    CG_TotalVolumeCollector,
+)
+from signal_noise.collector.github_events import (
+    GITHUB_REPOS,
+    _make_gh_events_collector,
+    get_gh_events_collectors,
+)
+from signal_noise.collector.hackernews import HNBestCollector, HNNewCollector, HNTopCollector
+from signal_noise.collector.npm_downloads import (
+    NPM_PACKAGES,
+    _make_npm_collector,
+    get_npm_collectors,
+)
+from signal_noise.collector.stackoverflow import SO_TAGS, _make_so_collector, get_so_collectors
+from signal_noise.collector.wayback import (
+    WAYBACK_SITES,
+    _make_wayback_collector,
+    get_wayback_collectors,
+)
 # ── Hacker News ─────────────────────────────────────────────
-
-from signal_noise.collector.hackernews import HNTopCollector, HNBestCollector, HNNewCollector
 
 
 class TestHackerNews:
@@ -39,8 +61,6 @@ class TestHackerNews:
 
 # ── StackOverflow ───────────────────────────────────────────
 
-from signal_noise.collector.stackoverflow import SO_TAGS, get_so_collectors, _make_so_collector
-
 
 class TestStackOverflow:
     def test_tag_count(self):
@@ -69,10 +89,6 @@ class TestStackOverflow:
 
 # ── GitHub Events ───────────────────────────────────────────
 
-from signal_noise.collector.github_events import (
-    GITHUB_REPOS, get_gh_events_collectors, _make_gh_events_collector,
-)
-
 
 class TestGitHubEvents:
     def test_repo_count(self):
@@ -99,12 +115,6 @@ class TestGitHubEvents:
 
 
 # ── CoinGecko Global ───────────────────────────────────────
-
-from signal_noise.collector.coingecko_global import (
-    CG_TotalMarketCapCollector,
-    CG_TotalVolumeCollector,
-    CG_BtcDominanceCollector,
-)
 
 CG_GLOBAL_RESPONSE = {
     "data": {
@@ -147,10 +157,6 @@ class TestCoinGeckoGlobal:
 
 # ── Blockchain.com Charts ──────────────────────────────────
 
-from signal_noise.collector.blockchain_charts import (
-    BLOCKCHAIN_CHARTS, get_blockchain_collectors, _make_bc_collector,
-)
-
 
 class TestBlockchainCharts:
     def test_chart_count(self):
@@ -184,10 +190,6 @@ class TestBlockchainCharts:
 
 # ── NPM Downloads ──────────────────────────────────────────
 
-from signal_noise.collector.npm_downloads import (
-    NPM_PACKAGES, get_npm_collectors, _make_npm_collector,
-)
-
 
 class TestNPMDownloads:
     def test_package_count(self):
@@ -216,10 +218,6 @@ class TestNPMDownloads:
 
 
 # ── Archive.org Wayback ─────────────────────────────────────
-
-from signal_noise.collector.wayback import (
-    WAYBACK_SITES, get_wayback_collectors, _make_wayback_collector,
-)
 
 
 class TestWayback:
