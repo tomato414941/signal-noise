@@ -139,6 +139,44 @@ class TestEIABatchFetch:
         with pytest.raises(RuntimeError, match="No data for EIA"):
             cls().fetch()
 
+    @patch("signal_noise.collector.eia_generic._get_eia_key", return_value="test_key")
+    @patch("signal_noise.collector.eia_generic.requests.get")
+    def test_fetch_with_extra_facets(self, mock_get, mock_key):
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {
+            "response": {
+                "total": 2,
+                "data": [
+                    {
+                        "period": "2024-01",
+                        "sectorid": "RES",
+                        "stateid": "US",
+                        "sales": "120.5",
+                    },
+                    {
+                        "period": "2024-02",
+                        "sectorid": "RES",
+                        "stateid": "US",
+                        "sales": "118.0",
+                    },
+                ],
+            }
+        }
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        cls = _make_eia_collector(
+            "electricity/retail-sales/data", "sectorid", "RES",
+            "sales", "monthly",
+            "test_elec_sales_res", "Test Retail Sales", "economy", "economic",
+            {"stateid": "US"},
+        )
+        df = cls().fetch()
+
+        assert len(df) == 2
+        params = mock_get.call_args.kwargs["params"]
+        assert ("facets[stateid][]", "US") in params
+
     def test_no_key_raises(self):
         cls = _make_eia_collector(
             "petroleum/pri/spt/data", "series", "RWTC",
@@ -173,7 +211,7 @@ class TestEIAMeta:
 
 class TestEIARegistry:
     def test_series_count(self):
-        assert len(EIA_SERIES) >= 40
+        assert len(EIA_SERIES) >= 50
 
     def test_no_duplicates(self):
         names = [t[5] for t in EIA_SERIES]
@@ -189,7 +227,8 @@ class TestEIARegistry:
         expected = [
             "eia_wti_spot", "eia_brent_spot", "eia_henryhub_spot",
             "eia_crude_stocks", "eia_gasoline_retail",
-            "eia_total_consumption",
+            "eia_total_consumption", "eia_elec_sales_res",
+            "eia_elec_revenue_ind", "eia_steo_us_crude_prod",
         ]
         for name in expected:
             assert name in COLLECTORS, f"{name} not registered"

@@ -42,7 +42,7 @@ class TestBEAGeneric:
         _bea_cache.clear()
 
     def test_series_count(self):
-        assert len(BEA_SERIES) >= 12
+        assert len(BEA_SERIES) >= 40
 
     def test_no_duplicate_names(self):
         names = [t[3] for t in BEA_SERIES]
@@ -63,6 +63,8 @@ class TestBEAGeneric:
         assert len(collectors) == len(BEA_SERIES)
         assert "bea_gdp_real" in collectors
         assert "bea_gdi" in collectors
+        assert "bea_residential_investment" in collectors
+        assert "bea_corp_profits_petroleum_coal" in collectors
 
     @patch("signal_noise.collector.bea_generic._get_bea_key", return_value="fake-key")
     @patch("signal_noise.collector.bea_generic.requests.get")
@@ -157,10 +159,22 @@ class TestBEAGeneric:
             assert domain in DOMAINS, f"{name}: invalid domain {domain}"
             assert category in CATEGORIES, f"{name}: invalid category {category}"
 
+    def test_verified_line_mappings(self):
+        by_name = {name: (table, line) for _, table, line, name, *_ in BEA_SERIES}
+        assert by_name["bea_fixed_investment"] == ("T10106", "8")
+        assert by_name["bea_exports_real"] == ("T10106", "16")
+        assert by_name["bea_imports_real"] == ("T10106", "19")
+        assert by_name["bea_govt_spending"] == ("T10106", "22")
+        assert by_name["bea_saving_rate"] == ("T20100", "35")
+
 
 class TestBEARegistration:
     def test_bea_registered(self):
         from signal_noise.collector import COLLECTORS
 
-        for name in ["bea_gdp_real", "bea_gdi", "bea_corporate_profits"]:
+        for name in [
+            "bea_gdp_real", "bea_gdi", "bea_corporate_profits",
+            "bea_residential_investment", "bea_personal_taxes",
+            "bea_corp_profits_petroleum_coal",
+        ]:
             assert name in COLLECTORS, f"{name} not registered"

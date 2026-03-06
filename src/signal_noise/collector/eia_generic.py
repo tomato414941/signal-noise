@@ -89,17 +89,41 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
 
     # ── Electricity ────────────────────────────────────────────
     ("electricity/retail-sales/data", "sectorid", "ALL", "price", "monthly",
-     "eia_elec_price_total", "EIA US Electricity Price (All)", "markets", "commodity"),
+     "eia_elec_price_total", "EIA US Electricity Price (All)", "markets", "commodity",
+     {"stateid": "US"}),
     ("electricity/retail-sales/data", "sectorid", "RES", "price", "monthly",
-     "eia_elec_price_res", "EIA US Electricity Price (Residential)", "markets", "commodity"),
+     "eia_elec_price_res", "EIA US Electricity Price (Residential)", "markets", "commodity",
+     {"stateid": "US"}),
     ("electricity/retail-sales/data", "sectorid", "COM", "price", "monthly",
-     "eia_elec_price_com", "EIA US Electricity Price (Commercial)", "markets", "commodity"),
+     "eia_elec_price_com", "EIA US Electricity Price (Commercial)", "markets", "commodity",
+     {"stateid": "US"}),
     ("electricity/retail-sales/data", "sectorid", "IND", "price", "monthly",
-     "eia_elec_price_ind", "EIA US Electricity Price (Industrial)", "markets", "commodity"),
+     "eia_elec_price_ind", "EIA US Electricity Price (Industrial)", "markets", "commodity",
+     {"stateid": "US"}),
     ("electricity/retail-sales/data", "sectorid", "ALL", "revenue", "monthly",
-     "eia_elec_revenue", "EIA US Electricity Revenue (All)", "economy", "economic"),
+     "eia_elec_revenue", "EIA US Electricity Revenue (All)", "economy", "economic",
+     {"stateid": "US"}),
     ("electricity/retail-sales/data", "sectorid", "ALL", "sales", "monthly",
-     "eia_elec_sales", "EIA US Electricity Sales (All)", "economy", "economic"),
+     "eia_elec_sales", "EIA US Electricity Sales (All)", "economy", "economic",
+     {"stateid": "US"}),
+    ("electricity/retail-sales/data", "sectorid", "RES", "sales", "monthly",
+     "eia_elec_sales_res", "EIA US Electricity Sales (Residential)", "economy", "economic",
+     {"stateid": "US"}),
+    ("electricity/retail-sales/data", "sectorid", "COM", "sales", "monthly",
+     "eia_elec_sales_com", "EIA US Electricity Sales (Commercial)", "economy", "economic",
+     {"stateid": "US"}),
+    ("electricity/retail-sales/data", "sectorid", "IND", "sales", "monthly",
+     "eia_elec_sales_ind", "EIA US Electricity Sales (Industrial)", "economy", "economic",
+     {"stateid": "US"}),
+    ("electricity/retail-sales/data", "sectorid", "RES", "revenue", "monthly",
+     "eia_elec_revenue_res", "EIA US Electricity Revenue (Residential)", "economy", "economic",
+     {"stateid": "US"}),
+    ("electricity/retail-sales/data", "sectorid", "COM", "revenue", "monthly",
+     "eia_elec_revenue_com", "EIA US Electricity Revenue (Commercial)", "economy", "economic",
+     {"stateid": "US"}),
+    ("electricity/retail-sales/data", "sectorid", "IND", "revenue", "monthly",
+     "eia_elec_revenue_ind", "EIA US Electricity Revenue (Industrial)", "economy", "economic",
+     {"stateid": "US"}),
 
     # ── US energy totals ───────────────────────────────────────
     ("total-energy/data", "msn", "TETCBUS", "value", "monthly",
@@ -126,6 +150,14 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
      "eia_steo_wti_forecast", "EIA WTI Price Forecast", "markets", "commodity"),
     ("steo/data", "seriesId", "NGHHUUS", "value", "monthly",
      "eia_steo_henryhub_forecast", "EIA Henry Hub Price Forecast", "markets", "commodity"),
+    ("steo/data", "seriesId", "COPRPUS", "value", "monthly",
+     "eia_steo_us_crude_prod", "EIA STEO U.S. Crude Oil Production", "economy", "economic"),
+    ("steo/data", "seriesId", "NGMPPUS", "value", "monthly",
+     "eia_steo_natgas_marketed_prod", "EIA STEO Natural Gas Marketed Production", "economy", "economic"),
+    ("steo/data", "seriesId", "NGNWPUS", "value", "monthly",
+     "eia_steo_natgas_net_withdrawals", "EIA STEO Natural Gas Net Withdrawals", "markets", "commodity"),
+    ("steo/data", "seriesId", "EPEOPUS", "value", "monthly",
+     "eia_steo_power_generation", "EIA STEO Electric Power Generation", "economy", "economic"),
 
     # ── US gasoline retail prices ─────────────────────────────
     ("petroleum/pri/gnd/data", "series", "EMM_EPMR_PTE_NUS_DPG", "value", "weekly",
@@ -145,20 +177,49 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
     # ("international/data", ..., "eia_china_oil_consumption", ...),
 ]
 
-# Build group index: (route, facet_key, frequency) -> [(facet_value, data_col, name), ...]
-_GROUP_INDEX: dict[tuple[str, str, str], list[tuple[str, str, str]]] = defaultdict(list)
-for _r, _fk, _fv, _dc, _freq, _name, *_ in EIA_SERIES:
-    _GROUP_INDEX[(_r, _fk, _freq)].append((_fv, _dc, _name))
+def _extra_facet_key(extra_facets: dict[str, str] | None) -> tuple[tuple[str, str], ...]:
+    return tuple(sorted((extra_facets or {}).items()))
 
-# Lookup: collector_name -> (route, facet_key, facet_value, data_col, frequency)
-_SERIES_LOOKUP: dict[str, tuple[str, str, str, str, str]] = {
-    s[5]: (s[0], s[1], s[2], s[3], s[4]) for s in EIA_SERIES
+
+def _unpack_series_spec(
+    spec: tuple,
+) -> tuple[str, str, str, str, str, str, str, str, str, dict[str, str] | None]:
+    route, facet_key, facet_value, data_col, frequency, name, display, domain, category, *rest = spec
+    extra_facets = rest[0] if rest else None
+    return (
+        route,
+        facet_key,
+        facet_value,
+        data_col,
+        frequency,
+        name,
+        display,
+        domain,
+        category,
+        extra_facets,
+    )
+
+
+# Build group index: (route, facet_key, frequency, extra_facets) -> [(facet_value, data_col, name), ...]
+_GROUP_INDEX: dict[tuple[str, str, str, tuple[tuple[str, str], ...]], list[tuple[str, str, str]]] = defaultdict(list)
+for spec in EIA_SERIES:
+    _r, _fk, _fv, _dc, _freq, _name, *_rest, _extra = _unpack_series_spec(spec)
+    _GROUP_INDEX[(_r, _fk, _freq, _extra_facet_key(_extra))].append((_fv, _dc, _name))
+
+# Lookup: collector_name -> (route, facet_key, facet_value, data_col, frequency, extra_facets)
+_SERIES_LOOKUP: dict[str, tuple[str, str, str, str, str, dict[str, str] | None]] = {
+    spec[5]: (
+        spec[0], spec[1], spec[2], spec[3], spec[4],
+        spec[9] if len(spec) > 9 else None,
+    )
+    for spec in EIA_SERIES
 }
 
 
 def _fetch_eia_group(
     route: str, facet_key: str, frequency: str,
     members: list[tuple[str, str, str]],
+    extra_facets: dict[str, str] | None = None,
     timeout: int = 30,
 ) -> dict[str, list[dict]]:
     """Fetch multiple EIA series sharing the same route/facet/frequency.
@@ -184,6 +245,8 @@ def _fetch_eia_group(
     ]
     for fv in facet_values:
         params.append((f"facets[{facet_key}][]", fv))
+    for extra_key, extra_value in (extra_facets or {}).items():
+        params.append((f"facets[{extra_key}][]", extra_value))
     for dc in data_cols:
         params.append(("data[]", dc))
 
@@ -221,14 +284,26 @@ def _fetch_eia_group(
 
 
 def _get_eia_group_data(
-    route: str, facet_key: str, frequency: str, timeout: int = 30,
+    route: str,
+    facet_key: str,
+    frequency: str,
+    extra_facets: dict[str, str] | None = None,
+    timeout: int = 30,
 ) -> dict[tuple[str, str], list[dict]]:
     """Fetch an EIA group with caching."""
-    cache_key = f"{route}|{facet_key}|{frequency}"
-    members = _GROUP_INDEX[(route, facet_key, frequency)]
+    extra_key = _extra_facet_key(extra_facets)
+    cache_key = f"{route}|{facet_key}|{frequency}|{extra_key}"
+    members = _GROUP_INDEX[(route, facet_key, frequency, extra_key)]
 
     def _fetch() -> dict[tuple[str, str], list[dict]]:
-        result = _fetch_eia_group(route, facet_key, frequency, members, timeout)
+        result = _fetch_eia_group(
+            route,
+            facet_key,
+            frequency,
+            members,
+            extra_facets,
+            timeout,
+        )
         log.info("EIA batch %s: fetched %d series", cache_key, len(result))
         return result
 
@@ -240,6 +315,7 @@ def _make_eia_collector(
     data_col: str, frequency: str,
     name: str, display_name: str,
     domain: str, category: str,
+    extra_facets: dict[str, str] | None = None,
 ) -> type[BaseCollector]:
 
     class _Collector(BaseCollector):
@@ -256,6 +332,7 @@ def _make_eia_collector(
         def fetch(self) -> pd.DataFrame:
             group_data = _get_eia_group_data(
                 route, facet_key, frequency,
+                extra_facets,
                 timeout=self.config.request_timeout,
             )
             rows = group_data.get((facet_value, data_col), [])
@@ -268,8 +345,9 @@ def _make_eia_collector(
 
 def get_eia_collectors() -> dict[str, type[BaseCollector]]:
     collectors: dict[str, type[BaseCollector]] = {}
-    for route, fk, fv, dc, freq, name, display, domain, cat in EIA_SERIES:
+    for spec in EIA_SERIES:
+        route, fk, fv, dc, freq, name, display, domain, cat, extra = _unpack_series_spec(spec)
         collectors[name] = _make_eia_collector(
-            route, fk, fv, dc, freq, name, display, domain, cat,
+            route, fk, fv, dc, freq, name, display, domain, cat, extra,
         )
     return collectors
