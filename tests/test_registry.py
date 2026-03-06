@@ -106,6 +106,36 @@ class TestLazyRegistry:
         reg = LazyCollectorRegistry(manifest["collectors"])
         assert reg.get("nonexistent_collector_xyz") is None
 
+    def test_load_alias_loads_single_module(self):
+        from signal_noise.collector._lazy import LazyCollectorRegistry
+        from signal_noise.collector._manifest import build_manifest
+        manifest = build_manifest()
+        reg = LazyCollectorRegistry(manifest["collectors"])
+        first_name = next(iter(manifest["collectors"]))
+        cls = reg.load(first_name)
+        assert cls is not None
+        assert cls is reg[first_name]
+
+    def test_get_meta_returns_manifest_copy(self):
+        from signal_noise.collector._lazy import LazyCollectorRegistry
+        from signal_noise.collector._manifest import build_manifest
+        manifest = build_manifest()
+        reg = LazyCollectorRegistry(manifest["collectors"])
+        first_name = next(iter(manifest["collectors"]))
+        meta = reg.get_meta(first_name)
+        assert meta == manifest["collectors"][first_name]["meta"]
+        assert meta is not manifest["collectors"][first_name]["meta"]
+
+    def test_is_streaming_reflects_manifest(self):
+        from signal_noise.collector._lazy import LazyCollectorRegistry
+        from signal_noise.collector._manifest import build_manifest
+        manifest = build_manifest()
+        reg = LazyCollectorRegistry(manifest["collectors"])
+        first_name = next(iter(manifest["collectors"]))
+        assert reg.is_streaming(first_name) is bool(
+            manifest["collectors"][first_name].get("is_streaming", False)
+        )
+
     def test_keys_matches_manifest(self):
         from signal_noise.collector._lazy import LazyCollectorRegistry
         from signal_noise.collector._manifest import build_manifest

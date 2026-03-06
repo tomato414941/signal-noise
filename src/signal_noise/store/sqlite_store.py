@@ -148,6 +148,8 @@ class SignalStore:
         self._conn.commit()
 
     def _build_rows(self, name: str, df: pd.DataFrame) -> list[tuple]:
+        if df.empty:
+            return []
         ts_col = "timestamp" if "timestamp" in df.columns else "date"
         val_col = "value" if "value" in df.columns else df.columns[-1]
         has_ohlcv = all(c in df.columns for c in _OHLCV_COLS)
@@ -177,6 +179,120 @@ class SignalStore:
                 rows.append((name, ts, val, None, None, None, None, payload))
         return rows
 
+    def _build_realtime_rows(
+        self,
+        name: str,
+        df: pd.DataFrame,
+    ) -> list[tuple[str, str, float | None]]:
+        if df.empty:
+            return []
+        ts_col = "timestamp" if "timestamp" in df.columns else "date"
+        val_col = "value" if "value" in df.columns else df.columns[-1]
+        rows: list[tuple[str, str, float | None]] = []
+        for row in df.itertuples(index=False):
+            ts = _normalize_ts(getattr(row, ts_col))
+            val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
+            rows.append((name, ts, val))
+        return rows
+
+    def _upsert_meta_record(
+        self,
+        name: str,
+        domain: str,
+        category: str,
+        interval: int,
+        signal_type: str,
+        *,
+        suppressed: bool | None = None,
+    ) -> None:
+        if suppressed is None:
+            self._conn.execute(
+                """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
+                   VALUES (?, ?, ?, ?, ?)
+                   ON CONFLICT(name) DO UPDATE SET
+                       domain = excluded.domain,
+                       category = excluded.category,
+                       interval = excluded.interval,
+                       signal_type = excluded.signal_type""",
+                (name, domain, category, interval, signal_type),
+            )
+            return
+
+        self._conn.execute(
+            """INSERT INTO signal_meta (name, domain, category, interval, signal_type, suppressed)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(name) DO UPDATE SET
+                   domain = excluded.domain,
+                   category = excluded.category,
+                   interval = excluded.interval,
+                   signal_type = excluded.signal_type,
+                   suppressed = excluded.suppressed""",
+            (name, domain, category, interval, signal_type, int(suppressed)),
+        )
+
+    def _touch_last_updated(self, name: str, *, reset_failures: bool = False) -> None:
+        if reset_failures:
+            self._conn.execute(
+                "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),"
+                " consecutive_failures = 0 WHERE name = ?",
+                (name,),
+            )
+            return
+
+        self._conn.execute(
+            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')"
+            " WHERE name = ?",
+            (name,),
+        )
+
+    def _increment_failures_in_tx(self, name: str) -> None:
+        self._conn.execute(
+            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1"
+            " WHERE name = ?",
+            (name,),
+        )
+
+    def _reset_failures_in_tx(self, name: str) -> None:
+        self._conn.execute(
+            "UPDATE signal_meta SET consecutive_failures = 0 WHERE name = ?",
+            (name,),
+        )
+
+    def _insert_audit_log(
+        self,
+        name: str,
+        event: str,
+        *,
+        rows: int = 0,
+        detail: str = "",
+    ) -> None:
+        self._conn.execute(
+            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
+            (name, event, rows, detail),
+        )
+
+    def _save_collection_batch(
+        self,
+        insert_sql: str,
+        rows: list[tuple],
+        *,
+        name: str,
+        domain: str,
+        category: str,
+        interval: int,
+        signal_type: str,
+        event: str,
+    ) -> int:
+        if not rows:
+            return 0
+
+        self._conn.executemany(insert_sql, rows)
+        self._upsert_meta_record(name, domain, category, interval, signal_type)
+        self._touch_last_updated(name, reset_failures=True)
+        self._insert_audit_log(name, event, rows=len(rows))
+        self._conn.commit()
+        return len(rows)
+
     def save(self, name: str, df: pd.DataFrame) -> int:
         """Save time-series data. Returns number of rows written."""
         if df.empty:
@@ -188,11 +304,7 @@ class SignalStore:
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
         )
-        self._conn.execute(
-            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')"
-            " WHERE name = ?",
-            (name,),
-        )
+        self._touch_last_updated(name)
         self._conn.commit()
         return len(rows)
 
@@ -204,16 +316,13 @@ class SignalStore:
 
         last_updated is only set by save() when actual data is written.
         """
-        self._conn.execute(
-            """INSERT INTO signal_meta (name, domain, category, interval, signal_type, suppressed)
-               VALUES (?, ?, ?, ?, ?, ?)
-               ON CONFLICT(name) DO UPDATE SET
-                   domain = excluded.domain,
-                   category = excluded.category,
-                   interval = excluded.interval,
-                   signal_type = excluded.signal_type,
-                   suppressed = excluded.suppressed""",
-            (name, domain, category, interval, signal_type, int(suppressed)),
+        self._upsert_meta_record(
+            name,
+            domain,
+            category,
+            interval,
+            signal_type,
+            suppressed=suppressed,
         )
         self._conn.commit()
 
@@ -419,78 +528,40 @@ class SignalStore:
         event: str = "collected",
     ) -> int:
         """Batch save: data + meta + reset failures + audit in one transaction."""
-        if df.empty:
-            return 0
         rows = self._build_rows(name, df)
-
-        self._conn.executemany(
+        return self._save_collection_batch(
             "INSERT OR REPLACE INTO signals (name, timestamp, value, open, high, low, volume, payload)"
             " VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
+            name=name,
+            domain=domain,
+            category=category,
+            interval=interval,
+            signal_type=signal_type,
+            event=event,
         )
-        self._conn.execute(
-            """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
-               VALUES (?, ?, ?, ?, ?)
-               ON CONFLICT(name) DO UPDATE SET
-                   domain = excluded.domain,
-                   category = excluded.category,
-                   interval = excluded.interval,
-                   signal_type = excluded.signal_type""",
-            (name, domain, category, interval, signal_type),
-        )
-        self._conn.execute(
-            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),"
-            " consecutive_failures = 0 WHERE name = ?",
-            (name,),
-        )
-        self._conn.execute(
-            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
-            (name, event, len(rows), ""),
-        )
-        self._conn.commit()
-        return len(rows)
 
     def save_collection_failure(self, name: str, error_detail: str = "") -> None:
         """Batch failure: increment failures + audit in one transaction."""
-        self._conn.execute(
-            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1"
-            " WHERE name = ?",
-            (name,),
-        )
-        self._conn.execute(
-            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
-            (name, "failed", 0, error_detail),
-        )
+        self._increment_failures_in_tx(name)
+        self._insert_audit_log(name, "failed", detail=error_detail)
         self._conn.commit()
 
     def log_collection_event(self, name: str, event: str, detail: str = "") -> None:
         """Single audit log entry (for circuit breaker events)."""
-        self._conn.execute(
-            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
-            (name, event, 0, detail),
-        )
+        self._insert_audit_log(name, event, detail=detail)
         self._conn.commit()
 
     def reset_failures(self, name: str) -> None:
-        self._conn.execute(
-            "UPDATE signal_meta SET consecutive_failures = 0 WHERE name = ?",
-            (name,),
-        )
+        self._reset_failures_in_tx(name)
         self._conn.commit()
 
     def increment_failures(self, name: str) -> None:
-        self._conn.execute(
-            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1"
-            " WHERE name = ?",
-            (name,),
-        )
+        self._increment_failures_in_tx(name)
         self._conn.commit()
 
     def log_event(self, name: str, event: str, rows: int = 0, detail: str = "") -> None:
-        self._conn.execute(
-            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
-            (name, event, rows, detail),
-        )
+        self._insert_audit_log(name, event, rows=rows, detail=detail)
         self._conn.commit()
 
     def get_audit_log(self, name: str | None = None, limit: int = 100) -> list[dict]:
@@ -628,13 +699,7 @@ class SignalStore:
         """Save scalar time-series to signals_realtime. Returns rows written."""
         if df.empty:
             return 0
-        ts_col = "timestamp" if "timestamp" in df.columns else "date"
-        val_col = "value" if "value" in df.columns else df.columns[-1]
-        rows = []
-        for row in df.itertuples(index=False):
-            ts = _normalize_ts(getattr(row, ts_col))
-            val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
-            rows.append((name, ts, val))
+        rows = self._build_realtime_rows(name, df)
         self._conn.executemany(
             "INSERT OR REPLACE INTO signals_realtime (name, timestamp, value)"
             " VALUES (?, ?, ?)",
@@ -650,41 +715,18 @@ class SignalStore:
         event: str = "collected",
     ) -> int:
         """Batch save to signals_realtime + meta + audit."""
-        if df.empty:
-            return 0
-        ts_col = "timestamp" if "timestamp" in df.columns else "date"
-        val_col = "value" if "value" in df.columns else df.columns[-1]
-        rows = []
-        for row in df.itertuples(index=False):
-            ts = _normalize_ts(getattr(row, ts_col))
-            val = float(getattr(row, val_col)) if pd.notna(getattr(row, val_col)) else None
-            rows.append((name, ts, val))
-        self._conn.executemany(
+        rows = self._build_realtime_rows(name, df)
+        return self._save_collection_batch(
             "INSERT OR REPLACE INTO signals_realtime (name, timestamp, value)"
             " VALUES (?, ?, ?)",
             rows,
+            name=name,
+            domain=domain,
+            category=category,
+            interval=interval,
+            signal_type=signal_type,
+            event=event,
         )
-        self._conn.execute(
-            """INSERT INTO signal_meta (name, domain, category, interval, signal_type)
-               VALUES (?, ?, ?, ?, ?)
-               ON CONFLICT(name) DO UPDATE SET
-                   domain = excluded.domain,
-                   category = excluded.category,
-                   interval = excluded.interval,
-                   signal_type = excluded.signal_type""",
-            (name, domain, category, interval, signal_type),
-        )
-        self._conn.execute(
-            "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),"
-            " consecutive_failures = 0 WHERE name = ?",
-            (name,),
-        )
-        self._conn.execute(
-            "INSERT INTO audit_log (name, event, rows, detail) VALUES (?, ?, ?, ?)",
-            (name, event, len(rows), ""),
-        )
-        self._conn.commit()
-        return len(rows)
 
     def get_realtime_data(
         self, name: str, *, since: str | None = None,

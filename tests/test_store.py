@@ -621,6 +621,12 @@ class TestBatchMethods:
         store.save_collection_result("s", df, "markets", "crypto", 3600)
         assert store.get_meta("s")["consecutive_failures"] == 0
 
+    def test_save_collection_result_preserves_suppressed(self, store: SignalStore) -> None:
+        store.save_meta("s", "markets", "crypto", 3600, suppressed=True)
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
+        store.save_collection_result("s", df, "markets", "crypto", 3600)
+        assert store.get_meta("s")["suppressed"] == 1
+
     def test_save_collection_result_empty_df(self, store: SignalStore) -> None:
         rows = store.save_collection_result("s", pd.DataFrame(), "markets", "crypto", 3600)
         assert rows == 0

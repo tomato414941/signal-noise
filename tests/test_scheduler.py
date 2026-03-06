@@ -49,6 +49,17 @@ class _FailCollector(BaseCollector):
         raise RuntimeError("always fail")
 
 
+class _ExplodingSaveStore:
+    def __init__(self, store: SignalStore) -> None:
+        self._store = store
+
+    def __getattr__(self, name: str):
+        return getattr(self._store, name)
+
+    def save_collection_result(self, *args, **kwargs):  # noqa: ANN002,ANN003,ANN201
+        raise RuntimeError("save failed")
+
+
 @pytest.fixture
 def store(tmp_path: Path) -> SignalStore:
     s = SignalStore(tmp_path / "test.db")
@@ -233,6 +244,38 @@ class TestWorker:
         breaker = schedule.get_breaker("broken")
         assert breaker.consecutive_failures == 1
         assert len(schedule) == 1  # rescheduled
+
+    @pytest.mark.asyncio
+    async def test_worker_records_failure_when_save_raises(self, store: SignalStore) -> None:
+        schedule = ScheduleQueue()
+        registry = {"dummy": _DummyCollector}
+        wrapped_store = _ExplodingSaveStore(store)
+        semaphore = asyncio.Semaphore(5)
+        work_queue: asyncio.Queue[ScheduleEntry] = asyncio.Queue()
+
+        store.save_meta("dummy", "markets", "crypto", 3600)
+        entry = ScheduleEntry(
+            next_run=0, name="dummy", interval=3600,
+            meta_dict={"domain": "markets", "category": "crypto",
+                        "interval": 3600, "signal_type": "scalar"},
+        )
+        await work_queue.put(entry)
+
+        task = asyncio.create_task(
+            _worker(0, work_queue, schedule, registry, wrapped_store, semaphore,
+                    fetch_timeout=10.0, max_failures=5),
+        )
+        await asyncio.sleep(0.5)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+        breaker = schedule.get_breaker("dummy")
+        assert breaker.consecutive_failures == 1
+        assert store.get_audit_log("dummy")[0]["event"] == "failed"
+        assert len(schedule) == 1
 
 
 # ── Dispatcher tests ──

@@ -106,6 +106,9 @@ class LazyCollectorRegistry(Mapping[str, type["BaseCollector"]]):
         cls = self._load_one(name)
         return cls if cls is not None else default
 
+    def load(self, name: str) -> type[BaseCollector] | None:
+        return self._load_one(name)
+
     def items(self):  # noqa: ANN201
         self._load_all()
         return self._loaded.items()
@@ -116,6 +119,21 @@ class LazyCollectorRegistry(Mapping[str, type["BaseCollector"]]):
 
     def get_manifest_entry(self, name: str) -> dict | None:
         return self._manifest.get(name)
+
+    def get_meta(self, name: str) -> dict[str, object] | None:
+        entry = self._manifest.get(name)
+        if not entry:
+            return None
+        meta = entry.get("meta")
+        if not isinstance(meta, dict):
+            return None
+        return dict(meta)
+
+    def is_streaming(self, name: str) -> bool:
+        entry = self._manifest.get(name)
+        if not entry:
+            return False
+        return bool(entry.get("is_streaming", False))
 
     def __repr__(self) -> str:
         loaded = len(self._loaded)

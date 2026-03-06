@@ -32,15 +32,6 @@ class _StreamingCollector:
     )
 
 
-class _FakeRegistry(dict):
-    def __init__(self, mapping: dict, manifest_entries: dict[str, dict]) -> None:
-        super().__init__(mapping)
-        self._manifest_entries = manifest_entries
-
-    def get_manifest_entry(self, name: str) -> dict | None:
-        return self._manifest_entries.get(name)
-
-
 def test_parse_excludes_csv():
     assert _parse_excludes("a,b, c ,,") == {"a", "b", "c"}
     assert _parse_excludes("") == set()
@@ -84,38 +75,10 @@ def test_collector_list_rows_uses_combined_store_counts(tmp_path):
 
 def test_prepare_scheduler_targets_syncs_suppressed(tmp_path, monkeypatch):
     store = SignalStore(tmp_path / "test.db")
-    registry = _FakeRegistry(
-        {
-            "daily_demo": _DailyCollector,
-            "stream_demo": _StreamingCollector,
-        },
-        {
-            "daily_demo": {
-                "meta": {
-                    "display_name": "Daily Demo",
-                    "domain": "markets",
-                    "category": "crypto",
-                    "update_frequency": "daily",
-                    "requires_key": False,
-                    "signal_type": "scalar",
-                    "collection_level": "",
-                    "interval": 86400,
-                }
-            },
-            "stream_demo": {
-                "meta": {
-                    "display_name": "Stream Demo",
-                    "domain": "technology",
-                    "category": "internet",
-                    "update_frequency": "hourly",
-                    "requires_key": False,
-                    "signal_type": "scalar",
-                    "collection_level": "",
-                    "interval": 3600,
-                }
-            },
-        },
-    )
+    registry = {
+        "daily_demo": _DailyCollector,
+        "stream_demo": _StreamingCollector,
+    }
 
     monkeypatch.setenv("SIGNAL_NOISE_EXCLUDE", "daily_demo")
     targets, excludes = _prepare_scheduler_targets(store, registry, exclude="stream_demo")

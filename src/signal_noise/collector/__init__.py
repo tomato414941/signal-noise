@@ -32,7 +32,7 @@ def collect_all(
     targets = collectors or list(COLLECTORS.keys())
     results: dict[str, pd.DataFrame] = {}
     for name in targets:
-        cls = COLLECTORS.get(name)
+        cls = COLLECTORS.load(name)
         if not cls:
             log.warning("Unknown collector: %s", name)
             continue

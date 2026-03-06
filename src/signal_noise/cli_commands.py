@@ -6,61 +6,13 @@ import os
 from collections import Counter
 from typing import TYPE_CHECKING
 
+from signal_noise.collector._registry import CollectorRegistry, ensure_registry
+
 if TYPE_CHECKING:
     from signal_noise.collector.base import BaseCollector
     from signal_noise.store.sqlite_store import SignalStore
 
 log = logging.getLogger(__name__)
-
-
-def _get_manifest_entry(registry: object, name: str) -> dict | None:
-    if hasattr(registry, "get_manifest_entry"):
-        return registry.get_manifest_entry(name)
-    return None
-
-
-def _get_registry_class(registry: object, name: str) -> type[BaseCollector] | None:
-    if hasattr(registry, "get"):
-        return registry.get(name)
-    try:
-        return registry[name]
-    except KeyError:
-        return None
-
-
-def _meta_from_class(cls: type[BaseCollector]) -> dict[str, object]:
-    meta = cls.meta
-    return {
-        "display_name": meta.display_name,
-        "domain": meta.domain,
-        "category": meta.category,
-        "update_frequency": meta.update_frequency,
-        "requires_key": meta.requires_key,
-        "signal_type": meta.signal_type,
-        "collection_level": meta.collection_level,
-        "interval": meta.interval,
-    }
-
-
-def _resolve_collector_meta(registry: object, name: str) -> dict[str, object] | None:
-    entry = _get_manifest_entry(registry, name)
-    if entry:
-        meta = dict(entry.get("meta", {}))
-        if "display_name" in meta:
-            return meta
-
-        cls = _get_registry_class(registry, name)
-        if cls is not None:
-            meta["display_name"] = cls.meta.display_name
-            return meta
-
-        meta["display_name"] = name
-        return meta
-
-    cls = _get_registry_class(registry, name)
-    if cls is None:
-        return None
-    return _meta_from_class(cls)
 
 
 def _classify_level(name: str, meta: dict[str, object]) -> str:
@@ -82,12 +34,13 @@ def _parse_excludes(raw: str | None) -> set[str]:
 
 
 def _sync_suppressed_meta(store: SignalStore, registry: object, suppressed: set[str]) -> None:
+    resolved = ensure_registry(registry)
     if not suppressed:
         store.sync_suppressed(set())
         return
 
     for name in suppressed:
-        meta = _resolve_collector_meta(registry, name)
+        meta = resolved.get_meta(name)
         if meta is None:
             continue
         store.save_meta(
@@ -102,20 +55,21 @@ def _sync_suppressed_meta(store: SignalStore, registry: object, suppressed: set[
 
 
 def _select_collectors_from_registry(
-    registry: object,
+    registry: CollectorRegistry | dict[str, type[BaseCollector]],
     *,
     frequency: str | None = None,
     level: str | None = None,
     exclude: set[str] | None = None,
 ) -> dict[str, type[BaseCollector]]:
+    resolved = ensure_registry(registry)
     excluded = exclude or set()
     selected: dict[str, type[BaseCollector]] = {}
 
-    for name in registry.keys():
+    for name in resolved.keys():
         if name in excluded:
             continue
 
-        meta = _resolve_collector_meta(registry, name)
+        meta = resolved.get_meta(name)
         if meta is None:
             continue
         if frequency and meta.get("update_frequency") != frequency:
@@ -123,7 +77,7 @@ def _select_collectors_from_registry(
         if level and _classify_level(name, meta) != level:
             continue
 
-        cls = _get_registry_class(registry, name)
+        cls = resolved.load(name)
         if cls is None:
             continue
         selected[name] = cls
@@ -148,18 +102,19 @@ def _select_collectors(
 
 def _prepare_scheduler_targets(
     store: SignalStore,
-    registry: object,
+    registry: CollectorRegistry | dict[str, type[BaseCollector]],
     *,
     frequency: str | None = None,
     level: str | None = None,
     exclude: str | None = None,
 ) -> tuple[dict[str, type[BaseCollector]], set[str]]:
+    resolved = ensure_registry(registry)
     env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
     cli_excludes = _parse_excludes(exclude)
     excludes = env_excludes | cli_excludes
-    _sync_suppressed_meta(store, registry, excludes)
+    _sync_suppressed_meta(store, resolved, excludes)
     targets = _select_collectors_from_registry(
-        registry,
+        resolved,
         frequency=frequency,
         level=level,
         exclude=excludes,
@@ -167,12 +122,16 @@ def _prepare_scheduler_targets(
     return targets, excludes
 
 
-def _collector_list_rows(store: SignalStore, registry: object) -> list[dict[str, object]]:
+def _collector_list_rows(
+    store: SignalStore,
+    registry: CollectorRegistry | dict[str, type[BaseCollector]],
+) -> list[dict[str, object]]:
+    resolved = ensure_registry(registry)
     row_counts = store.get_signal_row_counts()
     rows: list[dict[str, object]] = []
 
-    for name in registry.keys():
-        meta = _resolve_collector_meta(registry, name)
+    for name in resolved.keys():
+        meta = resolved.get_meta(name)
         if meta is None:
             continue
         row_count = row_counts.get(name, 0)
@@ -194,20 +153,21 @@ def _cmd_collect(args: argparse.Namespace) -> None:
     from signal_noise.store.sqlite_store import SignalStore
 
     store = SignalStore(DB_PATH)
+    registry = ensure_registry(COLLECTORS)
 
     if args.collector:
         collectors = [args.collector]
     elif args.frequency:
         collectors = [
-            name for name in COLLECTORS.keys()
-            if (_resolve_collector_meta(COLLECTORS, name) or {}).get("update_frequency") == args.frequency
+            name for name in registry.keys()
+            if (registry.get_meta(name) or {}).get("update_frequency") == args.frequency
         ]
         log.info("Filtered to %d %s collectors", len(collectors), args.frequency)
     else:
         collectors = None
 
     if args.force:
-        for name in collectors or COLLECTORS.keys():
+        for name in collectors or registry.keys():
             cache = CACHE_DIR / f"{name}.json"
             if cache.exists():
                 cache.unlink()
@@ -226,17 +186,18 @@ def _cmd_backfill(args: argparse.Namespace) -> None:
 
     store = SignalStore(DB_PATH)
     total = args.total
+    registry = ensure_registry(COLLECTORS)
 
     targets: list[str] = []
     if args.collector:
         targets = [args.collector]
     elif args.category:
         targets = [
-            name for name in COLLECTORS.keys()
-            if (_resolve_collector_meta(COLLECTORS, name) or {}).get("category") == args.category
+            name for name in registry.keys()
+            if (registry.get_meta(name) or {}).get("category") == args.category
         ]
     else:
-        targets = list(COLLECTORS.keys())
+        targets = list(registry.keys())
 
     if not targets:
         print("No collectors matched.")
@@ -245,7 +206,7 @@ def _cmd_backfill(args: argparse.Namespace) -> None:
 
     print(f"Backfilling {len(targets)} collectors (total={total})...")
     for name in targets:
-        cls = COLLECTORS.get(name)
+        cls = registry.load(name)
         if not cls:
             log.warning("Unknown collector: %s", name)
             continue
@@ -303,14 +264,15 @@ def _cmd_coverage(args: argparse.Namespace) -> None:
 
     from signal_noise.collector import COLLECTORS
 
+    registry = ensure_registry(COLLECTORS)
     domain_freq: Counter[tuple[str, str]] = Counter()
     domain_count: Counter[str] = Counter()
     category_count: Counter[str] = Counter()
     level_count: Counter[str] = Counter()
     freq_count: Counter[str] = Counter()
 
-    for name in COLLECTORS.keys():
-        meta = _resolve_collector_meta(COLLECTORS, name)
+    for name in registry.keys():
+        meta = registry.get_meta(name)
         if meta is None:
             continue
         domain = str(meta.get("domain", ""))
@@ -322,7 +284,7 @@ def _cmd_coverage(args: argparse.Namespace) -> None:
         freq_count[update_frequency] += 1
         level_count[_classify_level(name, meta)] += 1
 
-    total = len(COLLECTORS)
+    total = len(registry)
 
     if args.json:
         data = {
