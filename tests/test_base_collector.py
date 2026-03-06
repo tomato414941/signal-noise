@@ -5,6 +5,7 @@ import pytest
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta, DOMAINS, CATEGORIES, FREQUENCIES
 from signal_noise.config import CollectorConfig
+from signal_noise.store.sqlite_store import SignalStore
 
 
 class DummyCollector(BaseCollector):
@@ -71,6 +72,24 @@ class TestBaseCollector:
             c = DummyCollector(fail_count=5, config=config)
             with pytest.raises(RuntimeError, match="Failed to fetch dummy"):
                 c.collect()
+
+    def test_collect_with_store_resets_failures(self, tmp_path):
+        with patch("signal_noise.collector.base.CACHE_DIR", tmp_path / "cache"):
+            store = SignalStore(tmp_path / "signals.db")
+            store.save_meta("dummy", "", "", 86400)
+            store.increment_failures("dummy")
+
+            c = DummyCollector()
+            df = c.collect(store=store)
+
+            assert len(df) == 5
+            meta = store.get_meta("dummy")
+            assert meta is not None
+            assert meta["consecutive_failures"] == 0
+            assert meta["last_updated"] is not None
+            assert store.get_audit_log("dummy", limit=1)[0]["event"] == "collected"
+
+            store.close()
 
     def test_taxonomy_constants_non_empty(self):
         assert len(DOMAINS) >= 6

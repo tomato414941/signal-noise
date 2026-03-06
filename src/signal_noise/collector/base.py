@@ -126,10 +126,12 @@ class BaseCollector(ABC):
         df = self._fetch_with_retry()
         self._save_cache(df)
         if store:
-            store.save(self.meta.name, df)
-            store.save_meta(
-                self.meta.name, self.meta.domain,
-                self.meta.category, self.meta.interval,
+            store.save_collection_result(
+                self.meta.name,
+                df,
+                self.meta.domain,
+                self.meta.category,
+                self.meta.interval,
                 self.meta.signal_type,
             )
         return df
