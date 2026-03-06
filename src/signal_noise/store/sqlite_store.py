@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+import threading
 from pathlib import Path
 
 import pandas as pd
@@ -42,13 +43,31 @@ class SignalStore:
     """SQLite-backed storage for time-series signals (WAL mode)."""
 
     def __init__(self, db_path: Path | str, *, check_same_thread: bool = False):
-        self._conn = sqlite3.connect(str(db_path), check_same_thread=check_same_thread)
-        self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA journal_mode=WAL")
-        self._conn.execute("PRAGMA synchronous=NORMAL")
-        self._conn.execute("PRAGMA busy_timeout=15000")
+        self._db_path = str(db_path)
+        self._check_same_thread = check_same_thread
+        self._local = threading.local()
+        self._local.conn = self._open_connection()
         self._create_tables()
         self._migrate()
+
+    def _open_connection(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(
+            self._db_path,
+            check_same_thread=self._check_same_thread,
+        )
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA busy_timeout=15000")
+        return conn
+
+    @property
+    def _conn(self) -> sqlite3.Connection:
+        conn = getattr(self._local, "conn", None)
+        if conn is None:
+            conn = self._open_connection()
+            self._local.conn = conn
+        return conn
 
     def _create_tables(self) -> None:
         self._conn.executescript("""
@@ -693,4 +712,8 @@ class SignalStore:
         return cursor.rowcount
 
     def close(self) -> None:
-        self._conn.close()
+        conn = getattr(self._local, "conn", None)
+        if conn is None:
+            return
+        conn.close()
+        self._local.conn = None

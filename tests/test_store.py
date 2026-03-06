@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 
 import pandas as pd
@@ -294,6 +295,24 @@ class TestTimestampNormalization:
         assert meta["last_updated"] is not None
         assert "T" in meta["last_updated"]
         assert meta["last_updated"].endswith("Z")
+
+    def test_uses_separate_connection_per_thread(self, store: SignalStore) -> None:
+        store.save_meta("btc", "markets", "crypto", 3600)
+
+        main_conn_id = id(store._conn)
+        worker_conn_id: int | None = None
+
+        def run() -> None:
+            nonlocal worker_conn_id
+            worker_conn_id = id(store._conn)
+            assert store.list_signals()[0]["name"] == "btc"
+
+        thread = threading.Thread(target=run)
+        thread.start()
+        thread.join()
+
+        assert worker_conn_id is not None
+        assert worker_conn_id != main_conn_id
 
 
 class TestFreshness:
