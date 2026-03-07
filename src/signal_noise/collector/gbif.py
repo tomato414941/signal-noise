@@ -5,6 +5,8 @@ import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
 
+GBIF_LOOKBACK_DAYS = 7
+
 
 class GBIFOccurrenceCollector(BaseCollector):
     """GBIF — daily global biodiversity occurrence record count."""
@@ -23,7 +25,7 @@ class GBIFOccurrenceCollector(BaseCollector):
     def fetch(self) -> pd.DataFrame:
         now = pd.Timestamp.now(tz="UTC")
         rows = []
-        for days_ago in range(30):
+        for days_ago in range(GBIF_LOOKBACK_DAYS):
             date = (now - pd.Timedelta(days=days_ago)).strftime("%Y-%m-%d")
             params = {
                 "eventDate": date,

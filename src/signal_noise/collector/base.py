@@ -123,7 +123,7 @@ class BaseCollector(ABC):
                         return df
                 return pd.DataFrame()
 
-        df = self._fetch_with_retry()
+        df = self.fetch_with_retry()
         self._save_cache(df)
         if store:
             store.save_collection_result(
@@ -136,7 +136,7 @@ class BaseCollector(ABC):
             )
         return df
 
-    def _fetch_with_retry(self) -> pd.DataFrame:
+    def fetch_with_retry(self) -> pd.DataFrame:
         last_err: Exception | None = None
         for attempt in range(self.config.max_retries):
             try:
@@ -153,6 +153,16 @@ class BaseCollector(ABC):
         raise RuntimeError(
             f"Failed to fetch {self.meta.name} after {self.config.max_retries} attempts"
         ) from last_err
+
+    def _fetch_with_retry(self) -> pd.DataFrame:
+        return self.fetch_with_retry()
+
+    def retry_timeout_budget(self) -> float:
+        retry_wait = sum(
+            self.config.retry_backoff_base ** attempt
+            for attempt in range(max(self.config.max_retries - 1, 0))
+        )
+        return (self.config.request_timeout * self.config.max_retries) + retry_wait + 5.0
 
     def _save_cache(self, df: pd.DataFrame) -> None:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)

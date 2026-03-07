@@ -376,10 +376,11 @@ async def _execute_scheduled_collection(
 
     try:
         collector = cls()
+        effective_fetch_timeout = max(fetch_timeout, collector.retry_timeout_budget())
         async with semaphore:
             df = await asyncio.wait_for(
-                asyncio.to_thread(collector.fetch),
-                timeout=fetch_timeout,
+                asyncio.to_thread(collector.fetch_with_retry),
+                timeout=effective_fetch_timeout,
             )
         anomalies = store.check_anomalies(entry.name, df)
         if anomalies:

@@ -103,6 +103,10 @@ class TestBaseCollector:
             assert s["name"] == "dummy"
             assert s["cache_age_hours"] is None
 
+    def test_retry_timeout_budget(self):
+        c = DummyCollector(config=CollectorConfig(request_timeout=30, max_retries=3))
+        assert c.retry_timeout_budget() == 98.0
+
 
 class TestCollectInterval:
     def test_default_uses_frequency(self):

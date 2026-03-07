@@ -3,11 +3,13 @@ from __future__ import annotations
 import asyncio
 import time
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.config import CollectorConfig
 from signal_noise.scheduler.loop import (
     _dispatcher,
     _worker,
@@ -47,6 +49,27 @@ class _FailCollector(BaseCollector):
 
     def fetch(self) -> pd.DataFrame:
         raise RuntimeError("always fail")
+
+
+class _FlakyCollector(BaseCollector):
+    meta = CollectorMeta(
+        name="flaky",
+        display_name="Flaky",
+        update_frequency="daily",
+        api_docs_url="",
+        domain="markets",
+        category="crypto",
+    )
+    attempts = 0
+
+    def __init__(self) -> None:
+        super().__init__(CollectorConfig(max_retries=2))
+
+    def fetch(self) -> pd.DataFrame:
+        type(self).attempts += 1
+        if type(self).attempts == 1:
+            raise RuntimeError("temporary fail")
+        return pd.DataFrame({"timestamp": ["2024-01-01"], "value": [2.0]})
 
 
 class _ExplodingSaveStore:
@@ -228,22 +251,58 @@ class TestWorker:
         )
         await work_queue.put(entry)
 
-        task = asyncio.create_task(
-            _worker(0, work_queue, schedule, registry, store, semaphore,
-                    fetch_timeout=10.0, max_failures=5),
-        )
-        await asyncio.sleep(0.5)
-        task.cancel()
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
+        with patch("signal_noise.collector.base.time.sleep", return_value=None):
+            task = asyncio.create_task(
+                _worker(0, work_queue, schedule, registry, store, semaphore,
+                        fetch_timeout=10.0, max_failures=5),
+            )
+            await asyncio.sleep(0.5)
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
         result = store.get_data("broken")
         assert result.empty
         breaker = schedule.get_breaker("broken")
         assert breaker.consecutive_failures == 1
         assert len(schedule) == 1  # rescheduled
+
+    @pytest.mark.asyncio
+    async def test_worker_retries_transient_failure(self, store: SignalStore) -> None:
+        schedule = ScheduleQueue()
+        registry = {"flaky": _FlakyCollector}
+        semaphore = asyncio.Semaphore(5)
+        work_queue: asyncio.Queue[ScheduleEntry] = asyncio.Queue()
+
+        _FlakyCollector.attempts = 0
+        entry = ScheduleEntry(
+            next_run=0,
+            name="flaky",
+            interval=3600,
+            meta_dict={"domain": "markets", "category": "crypto",
+                       "interval": 3600, "signal_type": "scalar"},
+        )
+        await work_queue.put(entry)
+
+        with patch("signal_noise.collector.base.time.sleep", return_value=None):
+            task = asyncio.create_task(
+                _worker(0, work_queue, schedule, registry, store, semaphore,
+                        fetch_timeout=10.0, max_failures=5),
+            )
+            await asyncio.sleep(0.5)
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+
+        result = store.get_data("flaky")
+        assert len(result) == 1
+        breaker = schedule.get_breaker("flaky")
+        assert breaker.consecutive_failures == 0
+        assert _FlakyCollector.attempts == 2
 
     @pytest.mark.asyncio
     async def test_worker_records_failure_when_save_raises(self, store: SignalStore) -> None:

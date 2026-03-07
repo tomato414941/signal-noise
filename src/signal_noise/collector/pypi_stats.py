@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+import threading
+import time
+
 import requests
 import pandas as pd
 
@@ -24,6 +29,43 @@ PYPI_PACKAGES: list[tuple[str, str, str]] = [
     ("openai", "pypi_openai_downloads", "PyPI: openai"),
 ]
 
+_PYPI_REQUEST_LOCK = threading.Lock()
+_PYPI_NEXT_REQUEST_AT = 0.0
+_PYPI_MIN_INTERVAL = 2.0
+_PYPI_DEFAULT_RETRY_AFTER = 30.0
+
+
+def _parse_retry_after(value: str | None) -> float:
+    if not value:
+        return _PYPI_DEFAULT_RETRY_AFTER
+    try:
+        return max(float(value), _PYPI_MIN_INTERVAL)
+    except ValueError:
+        try:
+            retry_at = parsedate_to_datetime(value)
+            if retry_at.tzinfo is None:
+                retry_at = retry_at.replace(tzinfo=timezone.utc)
+            seconds = (retry_at - datetime.now(timezone.utc)).total_seconds()
+            return max(seconds, _PYPI_MIN_INTERVAL)
+        except (TypeError, ValueError):
+            return _PYPI_DEFAULT_RETRY_AFTER
+
+
+def _rate_limited_get(url: str, *, headers: dict[str, str], timeout: int):
+    global _PYPI_NEXT_REQUEST_AT
+
+    with _PYPI_REQUEST_LOCK:
+        wait = _PYPI_NEXT_REQUEST_AT - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+
+        resp = requests.get(url, headers=headers, timeout=timeout)
+        next_delay = _PYPI_MIN_INTERVAL
+        if resp.status_code == 429:
+            next_delay = _parse_retry_after(resp.headers.get("Retry-After"))
+        _PYPI_NEXT_REQUEST_AT = time.monotonic() + next_delay
+        return resp
+
 
 def _make_pypi_collector(
     package: str, name: str, display_name: str,
@@ -41,8 +83,10 @@ def _make_pypi_collector(
         def fetch(self) -> pd.DataFrame:
             url = f"https://pypistats.org/api/packages/{package}/overall?mirrors=true"
             headers = {"User-Agent": "signal-noise/0.1"}
-            resp = requests.get(
-                url, headers=headers, timeout=self.config.request_timeout,
+            resp = _rate_limited_get(
+                url,
+                headers=headers,
+                timeout=self.config.request_timeout,
             )
             resp.raise_for_status()
             items = resp.json().get("data", [])
