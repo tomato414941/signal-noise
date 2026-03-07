@@ -10,6 +10,7 @@ from signal_noise.collector.base import CATEGORIES, DOMAINS
 from signal_noise.collector.sec_form4 import (
     _FilingRef,
     _SIGNAL_SPECS,
+    _TICKER_SPECS,
     _fetch_ticker_history,
     _make_signal_collector,
     _parse_open_market_transactions,
@@ -114,6 +115,9 @@ class TestHistory:
 
 
 class TestCollectors:
+    def test_signal_spec_count_matches_tickers(self):
+        assert len(_SIGNAL_SPECS) == len(_TICKER_SPECS) * 2
+
     @patch("signal_noise.collector.sec_form4._fetch_ticker_history")
     def test_signal_collector(self, mock_history):
         mock_history.return_value = pd.DataFrame(
@@ -151,9 +155,13 @@ class TestCollectors:
         expected = [
             "form4_tsla_net_share_ratio",
             "form4_meta_open_market_tx_count",
+            "form4_nvda_net_share_ratio",
             "form4_gs_net_share_ratio",
             "form4_jpm_open_market_tx_count",
+            "form4_xom_net_share_ratio",
             "form4_cvx_net_share_ratio",
+            "form4_dhi_open_market_tx_count",
+            "form4_cat_net_share_ratio",
         ]
         for name in expected:
             assert name in COLLECTORS

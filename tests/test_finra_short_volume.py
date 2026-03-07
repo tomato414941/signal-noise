@@ -41,9 +41,15 @@ FINRA_DAY_1 = """Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market
 20260305|HYG|200|0|500|Q,N
 20260305|XLF|150|0|300|Q,N
 20260305|SMH|250|0|400|Q,N
+20260305|XLE|240|0|400|Q,N
+20260305|XHB|180|0|300|Q,N
+20260305|KRE|120|0|200|Q,N
+20260305|IYT|190|0|350|Q,N
+20260305|XLY|260|0|500|Q,N
+20260305|XLP|140|0|300|Q,N
 20260305|TSLA|700|0|1000|Q,N
 20260305|NVDA|510|0|800|Q,N
-8
+14
 """
 
 FINRA_DAY_2 = """Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market
@@ -53,9 +59,15 @@ FINRA_DAY_2 = """Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market
 20260304|HYG|190|0|500|Q,N
 20260304|XLF|180|0|320|Q,N
 20260304|SMH|270|0|450|Q,N
+20260304|XLE|220|0|420|Q,N
+20260304|XHB|150|0|280|Q,N
+20260304|KRE|115|0|210|Q,N
+20260304|IYT|160|0|340|Q,N
+20260304|XLY|230|0|480|Q,N
+20260304|XLP|150|0|310|Q,N
 20260304|TSLA|640|0|1000|Q,N
 20260304|NVDA|495|0|900|Q,N
-8
+14
 """
 
 
@@ -158,9 +170,11 @@ class TestCollectors:
         expected = [
             "finra_spy_short_ratio",
             "finra_qqq_short_ratio",
+            "finra_xhb_short_ratio",
             "finra_tsla_short_ratio",
             "finra_small_large_short_spread",
             "finra_tech_broad_short_spread",
+            "finra_consumer_disc_staples_short_spread",
         ]
         for name in expected:
             assert name in COLLECTORS

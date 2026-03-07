@@ -55,9 +55,15 @@ class _OpenMarketTransaction:
 _TICKER_SPECS: list[_TickerSpec] = [
     _TickerSpec("TSLA", "Tesla"),
     _TickerSpec("META", "Meta"),
+    _TickerSpec("NVDA", "NVIDIA"),
     _TickerSpec("GS", "Goldman Sachs"),
     _TickerSpec("JPM", "JPMorgan"),
+    _TickerSpec("XOM", "Exxon Mobil"),
     _TickerSpec("CVX", "Chevron"),
+    _TickerSpec("DHI", "D.R. Horton"),
+    _TickerSpec("LEN", "Lennar"),
+    _TickerSpec("CAT", "Caterpillar"),
+    _TickerSpec("DE", "Deere"),
 ]
 
 _SIGNAL_SPECS: list[_SignalSpec] = [

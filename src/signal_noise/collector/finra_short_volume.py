@@ -42,6 +42,12 @@ _RAW_SPECS: list[_RawSpec] = [
     _RawSpec("HYG", "finra_hyg_short_ratio", "FINRA HYG Short Volume Ratio"),
     _RawSpec("XLF", "finra_xlf_short_ratio", "FINRA XLF Short Volume Ratio"),
     _RawSpec("SMH", "finra_smh_short_ratio", "FINRA SMH Short Volume Ratio"),
+    _RawSpec("XLE", "finra_xle_short_ratio", "FINRA XLE Short Volume Ratio"),
+    _RawSpec("XHB", "finra_xhb_short_ratio", "FINRA XHB Short Volume Ratio"),
+    _RawSpec("KRE", "finra_kre_short_ratio", "FINRA KRE Short Volume Ratio"),
+    _RawSpec("IYT", "finra_iyt_short_ratio", "FINRA IYT Short Volume Ratio"),
+    _RawSpec("XLY", "finra_xly_short_ratio", "FINRA XLY Short Volume Ratio"),
+    _RawSpec("XLP", "finra_xlp_short_ratio", "FINRA XLP Short Volume Ratio"),
     _RawSpec("TSLA", "finra_tsla_short_ratio", "FINRA TSLA Short Volume Ratio"),
     _RawSpec("NVDA", "finra_nvda_short_ratio", "FINRA NVDA Short Volume Ratio"),
 ]
@@ -49,6 +55,12 @@ _RAW_SPECS: list[_RawSpec] = [
 _SPREAD_SPECS: list[_SpreadSpec] = [
     _SpreadSpec("IWM", "SPY", "finra_small_large_short_spread", "FINRA IWM - SPY Short Ratio Spread"),
     _SpreadSpec("QQQ", "SPY", "finra_tech_broad_short_spread", "FINRA QQQ - SPY Short Ratio Spread"),
+    _SpreadSpec("XHB", "SPY", "finra_homebuilders_broad_short_spread", "FINRA XHB - SPY Short Ratio Spread"),
+    _SpreadSpec("KRE", "XLF", "finra_regional_banks_money_center_short_spread", "FINRA KRE - XLF Short Ratio Spread"),
+    _SpreadSpec("IYT", "SPY", "finra_transports_broad_short_spread", "FINRA IYT - SPY Short Ratio Spread"),
+    _SpreadSpec("XLE", "SPY", "finra_energy_broad_short_spread", "FINRA XLE - SPY Short Ratio Spread"),
+    _SpreadSpec("XLY", "XLP", "finra_consumer_disc_staples_short_spread", "FINRA XLY - XLP Short Ratio Spread"),
+    _SpreadSpec("SMH", "QQQ", "finra_semis_nasdaq_short_spread", "FINRA SMH - QQQ Short Ratio Spread"),
 ]
 
 
