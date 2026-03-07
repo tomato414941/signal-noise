@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-import time
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 import pytest
@@ -97,7 +97,7 @@ async def test_funding_rate_collector_samples():
     """Funding rate collector yields one row per minute."""
     c = BinanceFundingRateStreamCollector()
 
-    now_ms = int(time.time() * 1000)
+    now_ms = int(datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc).timestamp() * 1000)
     messages = [
         _funding_msg(0.0001, now_ms),
         _funding_msg(0.0002, now_ms + 61000),
@@ -119,7 +119,7 @@ async def test_funding_rate_dedup_same_minute():
     """Messages in the same minute are deduplicated."""
     c = BinanceFundingRateStreamCollector()
 
-    now_ms = int(time.time() * 1000)
+    now_ms = int(datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc).timestamp() * 1000)
     messages = [
         _funding_msg(0.0001, now_ms),
         _funding_msg(0.0002, now_ms + 1000),
@@ -156,8 +156,6 @@ def test_orderbook_meta():
 
 
 def test_compute_orderbook_signals_imbalance():
-    from datetime import datetime, timezone
-
     ts = datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc)
     snapshot = {
         "b": [["50000", "2.0"], ["49990", "3.0"], ["49980", "1.0"],
@@ -183,8 +181,6 @@ def test_compute_orderbook_signals_imbalance():
 
 
 def test_compute_orderbook_signals_empty():
-    from datetime import datetime, timezone
-
     ts = datetime(2026, 3, 1, 10, 0, tzinfo=timezone.utc)
     rows = _compute_orderbook_signals(ts, {"b": [], "a": []})
     assert rows == []
@@ -193,8 +189,6 @@ def test_compute_orderbook_signals_empty():
 @pytest.mark.asyncio
 async def test_orderbook_stream_yields_multi_signal_df():
     """Orderbook collector yields DataFrames with name column."""
-    from datetime import datetime, timezone
-
     c = BinanceOrderbookCollector()
 
     snapshot = json.dumps({
