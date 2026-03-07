@@ -89,7 +89,9 @@ class SignalStore:
                 interval     INTEGER NOT NULL DEFAULT 86400,
                 signal_type  TEXT NOT NULL DEFAULT 'scalar',
                 suppressed   INTEGER NOT NULL DEFAULT 0,
-                last_updated TEXT
+                last_updated TEXT,
+                last_error   TEXT,
+                last_error_at TEXT
             );
             CREATE TABLE IF NOT EXISTS signals_realtime (
                 name      TEXT NOT NULL,
@@ -128,6 +130,14 @@ class SignalStore:
         if "suppressed" not in meta_cols:
             self._conn.execute(
                 "ALTER TABLE signal_meta ADD COLUMN suppressed INTEGER NOT NULL DEFAULT 0"
+            )
+        if "last_error" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN last_error TEXT"
+            )
+        if "last_error_at" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN last_error_at TEXT"
             )
 
         # Normalize existing space-separated timestamps to ISO 8601 T-separator
@@ -234,7 +244,8 @@ class SignalStore:
         if reset_failures:
             self._conn.execute(
                 "UPDATE signal_meta SET last_updated = strftime('%Y-%m-%dT%H:%M:%SZ', 'now'),"
-                " consecutive_failures = 0 WHERE name = ?",
+                " consecutive_failures = 0, last_error = NULL, last_error_at = NULL"
+                " WHERE name = ?",
                 (name,),
             )
             return
@@ -245,16 +256,18 @@ class SignalStore:
             (name,),
         )
 
-    def _increment_failures_in_tx(self, name: str) -> None:
+    def _increment_failures_in_tx(self, name: str, error_detail: str = "") -> None:
         self._conn.execute(
-            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1"
+            "UPDATE signal_meta SET consecutive_failures = consecutive_failures + 1,"
+            " last_error = ?, last_error_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')"
             " WHERE name = ?",
-            (name,),
+            (error_detail, name),
         )
 
     def _reset_failures_in_tx(self, name: str) -> None:
         self._conn.execute(
-            "UPDATE signal_meta SET consecutive_failures = 0 WHERE name = ?",
+            "UPDATE signal_meta SET consecutive_failures = 0,"
+            " last_error = NULL, last_error_at = NULL WHERE name = ?",
             (name,),
         )
 
@@ -487,7 +500,7 @@ class SignalStore:
 
         rows = self._conn.execute("""
             SELECT name, domain, category, signal_type, interval, suppressed,
-                   last_updated, consecutive_failures,
+                   last_updated, consecutive_failures, last_error, last_error_at,
                    CASE WHEN last_updated IS NOT NULL THEN
                        CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)
                    END AS age_seconds
@@ -543,7 +556,7 @@ class SignalStore:
 
     def save_collection_failure(self, name: str, error_detail: str = "") -> None:
         """Batch failure: increment failures + audit in one transaction."""
-        self._increment_failures_in_tx(name)
+        self._increment_failures_in_tx(name, error_detail)
         self._insert_audit_log(name, "failed", detail=error_detail)
         self._conn.commit()
 
@@ -556,8 +569,8 @@ class SignalStore:
         self._reset_failures_in_tx(name)
         self._conn.commit()
 
-    def increment_failures(self, name: str) -> None:
-        self._increment_failures_in_tx(name)
+    def increment_failures(self, name: str, error_detail: str = "") -> None:
+        self._increment_failures_in_tx(name, error_detail)
         self._conn.commit()
 
     def log_event(self, name: str, event: str, rows: int = 0, detail: str = "") -> None:

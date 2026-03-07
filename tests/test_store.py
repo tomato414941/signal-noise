@@ -295,6 +295,9 @@ class TestTimestampNormalization:
         s = SignalStore(db_path)
         row = s._conn.execute("SELECT timestamp FROM signals WHERE name = 's'").fetchone()
         assert row[0] == "2024-01-01T12:00:00+00:00"
+        meta_cols = {r[1] for r in s._conn.execute("PRAGMA table_info(signal_meta)")}
+        assert "last_error" in meta_cols
+        assert "last_error_at" in meta_cols
         s.close()
 
     def test_save_meta_does_not_set_last_updated(self, store: SignalStore) -> None:
@@ -369,19 +372,23 @@ class TestFreshness:
 
     def test_reset_failures(self, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600)
-        store.increment_failures("btc")
+        store.increment_failures("btc", "err1")
         store.increment_failures("btc")
         meta = store.get_meta("btc")
         assert meta["consecutive_failures"] == 2
         store.reset_failures("btc")
         meta = store.get_meta("btc")
         assert meta["consecutive_failures"] == 0
+        assert meta["last_error"] is None
+        assert meta["last_error_at"] is None
 
     def test_increment_failures(self, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600)
-        store.increment_failures("btc")
+        store.increment_failures("btc", "boom")
         meta = store.get_meta("btc")
         assert meta["consecutive_failures"] == 1
+        assert meta["last_error"] == "boom"
+        assert meta["last_error_at"] is not None
 
     def test_check_freshness_includes_failures(self, store: SignalStore) -> None:
         store.save_meta("btc", "markets", "crypto", 3600)
@@ -642,6 +649,8 @@ class TestBatchMethods:
         store.save_collection_failure("s", "timeout error")
         meta = store.get_meta("s")
         assert meta["consecutive_failures"] == 1
+        assert meta["last_error"] == "timeout error"
+        assert meta["last_error_at"] is not None
         logs = store.get_audit_log("s")
         assert len(logs) == 1
         assert logs[0]["event"] == "failed"
@@ -652,6 +661,19 @@ class TestBatchMethods:
         store.save_collection_failure("s", "err1")
         store.save_collection_failure("s", "err2")
         assert store.get_meta("s")["consecutive_failures"] == 2
+        assert store.get_meta("s")["last_error"] == "err2"
+
+    def test_save_collection_result_clears_last_error(self, store: SignalStore) -> None:
+        store.save_meta("s", "markets", "crypto", 3600)
+        store.save_collection_failure("s", "temporary timeout")
+
+        df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
+        store.save_collection_result("s", df, "markets", "crypto", 3600)
+
+        meta = store.get_meta("s")
+        assert meta["consecutive_failures"] == 0
+        assert meta["last_error"] is None
+        assert meta["last_error_at"] is None
 
 
 class TestAuditLog:

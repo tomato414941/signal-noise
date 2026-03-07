@@ -48,7 +48,15 @@ def health_signals() -> dict:
         "fresh": len(h["fresh"]),
         "suppressed": [s["name"] for s in h["suppressed"]],
         "stale": [{"name": s["name"], "age_seconds": s["age_seconds"], "interval": s["interval"]} for s in h["stale"]],
-        "failing": [{"name": s["name"], "consecutive_failures": s["consecutive_failures"]} for s in h["failing"]],
+        "failing": [
+            {
+                "name": s["name"],
+                "consecutive_failures": s["consecutive_failures"],
+                "error": s.get("last_error"),
+                "error_at": s.get("last_error_at"),
+            }
+            for s in h["failing"]
+        ],
         "never_seen": [s["name"] for s in h["never_seen"]],
     }
 

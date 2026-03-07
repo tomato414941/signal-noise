@@ -96,7 +96,7 @@ class TestHealth:
         store.save_meta("new_sig", "environment", "weather", 86400)
         # failing
         store.save_meta("broken", "markets", "crypto", 3600)
-        store.increment_failures("broken")
+        store.save_collection_failure("broken", "read timeout")
         # suppressed
         store.save_meta("ignored", "society", "legislation", 86400, suppressed=True)
         r = client.get("/health/signals")
@@ -108,6 +108,8 @@ class TestHealth:
         assert "new_sig" in data["never_seen"]
         assert len(data["failing"]) == 1
         assert data["failing"][0]["name"] == "broken"
+        assert data["failing"][0]["error"] == "read timeout"
+        assert data["failing"][0]["error_at"] is not None
 
     def test_health_signals_empty(self, client: TestClient) -> None:
         r = client.get("/health/signals")
