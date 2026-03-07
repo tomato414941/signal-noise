@@ -19,6 +19,7 @@ from signal_noise.collector.open_meteo_air import (
     get_air_collectors,
     _make_air_collector,
 )
+from signal_noise.collector.berkeley_earth import BerkeleyEarthGlobalTempCollector
 from signal_noise.collector.noaa_climate import (
     GlobalTempAnomalyCollector,
     CO2DailyCollector,
@@ -219,10 +220,41 @@ class TestNOAAClimate:
         assert df["value"].iloc[0] == 1.12
 
 
+class TestBerkeleyEarthClimate:
+    def test_berkeley_meta(self):
+        assert BerkeleyEarthGlobalTempCollector.meta.name == "berkeley_global_temp"
+        assert BerkeleyEarthGlobalTempCollector.meta.category == "climate"
+
+    @patch("signal_noise.collector.berkeley_earth.requests.get")
+    def test_berkeley_fetch_uses_first_series_only(self, mock_get):
+        text = (
+            "% Berkeley Earth sample\n"
+            "2014 12 0.110 0.020 NaN NaN NaN NaN NaN NaN NaN NaN\n"
+            "2015 1 0.220 0.021 NaN NaN NaN NaN NaN NaN NaN NaN\n"
+            "2015 2 0.330 0.022 NaN NaN NaN NaN NaN NaN NaN NaN\n"
+            "1850 1 -0.500 0.200 NaN NaN NaN NaN NaN NaN NaN NaN\n"
+            "1850 2 -0.400 0.200 NaN NaN NaN NaN NaN NaN NaN NaN\n"
+        )
+        mock_resp = MagicMock()
+        mock_resp.text = text
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+
+        df = BerkeleyEarthGlobalTempCollector().fetch()
+        assert len(df) == 2
+        assert df["value"].tolist() == [0.22, 0.33]
+
+
 class TestClimateRegistration:
     def test_noaa_registered(self):
         from signal_noise.collector import COLLECTORS
-        for name in ["noaa_global_temp", "noaa_land_temp", "noaa_co2_daily", "nasa_giss_temp"]:
+        for name in [
+            "noaa_global_temp",
+            "noaa_land_temp",
+            "noaa_co2_daily",
+            "nasa_giss_temp",
+            "berkeley_global_temp",
+        ]:
             assert name in COLLECTORS, f"{name} not registered"
 
     def test_weather_registered(self):
