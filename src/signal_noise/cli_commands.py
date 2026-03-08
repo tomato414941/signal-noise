@@ -33,13 +33,38 @@ def _parse_excludes(raw: str | None) -> set[str]:
     return {v.strip() for v in raw.split(",") if v.strip()}
 
 
-def _sync_suppressed_meta(store: SignalStore, registry: object, suppressed: set[str]) -> None:
+def _build_suppressed_entries(
+    env_excludes: set[str],
+    cli_excludes: set[str],
+) -> dict[str, dict[str, str]]:
+    suppressed: dict[str, dict[str, str]] = {}
+    for name in sorted(env_excludes | cli_excludes):
+        sources: list[str] = []
+        reasons: list[str] = []
+        if name in env_excludes:
+            sources.append("env")
+            reasons.append("SIGNAL_NOISE_EXCLUDE")
+        if name in cli_excludes:
+            sources.append("cli")
+            reasons.append("--exclude")
+        suppressed[name] = {
+            "source": "+".join(sources),
+            "reason": ", ".join(reasons),
+        }
+    return suppressed
+
+
+def _sync_suppressed_meta(
+    store: SignalStore,
+    registry: object,
+    suppressed: dict[str, dict[str, str]],
+) -> None:
     resolved = ensure_registry(registry)
     if not suppressed:
-        store.sync_suppressed(set())
+        store.sync_suppressed({})
         return
 
-    for name in suppressed:
+    for name, detail in suppressed.items():
         meta = resolved.get_meta(name)
         if meta is None:
             continue
@@ -50,6 +75,8 @@ def _sync_suppressed_meta(store: SignalStore, registry: object, suppressed: set[
             int(meta.get("interval", 86400)),
             str(meta.get("signal_type", "scalar")),
             suppressed=True,
+            suppressed_reason=detail.get("reason"),
+            suppressed_source=detail.get("source"),
         )
     store.sync_suppressed(suppressed)
 
@@ -112,7 +139,8 @@ def _prepare_scheduler_targets(
     env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
     cli_excludes = _parse_excludes(exclude)
     excludes = env_excludes | cli_excludes
-    _sync_suppressed_meta(store, resolved, excludes)
+    suppressed_entries = _build_suppressed_entries(env_excludes, cli_excludes)
+    _sync_suppressed_meta(store, resolved, suppressed_entries)
     targets = _select_collectors_from_registry(
         resolved,
         frequency=frequency,

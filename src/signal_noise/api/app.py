@@ -46,7 +46,15 @@ def health_signals() -> dict:
     h = store.check_health()
     return {
         "fresh": len(h["fresh"]),
-        "suppressed": [s["name"] for s in h["suppressed"]],
+        "suppressed": [
+            {
+                "name": s["name"],
+                "reason": s.get("suppressed_reason"),
+                "source": s.get("suppressed_source"),
+                "suppressed_at": s.get("suppressed_at"),
+            }
+            for s in h["suppressed"]
+        ],
         "stale": [{"name": s["name"], "age_seconds": s["age_seconds"], "interval": s["interval"]} for s in h["stale"]],
         "failing": [
             {

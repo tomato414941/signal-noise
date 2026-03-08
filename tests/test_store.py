@@ -99,6 +99,24 @@ class TestSignalStore:
         assert meta is not None
         assert meta["category"] == "crypto"
 
+    def test_save_meta_with_suppression_detail(self, store: SignalStore) -> None:
+        store.save_meta(
+            "btc",
+            "markets",
+            "crypto",
+            3600,
+            suppressed=True,
+            suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_source="env",
+            suppressed_at="2026-03-08T00:00:00Z",
+        )
+        meta = store.get_meta("btc")
+        assert meta is not None
+        assert meta["suppressed"] == 1
+        assert meta["suppressed_reason"] == "SIGNAL_NOISE_EXCLUDE"
+        assert meta["suppressed_source"] == "env"
+        assert meta["suppressed_at"] == "2026-03-08T00:00:00Z"
+
     def test_get_meta_not_found(self, store: SignalStore) -> None:
         assert store.get_meta("nonexistent") is None
 
@@ -296,6 +314,9 @@ class TestTimestampNormalization:
         row = s._conn.execute("SELECT timestamp FROM signals WHERE name = 's'").fetchone()
         assert row[0] == "2024-01-01T12:00:00+00:00"
         meta_cols = {r[1] for r in s._conn.execute("PRAGMA table_info(signal_meta)")}
+        assert "suppressed_reason" in meta_cols
+        assert "suppressed_source" in meta_cols
+        assert "suppressed_at" in meta_cols
         assert "last_error" in meta_cols
         assert "last_error_at" in meta_cols
         s.close()
@@ -536,12 +557,45 @@ class TestCheckHealth:
         assert h["never_seen"][0]["name"] == "s"
 
     def test_suppressed_hidden_from_active_states(self, store: SignalStore) -> None:
-        store.save_meta("s", "markets", "crypto", 3600, suppressed=True)
+        store.save_meta(
+            "s",
+            "markets",
+            "crypto",
+            3600,
+            suppressed=True,
+            suppressed_reason="manual maintenance",
+            suppressed_source="test",
+            suppressed_at="2026-03-08T00:00:00Z",
+        )
         h = store.check_health()
         assert [s["name"] for s in h["suppressed"]] == ["s"]
+        assert h["suppressed"][0]["suppressed_reason"] == "manual maintenance"
+        assert h["suppressed"][0]["suppressed_source"] == "test"
+        assert h["suppressed"][0]["suppressed_at"] == "2026-03-08T00:00:00Z"
         assert h["never_seen"] == []
         assert h["stale"] == []
         assert h["failing"] == []
+
+    def test_sync_suppressed_clears_detail_when_unsuppressed(self, store: SignalStore) -> None:
+        store.save_meta(
+            "s",
+            "markets",
+            "crypto",
+            3600,
+            suppressed=True,
+            suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_source="env",
+            suppressed_at="2026-03-08T00:00:00Z",
+        )
+
+        store.sync_suppressed({})
+
+        meta = store.get_meta("s")
+        assert meta is not None
+        assert meta["suppressed"] == 0
+        assert meta["suppressed_reason"] is None
+        assert meta["suppressed_source"] is None
+        assert meta["suppressed_at"] is None
 
     def test_fresh(self, store: SignalStore) -> None:
         store.save_meta("s", "markets", "crypto", 3600)
@@ -629,10 +683,23 @@ class TestBatchMethods:
         assert store.get_meta("s")["consecutive_failures"] == 0
 
     def test_save_collection_result_preserves_suppressed(self, store: SignalStore) -> None:
-        store.save_meta("s", "markets", "crypto", 3600, suppressed=True)
+        store.save_meta(
+            "s",
+            "markets",
+            "crypto",
+            3600,
+            suppressed=True,
+            suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_source="env",
+            suppressed_at="2026-03-08T00:00:00Z",
+        )
         df = pd.DataFrame({"timestamp": ["2024-01-01"], "value": [1.0]})
         store.save_collection_result("s", df, "markets", "crypto", 3600)
-        assert store.get_meta("s")["suppressed"] == 1
+        meta = store.get_meta("s")
+        assert meta["suppressed"] == 1
+        assert meta["suppressed_reason"] == "SIGNAL_NOISE_EXCLUDE"
+        assert meta["suppressed_source"] == "env"
+        assert meta["suppressed_at"] == "2026-03-08T00:00:00Z"
 
     def test_save_collection_result_empty_df(self, store: SignalStore) -> None:
         rows = store.save_collection_result("s", pd.DataFrame(), "markets", "crypto", 3600)

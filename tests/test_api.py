@@ -98,11 +98,25 @@ class TestHealth:
         store.save_meta("broken", "markets", "crypto", 3600)
         store.save_collection_failure("broken", "read timeout")
         # suppressed
-        store.save_meta("ignored", "society", "legislation", 86400, suppressed=True)
+        store.save_meta(
+            "ignored",
+            "society",
+            "legislation",
+            86400,
+            suppressed=True,
+            suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_source="env",
+            suppressed_at="2026-03-08T00:00:00Z",
+        )
         r = client.get("/health/signals")
         assert r.status_code == 200
         data = r.json()
-        assert data["suppressed"] == ["ignored"]
+        assert data["suppressed"] == [{
+            "name": "ignored",
+            "reason": "SIGNAL_NOISE_EXCLUDE",
+            "source": "env",
+            "suppressed_at": "2026-03-08T00:00:00Z",
+        }]
         assert len(data["stale"]) == 1
         assert data["stale"][0]["name"] == "btc"
         assert "new_sig" in data["never_seen"]

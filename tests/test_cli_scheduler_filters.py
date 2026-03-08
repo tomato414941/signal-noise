@@ -85,7 +85,17 @@ def test_prepare_scheduler_targets_syncs_suppressed(tmp_path, monkeypatch):
 
     assert targets == {}
     assert excludes == {"daily_demo", "stream_demo"}
-    assert store.get_meta("daily_demo")["suppressed"] == 1
-    assert store.get_meta("stream_demo")["suppressed"] == 1
+    daily_meta = store.get_meta("daily_demo")
+    stream_meta = store.get_meta("stream_demo")
+
+    assert daily_meta["suppressed"] == 1
+    assert daily_meta["suppressed_reason"] == "SIGNAL_NOISE_EXCLUDE"
+    assert daily_meta["suppressed_source"] == "env"
+    assert daily_meta["suppressed_at"] is not None
+
+    assert stream_meta["suppressed"] == 1
+    assert stream_meta["suppressed_reason"] == "--exclude"
+    assert stream_meta["suppressed_source"] == "cli"
+    assert stream_meta["suppressed_at"] is not None
 
     store.close()

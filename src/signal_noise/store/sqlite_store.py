@@ -89,6 +89,9 @@ class SignalStore:
                 interval     INTEGER NOT NULL DEFAULT 86400,
                 signal_type  TEXT NOT NULL DEFAULT 'scalar',
                 suppressed   INTEGER NOT NULL DEFAULT 0,
+                suppressed_reason TEXT,
+                suppressed_source TEXT,
+                suppressed_at TEXT,
                 last_updated TEXT,
                 last_error   TEXT,
                 last_error_at TEXT
@@ -130,6 +133,18 @@ class SignalStore:
         if "suppressed" not in meta_cols:
             self._conn.execute(
                 "ALTER TABLE signal_meta ADD COLUMN suppressed INTEGER NOT NULL DEFAULT 0"
+            )
+        if "suppressed_reason" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed_reason TEXT"
+            )
+        if "suppressed_source" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed_source TEXT"
+            )
+        if "suppressed_at" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed_at TEXT"
             )
         if "last_error" not in meta_cols:
             self._conn.execute(
@@ -214,6 +229,9 @@ class SignalStore:
         signal_type: str,
         *,
         suppressed: bool | None = None,
+        suppressed_reason: str | None = None,
+        suppressed_source: str | None = None,
+        suppressed_at: str | None = None,
     ) -> None:
         if suppressed is None:
             self._conn.execute(
@@ -228,16 +246,52 @@ class SignalStore:
             )
             return
 
+        if suppressed:
+            self._conn.execute(
+                """INSERT INTO signal_meta (
+                       name, domain, category, interval, signal_type, suppressed,
+                       suppressed_reason, suppressed_source, suppressed_at
+                   )
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(name) DO UPDATE SET
+                       domain = excluded.domain,
+                       category = excluded.category,
+                       interval = excluded.interval,
+                       signal_type = excluded.signal_type,
+                       suppressed = excluded.suppressed,
+                       suppressed_reason = excluded.suppressed_reason,
+                       suppressed_source = excluded.suppressed_source,
+                       suppressed_at = excluded.suppressed_at""",
+                (
+                    name,
+                    domain,
+                    category,
+                    interval,
+                    signal_type,
+                    int(suppressed),
+                    suppressed_reason,
+                    suppressed_source,
+                    suppressed_at,
+                ),
+            )
+            return
+
         self._conn.execute(
-            """INSERT INTO signal_meta (name, domain, category, interval, signal_type, suppressed)
-               VALUES (?, ?, ?, ?, ?, ?)
+            """INSERT INTO signal_meta (
+                   name, domain, category, interval, signal_type, suppressed,
+                   suppressed_reason, suppressed_source, suppressed_at
+               )
+               VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL)
                ON CONFLICT(name) DO UPDATE SET
                    domain = excluded.domain,
                    category = excluded.category,
                    interval = excluded.interval,
                    signal_type = excluded.signal_type,
-                   suppressed = excluded.suppressed""",
-            (name, domain, category, interval, signal_type, int(suppressed)),
+                   suppressed = 0,
+                   suppressed_reason = NULL,
+                   suppressed_source = NULL,
+                   suppressed_at = NULL""",
+            (name, domain, category, interval, signal_type),
         )
 
     def _touch_last_updated(self, name: str, *, reset_failures: bool = False) -> None:
@@ -323,7 +377,11 @@ class SignalStore:
 
     def save_meta(
         self, name: str, domain: str, category: str, interval: int,
-        signal_type: str = "scalar", *, suppressed: bool = False,
+        signal_type: str = "scalar", *,
+        suppressed: bool = False,
+        suppressed_reason: str | None = None,
+        suppressed_source: str | None = None,
+        suppressed_at: str | None = None,
     ) -> None:
         """Upsert signal metadata without touching last_updated.
 
@@ -336,16 +394,40 @@ class SignalStore:
             interval,
             signal_type,
             suppressed=suppressed,
+            suppressed_reason=suppressed_reason,
+            suppressed_source=suppressed_source,
+            suppressed_at=suppressed_at,
         )
         self._conn.commit()
 
-    def sync_suppressed(self, names: set[str]) -> None:
-        self._conn.execute("UPDATE signal_meta SET suppressed = 0")
-        if names:
-            placeholders = ", ".join("?" for _ in names)
+    def sync_suppressed(self, entries: dict[str, dict[str, str | None]] | set[str]) -> None:
+        self._conn.execute(
+            "UPDATE signal_meta SET suppressed = 0,"
+            " suppressed_reason = NULL, suppressed_source = NULL, suppressed_at = NULL"
+        )
+        if not entries:
+            self._conn.commit()
+            return
+
+        suppressed_entries = (
+            {name: {} for name in entries}
+            if isinstance(entries, set)
+            else entries
+        )
+        for name, detail in sorted(suppressed_entries.items()):
             self._conn.execute(
-                f"UPDATE signal_meta SET suppressed = 1 WHERE name IN ({placeholders})",
-                tuple(sorted(names)),
+                "UPDATE signal_meta"
+                " SET suppressed = 1,"
+                " suppressed_reason = ?,"
+                " suppressed_source = ?,"
+                " suppressed_at = COALESCE(?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))"
+                " WHERE name = ?",
+                (
+                    detail.get("reason"),
+                    detail.get("source"),
+                    detail.get("suppressed_at"),
+                    name,
+                ),
             )
         self._conn.commit()
 
@@ -500,6 +582,7 @@ class SignalStore:
 
         rows = self._conn.execute("""
             SELECT name, domain, category, signal_type, interval, suppressed,
+                   suppressed_reason, suppressed_source, suppressed_at,
                    last_updated, consecutive_failures, last_error, last_error_at,
                    CASE WHEN last_updated IS NOT NULL THEN
                        CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)
