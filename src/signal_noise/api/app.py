@@ -3,8 +3,10 @@ from __future__ import annotations
 import logging
 
 from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
+from signal_noise.api.ops_ui import render_ops_page
 from signal_noise.config import DB_PATH
 from signal_noise.store.event_bus import EventBus
 from signal_noise.store.sqlite_store import SignalStore
@@ -21,6 +23,16 @@ def get_store() -> SignalStore:
     if _store is None:
         _store = SignalStore(DB_PATH)
     return _store
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    return RedirectResponse(url="/ops", status_code=307)
+
+
+@app.get("/ops", include_in_schema=False)
+def ops_board() -> HTMLResponse:
+    return HTMLResponse(render_ops_page())
 
 
 @app.get("/health")

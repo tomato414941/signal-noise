@@ -29,6 +29,20 @@ def client(store: SignalStore) -> TestClient:
 
 
 class TestHealth:
+    def test_root_redirects_to_ops(self, client: TestClient) -> None:
+        r = client.get("/", follow_redirects=False)
+        assert r.status_code == 307
+        assert r.headers["location"] == "/ops"
+
+    def test_ops_board_html(self, client: TestClient) -> None:
+        r = client.get("/ops")
+        assert r.status_code == 200
+        assert "text/html" in r.headers["content-type"]
+        body = r.text
+        assert "signal-noise ops board" in body
+        assert "/health/signals" in body
+        assert "Suppressed Ledger" in body
+
     def test_health_ok(self, client: TestClient) -> None:
         r = client.get("/health")
         assert r.status_code == 200
