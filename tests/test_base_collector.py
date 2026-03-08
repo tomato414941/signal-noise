@@ -91,6 +91,34 @@ class TestBaseCollector:
 
             store.close()
 
+    def test_collect_with_store_cache_hit_resets_failures(self, tmp_path):
+        with patch("signal_noise.collector.base.CACHE_DIR", tmp_path / "cache"):
+            store = SignalStore(tmp_path / "signals.db")
+            store.save_meta("dummy", "", "", 86400)
+            store.increment_failures("dummy", "timeout")
+
+            first = DummyCollector()
+            df = first.collect(store=store)
+            assert len(df) == 5
+
+            store.increment_failures("dummy", "second timeout")
+            meta = store.get_meta("dummy")
+            assert meta is not None
+            assert meta["consecutive_failures"] == 1
+
+            cached = DummyCollector()
+            df = cached.collect(store=store)
+            assert len(df) == 5
+            assert cached._call_count == 0
+
+            meta = store.get_meta("dummy")
+            assert meta is not None
+            assert meta["consecutive_failures"] == 0
+            assert meta["last_error"] is None
+            assert meta["last_error_at"] is None
+
+            store.close()
+
     def test_taxonomy_constants_non_empty(self):
         assert len(DOMAINS) >= 6
         assert len(CATEGORIES) >= 20

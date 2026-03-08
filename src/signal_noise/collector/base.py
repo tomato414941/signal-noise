@@ -120,6 +120,7 @@ class BaseCollector(ABC):
                 if store:
                     df = store.get_data(self.meta.name)
                     if not df.empty:
+                        store.reset_failures(self.meta.name)
                         return df
                 return pd.DataFrame()
 
