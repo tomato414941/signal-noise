@@ -66,12 +66,19 @@ class SignalClient:
         try:
             return self._get("/health")
         except Exception:
-            return {"status": "unreachable", "stale_count": -1}
+            return {
+                "status": "unreachable",
+                "fresh": -1,
+                "stale": -1,
+                "failing": -1,
+                "never_seen": -1,
+                "suppressed": -1,
+            }
 
     def stale_signals(self) -> list[dict]:
         try:
             data = self._get("/health/signals")
-            return data.get("stale_signals", [])
+            return data.get("stale", [])
         except Exception:
             return []
 

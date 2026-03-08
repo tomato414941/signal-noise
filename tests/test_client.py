@@ -66,3 +66,67 @@ def test_get_batch_chunks_large_requests(monkeypatch):
 
     assert seen_chunks == [["a", "b"], ["c", "d"], ["e"]]
     assert sorted(batch.keys()) == ["a", "b", "c", "d", "e"]
+
+
+def test_health_detail_returns_api_shape(monkeypatch):
+    client = SignalClient(base_url="http://localhost:8000")
+
+    def fake_get(path: str, params: dict | None = None):
+        assert path == "/health"
+        assert params is None
+        return {
+            "status": "ok",
+            "fresh": 10,
+            "stale": 1,
+            "failing": 2,
+            "never_seen": 3,
+            "suppressed": 4,
+        }
+
+    monkeypatch.setattr(client, "_get", fake_get)
+
+    assert client.health_detail() == {
+        "status": "ok",
+        "fresh": 10,
+        "stale": 1,
+        "failing": 2,
+        "never_seen": 3,
+        "suppressed": 4,
+    }
+
+
+def test_health_detail_returns_unreachable_shape_on_error(monkeypatch):
+    client = SignalClient(base_url="http://localhost:8000")
+
+    def fake_get(path: str, params: dict | None = None):
+        raise RuntimeError("network down")
+
+    monkeypatch.setattr(client, "_get", fake_get)
+
+    assert client.health_detail() == {
+        "status": "unreachable",
+        "fresh": -1,
+        "stale": -1,
+        "failing": -1,
+        "never_seen": -1,
+        "suppressed": -1,
+    }
+
+
+def test_stale_signals_reads_stale_key(monkeypatch):
+    client = SignalClient(base_url="http://localhost:8000")
+
+    def fake_get(path: str, params: dict | None = None):
+        assert path == "/health/signals"
+        assert params is None
+        return {
+            "fresh": 10,
+            "suppressed": [],
+            "stale": [{"name": "btc", "age_seconds": 7200, "interval": 3600}],
+            "failing": [],
+            "never_seen": [],
+        }
+
+    monkeypatch.setattr(client, "_get", fake_get)
+
+    assert client.stale_signals() == [{"name": "btc", "age_seconds": 7200, "interval": 3600}]
