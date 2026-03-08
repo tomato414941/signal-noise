@@ -72,6 +72,30 @@ class TestWorldBankFactory:
             assert dom in DOMAINS, f"{entry[2]} has invalid domain: {dom}"
             assert cat in CATEGORIES, f"{entry[2]} has invalid category: {cat}"
 
+    def test_series_include_tourism_receipts_and_expenditures(self):
+        names = {entry[2] for entry in WORLDBANK_SERIES}
+        for name in [
+            "wb_tourism_receipts_us",
+            "wb_tourism_receipts_fr",
+            "wb_tourism_expenditures_us",
+            "wb_tourism_expenditures_jp",
+        ]:
+            assert name in names
+
+    def test_tourism_expansion_collectors_are_registered(self):
+        from signal_noise.collector import COLLECTORS
+
+        for name in [
+            "wb_tourism_receipts_us",
+            "wb_tourism_receipts_fr",
+            "wb_tourism_receipts_es",
+            "wb_tourism_expenditures_us",
+            "wb_tourism_expenditures_it",
+            "wb_tourism_expenditures_th",
+        ]:
+            assert name in COLLECTORS
+            assert COLLECTORS[name].meta.category == "tourism"
+
 
 class TestWorldBankFetch:
     @patch("signal_noise.collector.worldbank_generic.requests.get")
