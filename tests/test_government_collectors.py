@@ -88,7 +88,6 @@ class TestWorldBankFactory:
         for name in [
             "wb_tourism_receipts_us",
             "wb_tourism_receipts_fr",
-            "wb_tourism_receipts_es",
             "wb_tourism_expenditures_us",
             "wb_tourism_expenditures_it",
             "wb_tourism_expenditures_th",

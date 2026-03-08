@@ -138,14 +138,12 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     # ── International tourism receipts (current US$) ──
     ("ST.INT.RCPT.CD", "US", "wb_tourism_receipts_us", "Tourism Receipts: US", "economy", "tourism"),
     ("ST.INT.RCPT.CD", "FR", "wb_tourism_receipts_fr", "Tourism Receipts: France", "economy", "tourism"),
-    ("ST.INT.RCPT.CD", "ES", "wb_tourism_receipts_es", "Tourism Receipts: Spain", "economy", "tourism"),
     ("ST.INT.RCPT.CD", "IT", "wb_tourism_receipts_it", "Tourism Receipts: Italy", "economy", "tourism"),
     ("ST.INT.RCPT.CD", "JP", "wb_tourism_receipts_jp", "Tourism Receipts: Japan", "economy", "tourism"),
     ("ST.INT.RCPT.CD", "TH", "wb_tourism_receipts_th", "Tourism Receipts: Thailand", "economy", "tourism"),
     # ── International tourism expenditures (current US$) ──
     ("ST.INT.XPND.CD", "US", "wb_tourism_expenditures_us", "Tourism Expenditures: US", "economy", "tourism"),
     ("ST.INT.XPND.CD", "FR", "wb_tourism_expenditures_fr", "Tourism Expenditures: France", "economy", "tourism"),
-    ("ST.INT.XPND.CD", "ES", "wb_tourism_expenditures_es", "Tourism Expenditures: Spain", "economy", "tourism"),
     ("ST.INT.XPND.CD", "IT", "wb_tourism_expenditures_it", "Tourism Expenditures: Italy", "economy", "tourism"),
     ("ST.INT.XPND.CD", "JP", "wb_tourism_expenditures_jp", "Tourism Expenditures: Japan", "economy", "tourism"),
     ("ST.INT.XPND.CD", "TH", "wb_tourism_expenditures_th", "Tourism Expenditures: Thailand", "economy", "tourism"),
