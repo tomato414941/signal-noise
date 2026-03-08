@@ -4,7 +4,7 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,989 collectors** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**2,006 collectors** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
@@ -118,7 +118,7 @@ The built-in `/ops` page is intentionally narrow in scope: it is a read-only ope
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -q   # 923 passed as of 2026-03-08
+pytest tests/ -q   # 924 passed as of 2026-03-08
 ruff check src/ tests/
 ```
 

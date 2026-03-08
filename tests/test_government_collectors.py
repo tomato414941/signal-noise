@@ -95,6 +95,20 @@ class TestWorldBankFactory:
             assert name in COLLECTORS
             assert COLLECTORS[name].meta.category == "tourism"
 
+    def test_transportation_expansion_collectors_are_registered(self):
+        from signal_noise.collector import COLLECTORS
+
+        for name in [
+            "wb_air_passengers_us",
+            "wb_air_passengers_in",
+            "wb_air_departures_us",
+            "wb_air_departures_br",
+            "wb_air_freight_cn",
+            "wb_air_freight_de",
+        ]:
+            assert name in COLLECTORS
+            assert COLLECTORS[name].meta.category == "transportation"
+
 
 class TestWorldBankFetch:
     @patch("signal_noise.collector.worldbank_generic.requests.get")
