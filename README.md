@@ -4,13 +4,14 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**1,700+ collectors** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**1,979 collectors** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
 - **Broad coverage** — markets, economy, environment, technology, sentiment, society
 - **Collection Spectrum** — L1 (free APIs) through L6 (physical sensors). See [DESIGN.md](DESIGN.md) for the full spectrum
 - **REST API** — FastAPI with signal discovery, time series data, anomaly detection, and batch queries
+- **Ops board** — mobile-friendly read-only status board at `/ops` for health, failures, stale signals, and suppressed collectors
 - **WebSocket** — Real-time signal event streaming (`/ws/signals`)
 - **Streaming collectors** — Binance WebSocket for orderbook depth, trade flow, VPIN, liquidations, funding rate
 - **EventBus** — In-process pub/sub for signal update propagation
@@ -30,6 +31,8 @@ python -m signal_noise serve
 python -m signal_noise collect
 curl http://localhost:8000/signals/fear_greed/latest
 ```
+
+Then open `http://localhost:8000/ops` in a browser for the internal ops board.
 
 ## CLI
 
@@ -53,7 +56,7 @@ python -m signal_noise rollup-realtime        # Rollup 1-min data to daily + pur
 # Health check
 curl http://localhost:8000/health
 
-# Per-signal health details
+# Per-signal health details (stale, failing, never_seen, suppressed)
 curl http://localhost:8000/health/signals
 
 # List all signals
@@ -83,6 +86,8 @@ curl -X POST http://localhost:8000/signals/batch \
 wscat -c "ws://localhost:8000/ws/signals?names=vpin_btc,book_imbalance_btc"
 ```
 
+Open `http://localhost:8000/ops` in a browser for the read-only ops board.
+
 ## Architecture
 
 ```
@@ -95,6 +100,8 @@ Streaming Collectors ──→ signals_realtime ──→ EventBus ──→ Web
 ```
 
 signal-noise is a **data collection service**. It collects and delivers raw time series — consumers handle transforms, evaluation, and prediction.
+
+The built-in `/ops` page is intentionally narrow in scope: it is a read-only operational view over `/health` and `/health/signals`, not a general signal exploration UI.
 
 ## Domain Coverage
 
@@ -111,7 +118,7 @@ signal-noise is a **data collection service**. It collects and delivers raw time
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v
+pytest tests/ -q   # 916 passed as of 2026-03-08
 ruff check src/ tests/
 ```
 
