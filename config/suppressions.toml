@@ -1,0 +1,295 @@
+# alpha-os suppression registry
+# This file is the committed source of truth for long-lived scheduler suppressions.
+
+[[rules]]
+selectors = ["gdelt_doc_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "upstream_unstable"
+detail = "GDELT document search times out or fails frequently from alpha-os."
+review_after = "2026-04-01"
+
+[[rules]]
+selectors = ["entsoe_dayahead_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "ENTSOE_API_KEY is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["ecb_ester"]
+scopes = ["alpha-os"]
+reason_code = "upstream_outage"
+detail = "ECB API is temporarily failing for this series."
+review_after = "2026-03-31"
+
+[[rules]]
+selectors = ["marine_suez"]
+scopes = ["alpha-os"]
+reason_code = "source_removed"
+detail = "No upstream source is currently available for this signal."
+review_after = "2026-06-01"
+
+[[rules]]
+selectors = ["liq_ratio_*_1h"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "geo_blocked"
+detail = "Binance returns 451 from the Germany-hosted alpha-os server."
+review_after = "2026-06-01"
+
+[[rules]]
+selectors = ["fr24_total"]
+scopes = ["alpha-os"]
+reason_code = "upstream_blocked"
+detail = "FlightRadar24 blocks scraping requests from alpha-os with 403."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["reliefweb_disaster_count"]
+scopes = ["alpha-os"]
+reason_code = "registration_missing"
+detail = "ReliefWeb requires a registered appname and returns 403 without it."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["reddit_wsb", "reddit_crypto", "reddit_bitcoin"]
+scopes = ["alpha-os"]
+reason_code = "access_denied"
+detail = "Reddit API application was rejected for this project."
+review_after = "2026-06-01"
+
+[[rules]]
+selectors = ["twitch_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "Twitch client credentials are not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["sonitus_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "credential_invalid"
+detail = "Sonitus authentication changed and the current credentials no longer work."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["congress_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "Congress.gov API key is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["acled_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "ACLED API key is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["ucdp_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "UCDP API key is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["bls_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "BLS_API_KEY is absent and anonymous quota is not viable for daily scheduling."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["coops_wt_san_francisco"]
+scopes = ["alpha-os"]
+reason_code = "upstream_timeout"
+detail = "NOAA CO-OPS times out consistently from alpha-os."
+review_after = "2026-04-01"
+
+[[rules]]
+selectors = ["glad_deforestation", "nasa_active_fires"]
+scopes = ["alpha-os"]
+reason_code = "upstream_timeout"
+detail = "FIRMS 24h CSV requests time out consistently from alpha-os."
+review_after = "2026-04-01"
+
+[[rules]]
+selectors = ["owid_excess_mortality"]
+scopes = ["alpha-os"]
+reason_code = "dataset_changed"
+detail = "Current OWID excess mortality dataset no longer includes the World aggregate."
+review_after = "2026-05-01"
+
+[[rules]]
+selectors = ["lumber"]
+scopes = ["alpha-os"]
+reason_code = "source_removed"
+detail = "Yahoo ticker LBS=F appears to be permanently dead."
+review_after = "2026-06-01"
+
+[[rules]]
+selectors = ["noaa_whale_stranding"]
+scopes = ["alpha-os"]
+reason_code = "source_removed"
+detail = "NOAA endpoint returns 404."
+review_after = "2026-06-01"
+
+[[rules]]
+selectors = ["fema_disaster_count", "fema_major_disaster_count"]
+scopes = ["alpha-os"]
+reason_code = "upstream_blocked"
+detail = "FEMA API returns 403 from alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["letsencrypt_cert_count"]
+scopes = ["alpha-os"]
+reason_code = "source_removed"
+detail = "The upstream CloudFront key now returns 404."
+review_after = "2026-06-01"
+
+[[rules]]
+selectors = ["nhtsa_recall_count", "nhtsa_recall_vehicles"]
+scopes = ["alpha-os"]
+reason_code = "upstream_blocked"
+detail = "NHTSA recallsByYear endpoint returns 403 from alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["fred_leading_index"]
+scopes = ["alpha-os"]
+reason_code = "no_data"
+detail = "FRED series USSLIND currently returns no data."
+review_after = "2026-05-01"
+
+[[rules]]
+selectors = ["iucn_threatened_species"]
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "IUCN API key is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["nasa_giss_temp"]
+scopes = ["alpha-os"]
+reason_code = "connection_refused"
+detail = "alpha-os receives Connection refused from data.giss.nasa.gov:443."
+review_after = "2026-04-01"
+
+[[rules]]
+selectors = ["nyc_taxi_trips"]
+scopes = ["alpha-os"]
+reason_code = "query_invalid"
+detail = "NYC Socrata query returns 400."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = [
+  "s2_ai_papers",
+  "s2_llm_papers",
+  "s2_climate_papers",
+  "s2_fusion_papers",
+]
+scopes = ["alpha-os"]
+reason_code = "no_data"
+detail = "Semantic Scholar queries currently return no data for these topics."
+review_after = "2026-05-01"
+
+[[rules]]
+selectors = ["usda_*_production"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "upstream_blocked"
+detail = "USDA API returns 403 for these production endpoints."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["oecd_pti_cn"]
+scopes = ["alpha-os"]
+reason_code = "no_data"
+detail = "The upstream OECD record is absent."
+review_after = "2026-05-01"
+
+[[rules]]
+selectors = ["eonet_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "review_pending"
+detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate EONET availability."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["nrc_reactor_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "review_pending"
+detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate NRC source behavior."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["caiso_lmp_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "review_pending"
+detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate CAISO OASIS behavior."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["bgp_ipv4_prefix_count", "bgp_ipv6_prefix_count"]
+scopes = ["alpha-os"]
+reason_code = "upstream_changed"
+detail = "RIPEstat 0/0 prefix count path needs a replacement source."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["ebird_observations_us"]
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "EBIRD_API_KEY is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["metaculus_active_questions"]
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "METACULUS_API_TOKEN is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["fbi_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "missing_api_key"
+detail = "FBI_API_KEY is not configured on alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["usgs_gw_*"]
+match = "glob"
+scopes = ["alpha-os"]
+reason_code = "upstream_changed"
+detail = "USGS groundwater parameter 72019 is no longer served for these sites."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["btc_node_count"]
+scopes = ["alpha-os"]
+reason_code = "review_pending"
+detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate Bitnodes availability."
+review_after = "2026-04-15"
+
+[[rules]]
+selectors = ["uspto_trademark_apps"]
+scopes = ["alpha-os"]
+reason_code = "review_pending"
+detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate USPTO API behavior."
+review_after = "2026-04-15"

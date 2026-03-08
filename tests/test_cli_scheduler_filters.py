@@ -73,7 +73,46 @@ def test_collector_list_rows_uses_combined_store_counts(tmp_path):
     store.close()
 
 
-def test_prepare_scheduler_targets_syncs_suppressed(tmp_path, monkeypatch):
+def test_prepare_scheduler_targets_syncs_registry_suppressed(tmp_path, monkeypatch):
+    store = SignalStore(tmp_path / "test.db")
+    registry = {
+        "daily_demo": _DailyCollector,
+        "stream_demo": _StreamingCollector,
+    }
+
+    registry_path = tmp_path / "suppressions.toml"
+    registry_path.write_text(
+        """
+[[rules]]
+selectors = ["daily_demo"]
+scopes = ["tests"]
+reason_code = "missing_api_key"
+detail = "Demo key not configured."
+review_after = "2026-04-15"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SIGNAL_NOISE_SUPPRESSION_FILE", str(registry_path))
+    monkeypatch.setenv("SIGNAL_NOISE_SUPPRESSION_SCOPE", "tests")
+    targets, excludes = _prepare_scheduler_targets(store, registry)
+
+    assert targets == {"stream_demo": _StreamingCollector}
+    assert excludes == {"daily_demo"}
+    daily_meta = store.get_meta("daily_demo")
+
+    assert daily_meta["suppressed"] == 1
+    assert daily_meta["suppressed_reason"] == "missing_api_key"
+    assert daily_meta["suppressed_detail"] == "Demo key not configured."
+    assert daily_meta["suppressed_scope"] == "tests"
+    assert daily_meta["suppressed_review_after"] == "2026-04-15"
+    assert daily_meta["suppressed_source"] == "registry"
+    assert daily_meta["suppressed_at"] is not None
+
+    store.close()
+
+
+def test_prepare_scheduler_targets_syncs_runtime_overrides(tmp_path, monkeypatch):
     store = SignalStore(tmp_path / "test.db")
     registry = {
         "daily_demo": _DailyCollector,
@@ -85,17 +124,60 @@ def test_prepare_scheduler_targets_syncs_suppressed(tmp_path, monkeypatch):
 
     assert targets == {}
     assert excludes == {"daily_demo", "stream_demo"}
+
     daily_meta = store.get_meta("daily_demo")
     stream_meta = store.get_meta("stream_demo")
 
     assert daily_meta["suppressed"] == 1
-    assert daily_meta["suppressed_reason"] == "SIGNAL_NOISE_EXCLUDE"
+    assert daily_meta["suppressed_reason"] == "legacy_env_override"
+    assert daily_meta["suppressed_detail"] == "Explicit SIGNAL_NOISE_EXCLUDE runtime override."
+    assert daily_meta["suppressed_scope"] == "runtime"
     assert daily_meta["suppressed_source"] == "env"
     assert daily_meta["suppressed_at"] is not None
 
     assert stream_meta["suppressed"] == 1
-    assert stream_meta["suppressed_reason"] == "--exclude"
+    assert stream_meta["suppressed_reason"] == "cli_override"
+    assert stream_meta["suppressed_detail"] == "Explicit --exclude runtime override."
+    assert stream_meta["suppressed_scope"] == "runtime"
     assert stream_meta["suppressed_source"] == "cli"
     assert stream_meta["suppressed_at"] is not None
+
+    store.close()
+
+
+def test_prepare_scheduler_targets_keeps_registry_suppression_for_legacy_meta(
+    tmp_path,
+    monkeypatch,
+):
+    store = SignalStore(tmp_path / "test.db")
+    store.save_meta("legacy_demo", "society", "policy", 86400)
+    registry = {
+        "daily_demo": _DailyCollector,
+        "stream_demo": _StreamingCollector,
+    }
+
+    registry_path = tmp_path / "suppressions.toml"
+    registry_path.write_text(
+        """
+[[rules]]
+selectors = ["legacy_demo"]
+scopes = ["tests"]
+reason_code = "source_removed"
+detail = "Legacy signal kept suppressed while meta remains."
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("SIGNAL_NOISE_SUPPRESSION_FILE", str(registry_path))
+    monkeypatch.setenv("SIGNAL_NOISE_SUPPRESSION_SCOPE", "tests")
+
+    targets, excludes = _prepare_scheduler_targets(store, registry)
+
+    assert targets == registry
+    assert excludes == {"legacy_demo"}
+    legacy_meta = store.get_meta("legacy_demo")
+    assert legacy_meta["suppressed"] == 1
+    assert legacy_meta["suppressed_reason"] == "source_removed"
+    assert legacy_meta["suppressed_source"] == "registry"
 
     store.close()

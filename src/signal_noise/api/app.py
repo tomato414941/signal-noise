@@ -62,6 +62,9 @@ def health_signals() -> dict:
             {
                 "name": s["name"],
                 "reason": s.get("suppressed_reason"),
+                "detail": s.get("suppressed_detail"),
+                "scope": s.get("suppressed_scope"),
+                "review_after": s.get("suppressed_review_after"),
                 "source": s.get("suppressed_source"),
                 "suppressed_at": s.get("suppressed_at"),
             }

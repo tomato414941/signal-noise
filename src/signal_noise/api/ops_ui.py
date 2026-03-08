@@ -746,10 +746,16 @@ OPS_HTML = """<!doctype html>
       for (const item of items) {
         const reason = item.reason || 'unspecified';
         const source = item.source || 'unknown';
-        const key = source + '::' + reason;
+        const detail = item.detail || '';
+        const scope = item.scope || '';
+        const reviewAfter = item.review_after || '';
+        const key = [source, reason, detail, scope, reviewAfter].join('::');
         if (!groups.has(key)) {
           groups.set(key, {
             reason,
+            detail,
+            scope,
+            review_after: reviewAfter,
             source,
             items: [],
           });
@@ -767,7 +773,7 @@ OPS_HTML = """<!doctype html>
     function renderSuppressed(items) {
       const query = state.filter.trim().toLowerCase();
       const filtered = query
-        ? items.filter((item) => [item.name, item.reason, item.source].some((value) => String(value || '').toLowerCase().includes(query)))
+        ? items.filter((item) => [item.name, item.reason, item.detail, item.source, item.scope, item.review_after].some((value) => String(value || '').toLowerCase().includes(query)))
         : items;
 
       document.getElementById('suppressed-summary').textContent =
@@ -786,7 +792,12 @@ OPS_HTML = """<!doctype html>
             <summary>
               <div class="bucket-head">
                 <div class="bucket-title">${escapeHtml(group.reason)}</div>
-                <div class="bucket-meta">source: ${escapeHtml(group.source)}</div>
+                <div class="bucket-meta">
+                  source: ${escapeHtml(group.source)}
+                  ${group.scope ? ' | scope: ' + escapeHtml(group.scope) : ''}
+                  ${group.review_after ? ' | review: ' + escapeHtml(group.review_after) : ''}
+                  ${group.detail ? '<br>' + escapeHtml(group.detail) : ''}
+                </div>
               </div>
               <span class="bucket-count">${escapeHtml(String(group.items.length))}</span>
             </summary>

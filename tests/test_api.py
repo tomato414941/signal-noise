@@ -119,6 +119,9 @@ class TestHealth:
             86400,
             suppressed=True,
             suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_detail="Explicit runtime override.",
+            suppressed_scope="runtime",
+            suppressed_review_after="2026-04-15",
             suppressed_source="env",
             suppressed_at="2026-03-08T00:00:00Z",
         )
@@ -128,6 +131,9 @@ class TestHealth:
         assert data["suppressed"] == [{
             "name": "ignored",
             "reason": "SIGNAL_NOISE_EXCLUDE",
+            "detail": "Explicit runtime override.",
+            "scope": "runtime",
+            "review_after": "2026-04-15",
             "source": "env",
             "suppressed_at": "2026-03-08T00:00:00Z",
         }]

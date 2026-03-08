@@ -90,6 +90,9 @@ class SignalStore:
                 signal_type  TEXT NOT NULL DEFAULT 'scalar',
                 suppressed   INTEGER NOT NULL DEFAULT 0,
                 suppressed_reason TEXT,
+                suppressed_detail TEXT,
+                suppressed_scope TEXT,
+                suppressed_review_after TEXT,
                 suppressed_source TEXT,
                 suppressed_at TEXT,
                 last_updated TEXT,
@@ -137,6 +140,18 @@ class SignalStore:
         if "suppressed_reason" not in meta_cols:
             self._conn.execute(
                 "ALTER TABLE signal_meta ADD COLUMN suppressed_reason TEXT"
+            )
+        if "suppressed_detail" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed_detail TEXT"
+            )
+        if "suppressed_scope" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed_scope TEXT"
+            )
+        if "suppressed_review_after" not in meta_cols:
+            self._conn.execute(
+                "ALTER TABLE signal_meta ADD COLUMN suppressed_review_after TEXT"
             )
         if "suppressed_source" not in meta_cols:
             self._conn.execute(
@@ -230,6 +245,9 @@ class SignalStore:
         *,
         suppressed: bool | None = None,
         suppressed_reason: str | None = None,
+        suppressed_detail: str | None = None,
+        suppressed_scope: str | None = None,
+        suppressed_review_after: str | None = None,
         suppressed_source: str | None = None,
         suppressed_at: str | None = None,
     ) -> None:
@@ -250,9 +268,10 @@ class SignalStore:
             self._conn.execute(
                 """INSERT INTO signal_meta (
                        name, domain, category, interval, signal_type, suppressed,
-                       suppressed_reason, suppressed_source, suppressed_at
+                       suppressed_reason, suppressed_detail, suppressed_scope,
+                       suppressed_review_after, suppressed_source, suppressed_at
                    )
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(name) DO UPDATE SET
                        domain = excluded.domain,
                        category = excluded.category,
@@ -260,6 +279,9 @@ class SignalStore:
                        signal_type = excluded.signal_type,
                        suppressed = excluded.suppressed,
                        suppressed_reason = excluded.suppressed_reason,
+                       suppressed_detail = excluded.suppressed_detail,
+                       suppressed_scope = excluded.suppressed_scope,
+                       suppressed_review_after = excluded.suppressed_review_after,
                        suppressed_source = excluded.suppressed_source,
                        suppressed_at = excluded.suppressed_at""",
                 (
@@ -270,6 +292,9 @@ class SignalStore:
                     signal_type,
                     int(suppressed),
                     suppressed_reason,
+                    suppressed_detail,
+                    suppressed_scope,
+                    suppressed_review_after,
                     suppressed_source,
                     suppressed_at,
                 ),
@@ -279,9 +304,10 @@ class SignalStore:
         self._conn.execute(
             """INSERT INTO signal_meta (
                    name, domain, category, interval, signal_type, suppressed,
-                   suppressed_reason, suppressed_source, suppressed_at
+                   suppressed_reason, suppressed_detail, suppressed_scope,
+                   suppressed_review_after, suppressed_source, suppressed_at
                )
-               VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL)
+               VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)
                ON CONFLICT(name) DO UPDATE SET
                    domain = excluded.domain,
                    category = excluded.category,
@@ -289,6 +315,9 @@ class SignalStore:
                    signal_type = excluded.signal_type,
                    suppressed = 0,
                    suppressed_reason = NULL,
+                   suppressed_detail = NULL,
+                   suppressed_scope = NULL,
+                   suppressed_review_after = NULL,
                    suppressed_source = NULL,
                    suppressed_at = NULL""",
             (name, domain, category, interval, signal_type),
@@ -380,6 +409,9 @@ class SignalStore:
         signal_type: str = "scalar", *,
         suppressed: bool = False,
         suppressed_reason: str | None = None,
+        suppressed_detail: str | None = None,
+        suppressed_scope: str | None = None,
+        suppressed_review_after: str | None = None,
         suppressed_source: str | None = None,
         suppressed_at: str | None = None,
     ) -> None:
@@ -395,6 +427,9 @@ class SignalStore:
             signal_type,
             suppressed=suppressed,
             suppressed_reason=suppressed_reason,
+            suppressed_detail=suppressed_detail,
+            suppressed_scope=suppressed_scope,
+            suppressed_review_after=suppressed_review_after,
             suppressed_source=suppressed_source,
             suppressed_at=suppressed_at,
         )
@@ -403,7 +438,9 @@ class SignalStore:
     def sync_suppressed(self, entries: dict[str, dict[str, str | None]] | set[str]) -> None:
         self._conn.execute(
             "UPDATE signal_meta SET suppressed = 0,"
-            " suppressed_reason = NULL, suppressed_source = NULL, suppressed_at = NULL"
+            " suppressed_reason = NULL, suppressed_detail = NULL,"
+            " suppressed_scope = NULL, suppressed_review_after = NULL,"
+            " suppressed_source = NULL, suppressed_at = NULL"
         )
         if not entries:
             self._conn.commit()
@@ -419,11 +456,17 @@ class SignalStore:
                 "UPDATE signal_meta"
                 " SET suppressed = 1,"
                 " suppressed_reason = ?,"
+                " suppressed_detail = ?,"
+                " suppressed_scope = ?,"
+                " suppressed_review_after = ?,"
                 " suppressed_source = ?,"
                 " suppressed_at = COALESCE(?, strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))"
                 " WHERE name = ?",
                 (
                     detail.get("reason"),
+                    detail.get("detail"),
+                    detail.get("scope"),
+                    detail.get("review_after"),
                     detail.get("source"),
                     detail.get("suppressed_at"),
                     name,
@@ -582,7 +625,8 @@ class SignalStore:
 
         rows = self._conn.execute("""
             SELECT name, domain, category, signal_type, interval, suppressed,
-                   suppressed_reason, suppressed_source, suppressed_at,
+                   suppressed_reason, suppressed_detail, suppressed_scope,
+                   suppressed_review_after, suppressed_source, suppressed_at,
                    last_updated, consecutive_failures, last_error, last_error_at,
                    CASE WHEN last_updated IS NOT NULL THEN
                        CAST((julianday('now') - julianday(last_updated)) * 86400 AS INTEGER)

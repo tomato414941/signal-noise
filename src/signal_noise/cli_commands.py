@@ -7,6 +7,7 @@ from collections import Counter
 from typing import TYPE_CHECKING
 
 from signal_noise.collector._registry import CollectorRegistry, ensure_registry
+from signal_noise.suppression_registry import resolve_suppressions
 
 if TYPE_CHECKING:
     from signal_noise.collector.base import BaseCollector
@@ -33,25 +34,77 @@ def _parse_excludes(raw: str | None) -> set[str]:
     return {v.strip() for v in raw.split(",") if v.strip()}
 
 
-def _build_suppressed_entries(
-    env_excludes: set[str],
-    cli_excludes: set[str],
+def _join_unique(*values: str | None) -> str | None:
+    parts: list[str] = []
+    for value in values:
+        if not value:
+            continue
+        for part in str(value).split("+"):
+            normalized = part.strip()
+            if normalized and normalized not in parts:
+                parts.append(normalized)
+    return "+".join(parts) if parts else None
+
+
+def _join_detail(*values: str | None) -> str | None:
+    parts: list[str] = []
+    for value in values:
+        normalized = str(value or "").strip()
+        if normalized and normalized not in parts:
+            parts.append(normalized)
+    return " ".join(parts) if parts else None
+
+
+def _build_override_suppressed_entries(
+    names: set[str],
+    *,
+    source: str,
+    reason: str,
+    detail: str,
+    scope: str = "runtime",
 ) -> dict[str, dict[str, str]]:
-    suppressed: dict[str, dict[str, str]] = {}
-    for name in sorted(env_excludes | cli_excludes):
-        sources: list[str] = []
-        reasons: list[str] = []
-        if name in env_excludes:
-            sources.append("env")
-            reasons.append("SIGNAL_NOISE_EXCLUDE")
-        if name in cli_excludes:
-            sources.append("cli")
-            reasons.append("--exclude")
-        suppressed[name] = {
-            "source": "+".join(sources),
-            "reason": ", ".join(reasons),
+    return {
+        name: {
+            "source": source,
+            "reason": reason,
+            "detail": detail,
+            "scope": scope,
         }
-    return suppressed
+        for name in sorted(names)
+    }
+
+
+def _merge_suppressed_entries(
+    *entry_sets: dict[str, dict[str, str | None]],
+) -> dict[str, dict[str, str | None]]:
+    merged: dict[str, dict[str, str | None]] = {}
+    for entry_set in entry_sets:
+        for name, detail in entry_set.items():
+            current = merged.get(name)
+            if current is None:
+                merged[name] = dict(detail)
+                continue
+
+            current["source"] = _join_unique(current.get("source"), detail.get("source"))
+            current["scope"] = _join_unique(current.get("scope"), detail.get("scope"))
+            current["detail"] = _join_detail(current.get("detail"), detail.get("detail"))
+            if not current.get("review_after") and detail.get("review_after"):
+                current["review_after"] = detail.get("review_after")
+
+            current_reason = current.get("reason")
+            next_reason = detail.get("reason")
+            if next_reason and current_reason not in {next_reason, "legacy_env_override", "cli_override"}:
+                current["detail"] = _join_detail(
+                    current.get("detail"),
+                    f"Additional override active: {next_reason}.",
+                )
+            elif next_reason and not current_reason:
+                current["reason"] = next_reason
+
+            if current_reason in {"legacy_env_override", "cli_override"} and next_reason:
+                current["reason"] = next_reason
+
+    return merged
 
 
 def _sync_suppressed_meta(
@@ -76,6 +129,9 @@ def _sync_suppressed_meta(
             str(meta.get("signal_type", "scalar")),
             suppressed=True,
             suppressed_reason=detail.get("reason"),
+            suppressed_detail=detail.get("detail"),
+            suppressed_scope=detail.get("scope"),
+            suppressed_review_after=detail.get("review_after"),
             suppressed_source=detail.get("source"),
         )
     store.sync_suppressed(suppressed)
@@ -136,10 +192,25 @@ def _prepare_scheduler_targets(
     exclude: str | None = None,
 ) -> tuple[dict[str, type[BaseCollector]], set[str]]:
     resolved = ensure_registry(registry)
+    known_names = set(resolved.keys())
+    known_names.update(signal["name"] for signal in store.list_signals())
+    registry_entries = resolve_suppressions(sorted(known_names))
     env_excludes = _parse_excludes(os.getenv("SIGNAL_NOISE_EXCLUDE", ""))
     cli_excludes = _parse_excludes(exclude)
-    excludes = env_excludes | cli_excludes
-    suppressed_entries = _build_suppressed_entries(env_excludes, cli_excludes)
+    env_entries = _build_override_suppressed_entries(
+        env_excludes,
+        source="env",
+        reason="legacy_env_override",
+        detail="Explicit SIGNAL_NOISE_EXCLUDE runtime override.",
+    )
+    cli_entries = _build_override_suppressed_entries(
+        cli_excludes,
+        source="cli",
+        reason="cli_override",
+        detail="Explicit --exclude runtime override.",
+    )
+    suppressed_entries = _merge_suppressed_entries(registry_entries, env_entries, cli_entries)
+    excludes = set(suppressed_entries)
     _sync_suppressed_meta(store, resolved, suppressed_entries)
     targets = _select_collectors_from_registry(
         resolved,

@@ -107,6 +107,9 @@ class TestSignalStore:
             3600,
             suppressed=True,
             suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_detail="Explicit runtime override.",
+            suppressed_scope="runtime",
+            suppressed_review_after="2026-04-15",
             suppressed_source="env",
             suppressed_at="2026-03-08T00:00:00Z",
         )
@@ -114,6 +117,9 @@ class TestSignalStore:
         assert meta is not None
         assert meta["suppressed"] == 1
         assert meta["suppressed_reason"] == "SIGNAL_NOISE_EXCLUDE"
+        assert meta["suppressed_detail"] == "Explicit runtime override."
+        assert meta["suppressed_scope"] == "runtime"
+        assert meta["suppressed_review_after"] == "2026-04-15"
         assert meta["suppressed_source"] == "env"
         assert meta["suppressed_at"] == "2026-03-08T00:00:00Z"
 
@@ -315,6 +321,9 @@ class TestTimestampNormalization:
         assert row[0] == "2024-01-01T12:00:00+00:00"
         meta_cols = {r[1] for r in s._conn.execute("PRAGMA table_info(signal_meta)")}
         assert "suppressed_reason" in meta_cols
+        assert "suppressed_detail" in meta_cols
+        assert "suppressed_scope" in meta_cols
+        assert "suppressed_review_after" in meta_cols
         assert "suppressed_source" in meta_cols
         assert "suppressed_at" in meta_cols
         assert "last_error" in meta_cols
@@ -564,12 +573,18 @@ class TestCheckHealth:
             3600,
             suppressed=True,
             suppressed_reason="manual maintenance",
+            suppressed_detail="Operator pause.",
+            suppressed_scope="runtime",
+            suppressed_review_after="2026-04-01",
             suppressed_source="test",
             suppressed_at="2026-03-08T00:00:00Z",
         )
         h = store.check_health()
         assert [s["name"] for s in h["suppressed"]] == ["s"]
         assert h["suppressed"][0]["suppressed_reason"] == "manual maintenance"
+        assert h["suppressed"][0]["suppressed_detail"] == "Operator pause."
+        assert h["suppressed"][0]["suppressed_scope"] == "runtime"
+        assert h["suppressed"][0]["suppressed_review_after"] == "2026-04-01"
         assert h["suppressed"][0]["suppressed_source"] == "test"
         assert h["suppressed"][0]["suppressed_at"] == "2026-03-08T00:00:00Z"
         assert h["never_seen"] == []
@@ -584,6 +599,9 @@ class TestCheckHealth:
             3600,
             suppressed=True,
             suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_detail="Explicit runtime override.",
+            suppressed_scope="runtime",
+            suppressed_review_after="2026-04-15",
             suppressed_source="env",
             suppressed_at="2026-03-08T00:00:00Z",
         )
@@ -594,6 +612,9 @@ class TestCheckHealth:
         assert meta is not None
         assert meta["suppressed"] == 0
         assert meta["suppressed_reason"] is None
+        assert meta["suppressed_detail"] is None
+        assert meta["suppressed_scope"] is None
+        assert meta["suppressed_review_after"] is None
         assert meta["suppressed_source"] is None
         assert meta["suppressed_at"] is None
 
@@ -690,6 +711,9 @@ class TestBatchMethods:
             3600,
             suppressed=True,
             suppressed_reason="SIGNAL_NOISE_EXCLUDE",
+            suppressed_detail="Explicit runtime override.",
+            suppressed_scope="runtime",
+            suppressed_review_after="2026-04-15",
             suppressed_source="env",
             suppressed_at="2026-03-08T00:00:00Z",
         )
@@ -698,6 +722,9 @@ class TestBatchMethods:
         meta = store.get_meta("s")
         assert meta["suppressed"] == 1
         assert meta["suppressed_reason"] == "SIGNAL_NOISE_EXCLUDE"
+        assert meta["suppressed_detail"] == "Explicit runtime override."
+        assert meta["suppressed_scope"] == "runtime"
+        assert meta["suppressed_review_after"] == "2026-04-15"
         assert meta["suppressed_source"] == "env"
         assert meta["suppressed_at"] == "2026-03-08T00:00:00Z"
 
