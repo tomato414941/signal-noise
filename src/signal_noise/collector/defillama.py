@@ -496,6 +496,55 @@ def _make_defillama_protocol_tvl_collector(
     return _Collector
 
 
+# ── Yield per pool ──────────────────────────────────────────
+# (pool_id, collector_name, display_name)
+_YIELD_POOL_SERIES: list[tuple[str, str, str]] = [
+    ("747c1d2a-c668-4682-b9f9-296708a3dd90", "defi_yield_lido_steth", "DeFi Yield: Lido stETH"),
+    ("80b8bf92-b953-4c20-98ea-c9653ef2bb98", "defi_yield_binance_wbeth", "DeFi Yield: Binance wBETH"),
+    ("d8c4eff5-c8a9-46fc-a888-057c4c668e72", "defi_yield_sky_susds", "DeFi Yield: Sky sUSDS"),
+    ("66985a81-9c51-46ca-9977-42b4fe7bc6df", "defi_yield_ethena_susde", "DeFi Yield: Ethena sUSDe"),
+    ("43641cf5-a92e-416b-bce9-27113d3c0db6", "defi_yield_maple_usdc", "DeFi Yield: Maple USDC"),
+    ("d4b3c522-6127-4b89-bedf-83641cdcd2eb", "defi_yield_rocketpool", "DeFi Yield: Rocket Pool rETH"),
+]
+
+
+def _make_yield_pool_collector(
+    pool_id: str, name: str, display_name: str,
+) -> type[BaseCollector]:
+    class _Collector(BaseCollector):
+        meta = CollectorMeta(
+            name=name,
+            display_name=display_name,
+            update_frequency="daily",
+            api_docs_url="https://defillama.com/docs/api",
+            domain="markets",
+            category="defi",
+        )
+
+        def fetch(self) -> pd.DataFrame:
+            url = f"https://yields.llama.fi/chart/{pool_id}"
+            resp = requests.get(url, timeout=self.config.request_timeout)
+            resp.raise_for_status()
+            raw = resp.json()
+            data = raw if isinstance(raw, list) else raw.get("data", [])
+
+            rows = [
+                {
+                    "date": pd.to_datetime(r["timestamp"][:10], utc=True),
+                    "value": float(r["apy"]),
+                }
+                for r in data
+                if r.get("apy") is not None
+            ]
+            if not rows:
+                raise RuntimeError(f"No yield data for pool {pool_id}")
+            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+
+    _Collector.__name__ = f"DefiYield_{name}"
+    _Collector.__qualname__ = f"DefiYield_{name}"
+    return _Collector
+
+
 # ── Registry ─────────────────────────────────────────────────
 
 def get_defillama_collectors() -> dict[str, type[BaseCollector]]:
@@ -517,4 +566,6 @@ def get_defillama_collectors() -> dict[str, type[BaseCollector]]:
         collectors[name] = _make_defillama_chain_tvl_collector(chain, name, display)
     for slug, name, display in _DEFILLAMA_PROTOCOL_TVL_SERIES:
         collectors[name] = _make_defillama_protocol_tvl_collector(slug, name, display)
+    for pool_id, name, display in _YIELD_POOL_SERIES:
+        collectors[name] = _make_yield_pool_collector(pool_id, name, display)
     return collectors
