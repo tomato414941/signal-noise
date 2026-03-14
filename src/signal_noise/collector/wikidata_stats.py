@@ -59,6 +59,8 @@ _SIGNALS: list[tuple[str, str, str, str]] = [
     ("enwiki_edits", "English Wikipedia Total Edits", "https://en.wikipedia.org", "edits"),
     ("enwiki_active_users", "English Wikipedia Active Users", "https://en.wikipedia.org", "activeusers"),
     ("jawiki_articles", "Japanese Wikipedia Articles", "https://ja.wikipedia.org", "articles"),
+    ("commons_files", "Wikimedia Commons Total Files", "https://commons.wikimedia.org", "images"),
+    ("enwiktionary_entries", "English Wiktionary Entries", "https://en.wiktionary.org", "articles"),
 ]
 
 
