@@ -27,6 +27,11 @@ PYPI_PACKAGES: list[tuple[str, str, str]] = [
     ("langchain-core", "pypi_langchain_downloads", "PyPI: langchain-core"),
     ("anthropic", "pypi_anthropic_downloads", "PyPI: anthropic"),
     ("openai", "pypi_openai_downloads", "PyPI: openai"),
+    ("google-generativeai", "pypi_google_genai_downloads", "PyPI: google-generativeai"),
+    ("diffusers", "pypi_diffusers_downloads", "PyPI: diffusers"),
+    ("ccxt", "pypi_ccxt_downloads", "PyPI: ccxt"),
+    ("web3", "pypi_web3_downloads", "PyPI: web3"),
+    ("uvicorn", "pypi_uvicorn_downloads", "PyPI: uvicorn"),
 ]
 
 _PYPI_REQUEST_LOCK = threading.Lock()
