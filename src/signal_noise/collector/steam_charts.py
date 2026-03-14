@@ -17,6 +17,14 @@ STEAM_GAMES: list[tuple[str, str, str]] = [
     ("1245620", "steam_elden_ring", "Steam Players: Elden Ring"),
     ("1086940", "steam_baldurs_gate3", "Steam Players: Baldur's Gate 3"),
     ("359550", "steam_rainbow6", "Steam Players: Rainbow Six Siege"),
+    ("1623730", "steam_palworld", "Steam Players: Palworld"),
+    ("892970", "steam_valheim", "Steam Players: Valheim"),
+    ("1599340", "steam_lethal_company", "Steam Players: Lethal Company"),
+    ("553850", "steam_helldivers2", "Steam Players: Helldivers 2"),
+    ("105600", "steam_terraria", "Steam Players: Terraria"),
+    ("413150", "steam_stardew", "Steam Players: Stardew Valley"),
+    ("230410", "steam_warframe", "Steam Players: Warframe"),
+    ("1203220", "steam_naraka", "Steam Players: Naraka Bladepoint"),
 ]
 
 
