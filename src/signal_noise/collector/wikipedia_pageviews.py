@@ -1,0 +1,87 @@
+"""Wikipedia Pageviews panic/interest-indicator collectors.
+
+Uses the Wikimedia REST API to fetch daily pageview counts for articles
+that serve as proxies for public panic or interest in specific topics.
+
+No API key required.
+"""
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+
+import pandas as pd
+import requests
+
+from signal_noise.collector.base import BaseCollector, CollectorMeta
+
+_USER_AGENT = "signal-noise/0.1 (https://github.com/user/signal-noise)"
+
+# (article_title, collector_name, display_name)
+_PAGEVIEW_SERIES: list[tuple[str, str, str]] = [
+    ("Bitcoin", "wikipedia_pv_bitcoin", "Wikipedia PV: Bitcoin"),
+    ("Stock_market_crash", "wikipedia_pv_stock_crash", "Wikipedia PV: Stock Market Crash"),
+    ("Recession", "wikipedia_pv_recession", "Wikipedia PV: Recession"),
+    ("Bank_run", "wikipedia_pv_bank_run", "Wikipedia PV: Bank Run"),
+    ("Inflation", "wikipedia_pv_inflation", "Wikipedia PV: Inflation"),
+    ("Federal_Reserve", "wikipedia_pv_fed", "Wikipedia PV: Federal Reserve"),
+    ("Gold", "wikipedia_pv_gold", "Wikipedia PV: Gold"),
+    ("Cryptocurrency", "wikipedia_pv_crypto", "Wikipedia PV: Cryptocurrency"),
+    ("Artificial_intelligence", "wikipedia_pv_ai", "Wikipedia PV: AI"),
+    ("Pandemic", "wikipedia_pv_pandemic", "Wikipedia PV: Pandemic"),
+    ("Nuclear_weapon", "wikipedia_pv_nuclear", "Wikipedia PV: Nuclear Weapon"),
+    ("Climate_change", "wikipedia_pv_climate", "Wikipedia PV: Climate Change"),
+]
+
+
+def _make_wikipedia_pageviews_collector(
+    article: str, name: str, display_name: str,
+) -> type[BaseCollector]:
+    base_url = (
+        "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
+        f"en.wikipedia/all-access/all-agents/{article}/daily/{{start}}/{{end}}"
+    )
+
+    class _Collector(BaseCollector):
+        meta = CollectorMeta(
+            name=name,
+            display_name=display_name,
+            update_frequency="daily",
+            api_docs_url="https://wikimedia.org/api/rest_v1/",
+            domain="sentiment",
+            category="sentiment",
+        )
+
+        def fetch(self) -> pd.DataFrame:
+            end = datetime.now(UTC)
+            start = end - timedelta(days=90)
+            url = base_url.format(
+                start=start.strftime("%Y%m%d00"),
+                end=end.strftime("%Y%m%d00"),
+            )
+            resp = requests.get(
+                url,
+                headers={"User-Agent": _USER_AGENT},
+                timeout=self.config.request_timeout,
+            )
+            resp.raise_for_status()
+            items = resp.json()["items"]
+            rows = [
+                {
+                    "date": pd.to_datetime(item["timestamp"], format="%Y%m%d00", utc=True),
+                    "value": float(item["views"]),
+                }
+                for item in items
+            ]
+            df = pd.DataFrame(rows)
+            return df.sort_values("date").reset_index(drop=True)
+
+    _Collector.__name__ = f"WikiPV_{name}"
+    _Collector.__qualname__ = f"WikiPV_{name}"
+    return _Collector
+
+
+def get_wikipedia_pageviews_collectors() -> dict[str, type[BaseCollector]]:
+    return {
+        name: _make_wikipedia_pageviews_collector(article, name, display)
+        for article, name, display in _PAGEVIEW_SERIES
+    }
