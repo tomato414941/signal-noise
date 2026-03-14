@@ -33,6 +33,7 @@ YAHOO_TICKERS: list[tuple[str, str, str, str, str]] = [
     ("KC=F", "coffee", "Coffee Futures", "markets", "commodity"),
     ("CT=F", "cotton", "Cotton Futures", "markets", "commodity"),
     ("LBS=F", "lumber", "Lumber Futures", "markets", "commodity"),
+    ("DX-Y.NYB", "dxy", "US Dollar Index (DXY)", "markets", "forex"),
     ("EURUSD=X", "eur_usd", "EUR/USD", "markets", "forex"),
     ("GBPUSD=X", "gbp_usd", "GBP/USD", "markets", "forex"),
     ("USDJPY=X", "usd_jpy", "USD/JPY", "markets", "forex"),

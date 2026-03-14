@@ -19,6 +19,14 @@ SO_TAGS: list[tuple[str, str, str]] = [
     ("machine-learning", "so_ml", "StackOverflow: machine-learning"),
     ("artificial-intelligence", "so_ai", "StackOverflow: AI"),
     ("chatgpt", "so_chatgpt", "StackOverflow: chatgpt"),
+    ("langchain", "so_langchain", "StackOverflow: langchain"),
+    ("rust", "so_rust", "StackOverflow: rust"),
+    ("typescript", "so_typescript", "StackOverflow: typescript"),
+    ("python", "so_python", "StackOverflow: python"),
+    ("react-native", "so_react_native", "StackOverflow: react-native"),
+    ("kubernetes", "so_kubernetes", "StackOverflow: kubernetes"),
+    ("docker", "so_docker", "StackOverflow: docker"),
+    ("webassembly", "so_wasm", "StackOverflow: webassembly"),
 ]
 
 
