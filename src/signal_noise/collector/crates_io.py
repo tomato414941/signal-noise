@@ -1,9 +1,30 @@
 from __future__ import annotations
 
+import threading
+import time
+
 import requests
 import pandas as pd
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+
+_lock = threading.Lock()
+_last_request: float = 0.0
+_MIN_INTERVAL: float = 2.0
+_HEADERS = {"User-Agent": "signal-noise/0.1 (https://github.com/user/signal-noise)"}
+
+
+def _throttled_get(url: str, timeout: int = 30) -> dict:
+    global _last_request
+    with _lock:
+        wait = _MIN_INTERVAL - (time.monotonic() - _last_request)
+        if wait > 0:
+            time.sleep(wait)
+        resp = requests.get(url, headers=_HEADERS, timeout=timeout)
+        _last_request = time.monotonic()
+    resp.raise_for_status()
+    return resp.json()
+
 
 # (crate_name, collector_name, display_name)
 CRATES: list[tuple[str, str, str]] = [
@@ -17,6 +38,10 @@ CRATES: list[tuple[str, str, str]] = [
     ("sqlx", "crates_sqlx_downloads", "crates.io: sqlx"),
     ("tracing", "crates_tracing_downloads", "crates.io: tracing"),
     ("anyhow", "crates_anyhow_downloads", "crates.io: anyhow"),
+    ("wasm-bindgen", "crates_wasm_bindgen_downloads", "crates.io: wasm-bindgen"),
+    ("tauri", "crates_tauri_downloads", "crates.io: tauri"),
+    ("bevy", "crates_bevy_downloads", "crates.io: bevy"),
+    ("solana-sdk", "crates_solana_sdk_downloads", "crates.io: solana-sdk"),
 ]
 
 
@@ -35,26 +60,21 @@ def _make_crates_collector(
 
         def fetch(self) -> pd.DataFrame:
             url = f"https://crates.io/api/v1/crates/{crate}/downloads"
-            headers = {"User-Agent": "signal-noise/0.1 (research project)"}
-            resp = requests.get(
-                url, headers=headers, timeout=self.config.request_timeout,
-            )
-            resp.raise_for_status()
-            entries = resp.json().get("version_downloads", [])
-            rows = []
-            for entry in entries:
-                try:
-                    rows.append({
-                        "date": pd.Timestamp(entry["date"], tz="UTC"),
-                        "value": float(entry["downloads"]),
-                    })
-                except (KeyError, ValueError, TypeError):
-                    continue
+            data = _throttled_get(url, timeout=self.config.request_timeout)
+            extra = data.get("meta", {}).get("extra_downloads", [])
+            if not extra:
+                raise RuntimeError(f"No crates.io download data for {crate}")
+            rows = [
+                {
+                    "date": pd.to_datetime(r["date"], utc=True),
+                    "value": float(r["downloads"]),
+                }
+                for r in extra
+                if r.get("downloads") is not None
+            ]
             if not rows:
                 raise RuntimeError(f"No crates.io download data for {crate}")
-            df = pd.DataFrame(rows)
-            daily = df.groupby("date")["value"].sum().reset_index()
-            return daily.sort_values("date").reset_index(drop=True)
+            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
 
     _Collector.__name__ = f"Crates_{name}"
     _Collector.__qualname__ = f"Crates_{name}"
