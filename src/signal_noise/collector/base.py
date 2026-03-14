@@ -43,7 +43,7 @@ CATEGORIES = {
     "space_weather", "seismic", "celestial",
     "wildlife", "biodiversity", "noise", "cryosphere",
     # technology
-    "developer", "academic", "patents",
+    "developer", "academic", "patents", "infra",
     "logistics", "aviation", "internet", "space",
     "transportation", "safety",
     # sentiment
