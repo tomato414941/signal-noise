@@ -12,6 +12,7 @@ import pandas as pd
 import requests
 
 from signal_noise.collector.base import BaseCollector, CollectorMeta
+from signal_noise.collector._gdelt_throttle import throttle as _gdelt_throttle
 
 _DOC_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
 
@@ -46,6 +47,7 @@ def _make_gdelt_tone_collector(
         )
 
         def fetch(self) -> pd.DataFrame:
+            _gdelt_throttle()
             params = {
                 "query": query,
                 "mode": "timelinetone",
