@@ -392,6 +392,109 @@ class DeFiAvgYieldCollector(BaseCollector):
         return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
 
 
+# ── DefiLlama Chain TVL (defi category) ──────────────────────
+# "total" is special: uses historicalChainTvl without chain suffix
+# (chain_or_total, collector_name, display_name)
+_DEFILLAMA_CHAIN_TVL_SERIES: list[tuple[str, str, str]] = [
+    ("total", "defillama_tvl_total", "DeFi TVL: Total"),
+    ("Ethereum", "defillama_tvl_ethereum", "DeFi TVL: Ethereum"),
+    ("Solana", "defillama_tvl_solana", "DeFi TVL: Solana"),
+    ("BSC", "defillama_tvl_bsc", "DeFi TVL: BSC"),
+    ("Tron", "defillama_tvl_tron", "DeFi TVL: Tron"),
+    ("Base", "defillama_tvl_base", "DeFi TVL: Base"),
+    ("Bitcoin", "defillama_tvl_bitcoin", "DeFi TVL: Bitcoin"),
+    ("Arbitrum", "defillama_tvl_arbitrum", "DeFi TVL: Arbitrum"),
+]
+
+
+def _make_defillama_chain_tvl_collector(
+    chain: str, name: str, display_name: str,
+) -> type[BaseCollector]:
+    if chain == "total":
+        api_url = "https://api.llama.fi/v2/historicalChainTvl"
+    else:
+        api_url = f"https://api.llama.fi/v2/historicalChainTvl/{chain}"
+
+    class _Collector(BaseCollector):
+        meta = CollectorMeta(
+            name=name,
+            display_name=display_name,
+            update_frequency="daily",
+            api_docs_url="https://defillama.com/docs/api",
+            domain="markets",
+            category="defi",
+        )
+
+        def fetch(self) -> pd.DataFrame:
+            resp = requests.get(api_url, timeout=self.config.request_timeout)
+            resp.raise_for_status()
+            data = resp.json()
+
+            rows = [
+                {
+                    "date": pd.to_datetime(r["date"], unit="s", utc=True),
+                    "value": float(r["tvl"]),
+                }
+                for r in data
+                if r.get("tvl") is not None and float(r["tvl"]) > 0
+            ]
+            if not rows:
+                raise RuntimeError(f"No TVL data for {chain}")
+            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+
+    _Collector.__name__ = f"DefiLlamaTVL_{name}"
+    _Collector.__qualname__ = f"DefiLlamaTVL_{name}"
+    return _Collector
+
+
+# ── DefiLlama Protocol TVL (defi category) ──────────────────
+# (protocol_slug, collector_name, display_name)
+_DEFILLAMA_PROTOCOL_TVL_SERIES: list[tuple[str, str, str]] = [
+    ("lido", "defillama_tvl_lido", "DeFi TVL: Lido"),
+    ("aave-v3", "defillama_tvl_aave", "DeFi TVL: Aave V3"),
+    ("eigencloud", "defillama_tvl_eigencloud", "DeFi TVL: EigenCloud"),
+    ("wbtc", "defillama_tvl_wbtc", "DeFi TVL: WBTC"),
+]
+
+
+def _make_defillama_protocol_tvl_collector(
+    slug: str, name: str, display_name: str,
+) -> type[BaseCollector]:
+    class _Collector(BaseCollector):
+        meta = CollectorMeta(
+            name=name,
+            display_name=display_name,
+            update_frequency="daily",
+            api_docs_url="https://defillama.com/docs/api",
+            domain="markets",
+            category="defi",
+        )
+
+        def fetch(self) -> pd.DataFrame:
+            url = f"https://api.llama.fi/protocol/{slug}"
+            resp = requests.get(url, timeout=self.config.request_timeout)
+            resp.raise_for_status()
+            data = resp.json()
+            tvl_data = data.get("tvl", [])
+
+            rows = [
+                {
+                    "date": pd.to_datetime(r["date"], unit="s", utc=True),
+                    "value": float(r["totalLiquidityUSD"]),
+                }
+                for r in tvl_data
+                if r.get("totalLiquidityUSD") is not None
+                and float(r["totalLiquidityUSD"]) > 0
+            ]
+            if not rows:
+                raise RuntimeError(f"No protocol TVL for {slug}")
+            return pd.DataFrame(rows).sort_values("date").reset_index(drop=True)
+
+    _Collector.__name__ = f"DefiLlamaProtoTVL_{name}"
+    _Collector.__qualname__ = f"DefiLlamaProtoTVL_{name}"
+    return _Collector
+
+
 # ── Registry ─────────────────────────────────────────────────
 
 def get_defillama_collectors() -> dict[str, type[BaseCollector]]:
@@ -409,4 +512,8 @@ def get_defillama_collectors() -> dict[str, type[BaseCollector]]:
         collectors[name] = _make_stablecoin_collector(sc_id, name, display)
     for slug, name, display in PROTOCOL_TVL_SERIES:
         collectors[name] = _make_protocol_tvl_collector(slug, name, display)
+    for chain, name, display in _DEFILLAMA_CHAIN_TVL_SERIES:
+        collectors[name] = _make_defillama_chain_tvl_collector(chain, name, display)
+    for slug, name, display in _DEFILLAMA_PROTOCOL_TVL_SERIES:
+        collectors[name] = _make_defillama_protocol_tvl_collector(slug, name, display)
     return collectors

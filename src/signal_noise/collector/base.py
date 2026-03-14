@@ -32,7 +32,7 @@ DOMAINS = {
 # category: concrete data classification
 CATEGORIES = {
     # markets
-    "equity", "crypto", "crypto_derivatives", "forex", "rates", "commodity",
+    "equity", "crypto", "crypto_derivatives", "defi", "forex", "rates", "commodity",
     "microstructure", "regulatory",
     # economy
     "economic", "labor", "inflation", "trade", "fiscal",
