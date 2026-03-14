@@ -19,8 +19,12 @@ NPM_PACKAGES: list[tuple[str, str, str]] = [
     ("openai", "npm_openai", "NPM: openai"),
     ("langchain", "npm_langchain", "NPM: langchain"),
     ("@anthropic-ai/sdk", "npm_anthropic", "NPM: @anthropic-ai/sdk"),
+    ("@google/generative-ai", "npm_google_genai", "NPM: @google/generative-ai"),
     ("typescript", "npm_typescript", "NPM: typescript"),
     ("react", "npm_react", "NPM: react"),
+    ("next", "npm_next", "NPM: next"),
+    ("svelte", "npm_svelte", "NPM: svelte"),
+    ("esbuild", "npm_esbuild", "NPM: esbuild"),
 ]
 
 
