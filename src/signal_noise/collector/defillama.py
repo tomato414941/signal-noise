@@ -104,12 +104,13 @@ class DeFiTotalTVLCollector(BaseCollector):
 STABLECOIN_SERIES: list[tuple[int, str, str]] = [
     (1, "defi_sc_usdt", "Stablecoin: USDT"),
     (2, "defi_sc_usdc", "Stablecoin: USDC"),
-    (3, "defi_sc_dai", "Stablecoin: DAI"),
-    (5, "defi_sc_frax", "Stablecoin: FRAX"),
-    (6, "defi_sc_tusd", "Stablecoin: TUSD"),
-    (33, "defi_sc_usde", "Stablecoin: USDe"),
-    (14, "defi_sc_pyusd", "Stablecoin: PYUSD"),
-    (115, "defi_sc_usd1", "Stablecoin: WLFI USD1"),
+    (5, "defi_sc_dai", "Stablecoin: DAI"),
+    (6, "defi_sc_frax", "Stablecoin: FRAX"),
+    (7, "defi_sc_tusd", "Stablecoin: TUSD"),
+    (146, "defi_sc_usde", "Stablecoin: USDe"),
+    (120, "defi_sc_pyusd", "Stablecoin: PYUSD"),
+    (262, "defi_sc_usd1", "Stablecoin: WLFI USD1"),
+    (209, "defi_sc_usds", "Stablecoin: USDS (Sky Dollar)"),
 ]
 
 
