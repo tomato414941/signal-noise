@@ -53,7 +53,7 @@ class TestFredGenericFactory:
             assert cat in CATEGORIES, f"{name} has invalid category: {cat}"
 
     def test_all_series_have_valid_frequency(self):
-        valid_freqs = {"daily", "weekly", "monthly", "quarterly"}
+        valid_freqs = {"daily", "weekly", "monthly", "quarterly", "annual", "yearly"}
         for series_id, name, display, freq, dom, cat in FRED_SERIES:
             assert freq in valid_freqs, f"{name} has invalid frequency: {freq}"
 

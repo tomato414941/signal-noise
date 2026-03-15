@@ -25,8 +25,8 @@ class TestFinnhubMetric:
         _finnhub_cache.clear()
 
     def test_metric_series_count(self):
-        # 18 stocks x 3 metrics = 54
-        assert len(FINNHUB_METRIC_SERIES) == 54
+        from signal_noise.collector.finnhub_generic import _STOCKS, _METRICS
+        assert len(FINNHUB_METRIC_SERIES) == len(_STOCKS) * len(_METRICS)
 
     def test_no_duplicate_metric_names(self):
         names = [t[2] for t in FINNHUB_METRIC_SERIES]
@@ -129,7 +129,8 @@ class TestFinnhubRecommendation:
         _finnhub_cache.clear()
 
     def test_rec_series_count(self):
-        assert len(FINNHUB_REC_SERIES) == 18
+        from signal_noise.collector.finnhub_generic import _STOCKS
+        assert len(FINNHUB_REC_SERIES) == len(_STOCKS)
 
     @patch("signal_noise.collector.finnhub_generic._get_finnhub_key", return_value="fake")
     @patch("signal_noise.collector.finnhub_generic.requests.get")
@@ -210,7 +211,8 @@ class TestFinnhubInsider:
         _finnhub_cache.clear()
 
     def test_insider_series_count(self):
-        assert len(FINNHUB_INSIDER_SERIES) == 18
+        from signal_noise.collector.finnhub_generic import _STOCKS
+        assert len(FINNHUB_INSIDER_SERIES) == len(_STOCKS)
 
     @patch("signal_noise.collector.finnhub_generic._get_finnhub_key", return_value="fake")
     @patch("signal_noise.collector.finnhub_generic.requests.get")
@@ -255,7 +257,8 @@ class TestFinnhubEarnings:
         _finnhub_cache.clear()
 
     def test_earnings_series_count(self):
-        assert len(FINNHUB_EARNINGS_SERIES) == 18
+        from signal_noise.collector.finnhub_generic import _STOCKS
+        assert len(FINNHUB_EARNINGS_SERIES) == len(_STOCKS)
 
     @patch("signal_noise.collector.finnhub_generic._get_finnhub_key", return_value="fake")
     @patch("signal_noise.collector.finnhub_generic.requests.get")
@@ -331,8 +334,11 @@ class TestFinnhubValidation:
         assert len(all_names) == len(set(all_names))
 
     def test_total_collector_count(self):
+        from signal_noise.collector.finnhub_generic import _STOCKS, _METRICS
         collectors = get_finnhub_collectors()
-        assert len(collectors) == 108  # 54 metric + 18 rec + 18 insider + 18 earnings
+        n = len(_STOCKS)
+        expected = n * len(_METRICS) + n + n + n  # metric + rec + insider + earnings
+        assert len(collectors) == expected
 
 
 class TestFinnhubRegistration:

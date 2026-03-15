@@ -124,8 +124,11 @@ class TestBLSBatchFetch:
         prod_cls().fetch()
 
         # Both fetches should share the same batched request (cached)
-        # Without key: 46 series / 25 per batch = 2 requests
-        assert mock_post.call_count == 2
+        # Without key: N series / 25 per batch = ceil(N/25) requests
+        from signal_noise.collector.bls_generic import BLS_SERIES
+        import math
+        expected_batches = math.ceil(len(BLS_SERIES) / 25)
+        assert mock_post.call_count == expected_batches
 
     @patch("signal_noise.collector.bls_generic.requests.post")
     def test_rate_limit_raises(self, mock_post):

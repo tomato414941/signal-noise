@@ -170,11 +170,38 @@ EIA_SERIES: list[tuple[str, str, str, str, str, str, str, str, str]] = [
     # ── International petroleum ────────────────────────────────
     # TODO: international/data uses productId/activityId/countryRegionId facets,
     # not seriesId. Needs dedicated fetch logic (not batch-compatible).
-    # ("international/data", ..., "eia_opec_production", ...),
-    # ("international/data", ..., "eia_russia_oil_prod", ...),
-    # ("international/data", ..., "eia_saudi_oil_prod", ...),
-    # ("international/data", ..., "eia_china_oil_prod", ...),
-    # ("international/data", ..., "eia_china_oil_consumption", ...),
+
+    # ── Renewable energy ─────────────────────────────────────
+    ("total-energy/data", "msn", "SOTCBUS", "value", "monthly",
+     "eia_solar_generation", "EIA US Solar Generation", "economy", "energy"),
+    ("total-energy/data", "msn", "WYTCBUS", "value", "monthly",
+     "eia_wind_generation", "EIA US Wind Generation", "economy", "energy"),
+    ("total-energy/data", "msn", "GETCBUS", "value", "monthly",
+     "eia_geothermal_generation", "EIA US Geothermal Generation", "economy", "energy"),
+    ("total-energy/data", "msn", "HYTCPUS", "value", "monthly",
+     "eia_hydro_generation", "EIA US Hydro Generation", "economy", "energy"),
+
+    # ── State-level electricity prices ───────────────────────
+    ("electricity/retail-sales/data", "sectorid", "ALL", "price", "monthly",
+     "eia_elec_price_ca", "EIA Electricity Price: California", "markets", "commodity",
+     {"stateid": "CA"}),
+    ("electricity/retail-sales/data", "sectorid", "ALL", "price", "monthly",
+     "eia_elec_price_tx", "EIA Electricity Price: Texas", "markets", "commodity",
+     {"stateid": "TX"}),
+    ("electricity/retail-sales/data", "sectorid", "ALL", "price", "monthly",
+     "eia_elec_price_ny", "EIA Electricity Price: New York", "markets", "commodity",
+     {"stateid": "NY"}),
+    ("electricity/retail-sales/data", "sectorid", "ALL", "price", "monthly",
+     "eia_elec_price_fl", "EIA Electricity Price: Florida", "markets", "commodity",
+     {"stateid": "FL"}),
+
+    # ── STEO additional ──────────────────────────────────────
+    ("steo/data", "seriesId", "RETCBUS", "value", "monthly",
+     "eia_steo_renewable_total", "EIA STEO US Renewable Energy Total", "economy", "energy"),
+    ("steo/data", "seriesId", "SOWGPUS", "value", "monthly",
+     "eia_steo_solar_generation", "EIA STEO Solar Generation Forecast", "economy", "energy"),
+    ("steo/data", "seriesId", "WNDGPUS", "value", "monthly",
+     "eia_steo_wind_generation", "EIA STEO Wind Generation Forecast", "economy", "energy"),
 ]
 
 def _extra_facet_key(extra_facets: dict[str, str] | None) -> tuple[tuple[str, str], ...]:

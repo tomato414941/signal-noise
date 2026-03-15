@@ -91,6 +91,25 @@ BLS_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("JTS000000000000000HIR", "bls_jolts_hires", "BLS JOLTS Hires", "monthly", "economy", "labor"),
     ("JTS000000000000000TSR", "bls_jolts_separations", "BLS JOLTS Total Separations", "monthly", "economy", "labor"),
     ("JTS000000000000000QUR", "bls_jolts_quits", "BLS JOLTS Quits", "monthly", "economy", "labor"),
+
+    # ── CPI regional / detail ────────────────────────────────
+    ("CUSR0000SEHA", "bls_cpi_rent", "BLS CPI Rent of Primary Residence", "monthly", "economy", "inflation"),
+    ("CUSR0000SEHC", "bls_cpi_owners_equiv", "BLS CPI Owners' Equivalent Rent", "monthly", "economy", "inflation"),
+    ("CUSR0000SAF11", "bls_cpi_food_home", "BLS CPI Food at Home", "monthly", "economy", "inflation"),
+    ("CUSR0000SEFV", "bls_cpi_food_away", "BLS CPI Food Away from Home", "monthly", "economy", "inflation"),
+
+    # ── Sector employment detail ─────────────────────────────
+    ("CES1000000001", "bls_nfp_mining", "BLS Mining/Logging Payrolls", "monthly", "economy", "labor"),
+    ("CES4300000001", "bls_nfp_transport", "BLS Transportation/Warehousing Payrolls", "monthly", "economy", "labor"),
+    ("CES6561000001", "bls_nfp_temp_help", "BLS Temporary Help Payrolls", "monthly", "economy", "labor"),
+
+    # ── Employment Cost Index ────────────────────────────────
+    ("CIU1010000000000A", "bls_eci_total", "BLS Employment Cost Index (Total)", "quarterly", "economy", "labor"),
+    ("CIU1020000000000A", "bls_eci_wages", "BLS Employment Cost Index (Wages)", "quarterly", "economy", "labor"),
+    ("CIU1030000000000A", "bls_eci_benefits", "BLS Employment Cost Index (Benefits)", "quarterly", "economy", "labor"),
+
+    # ── Occupational Employment & Wages ──────────────────────
+    ("OEUN000000000000011000001", "bls_median_wage", "BLS Median Hourly Wage (All)", "annual", "economy", "labor"),
 ]
 
 _ALL_SERIES_IDS = [s[0] for s in BLS_SERIES]

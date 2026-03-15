@@ -111,6 +111,44 @@ EUROSTAT_SERIES: list[tuple[str, str, str, str, str, str, str]] = [
      "eu_eurjpy", "Eurostat EUR/JPY Rate", "monthly", "markets", "forex"),
     ("ert_bil_eur_m", "currency=CHF&statinfo=AVG",
      "eu_eurchf", "Eurostat EUR/CHF Rate", "monthly", "markets", "forex"),
+
+    # ── Labour cost ──────────────────────────────────────────
+    ("lc_lci_r2_q", "nace_r2=B-S&lcstruct=D11_D12&unit=I20&s_adj=SCA&geo=EU27_2020&freq=Q",
+     "eu_labour_cost", "Eurostat EU Labour Cost Index", "quarterly", "economy", "labor"),
+
+    # ── Tourism ──────────────────────────────────────────────
+    ("tour_occ_nim", "nace_r2=I551-I553&unit=NR&geo=EU27_2020&c_resid=TOTAL",
+     "eu_tourism_nights", "Eurostat EU Tourism Nights", "monthly", "economy", "tourism"),
+
+    # ── GDP per capita ───────────────────────────────────────
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=NL&s_adj=SCA&freq=Q",
+     "eu_gdp_nl", "Eurostat Netherlands GDP (Real)", "quarterly", "economy", "economic"),
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=PL&s_adj=SCA&freq=Q",
+     "eu_gdp_pl", "Eurostat Poland GDP (Real)", "quarterly", "economy", "economic"),
+    ("namq_10_gdp", "na_item=B1GQ&unit=CLV10_MEUR&geo=SE&s_adj=SCA&freq=Q",
+     "eu_gdp_se", "Eurostat Sweden GDP (Real)", "quarterly", "economy", "economic"),
+
+    # ── Additional unemployment ──────────────────────────────
+    ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=IT",
+     "eu_unemp_it", "Eurostat Italy Unemployment", "monthly", "economy", "labor"),
+    ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=NL",
+     "eu_unemp_nl", "Eurostat Netherlands Unemployment", "monthly", "economy", "labor"),
+    ("une_rt_m", "age=TOTAL&sex=T&unit=PC_ACT&s_adj=SA&geo=PL",
+     "eu_unemp_pl", "Eurostat Poland Unemployment", "monthly", "economy", "labor"),
+
+    # ── HICP additional countries ────────────────────────────
+    ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=IT",
+     "eu_hicp_it", "Eurostat Italy HICP", "monthly", "economy", "inflation"),
+    ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=ES",
+     "eu_hicp_es", "Eurostat Spain HICP", "monthly", "economy", "inflation"),
+    ("prc_hicp_midx", "coicop=CP00&unit=I15&geo=NL",
+     "eu_hicp_nl", "Eurostat Netherlands HICP", "monthly", "economy", "inflation"),
+
+    # ── Government deficit ───────────────────────────────────
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=ES&freq=Q",
+     "eu_govt_debt_es", "Eurostat Spain Govt Debt/GDP", "quarterly", "economy", "fiscal"),
+    ("gov_10q_ggdebt", "sector=S13&unit=PC_GDP&na_item=GD&geo=NL&freq=Q",
+     "eu_govt_debt_nl", "Eurostat Netherlands Govt Debt/GDP", "quarterly", "economy", "fiscal"),
 ]
 
 

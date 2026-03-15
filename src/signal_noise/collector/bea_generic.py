@@ -115,6 +115,23 @@ BEA_SERIES: list[tuple[str, str, str, str, str, str, str, str]] = [
     ("NIPA", "T61600D", "15", "bea_corp_profits_manufacturing", "BEA: Manufacturing Corporate Profits", "quarterly", "economy", "manufacturing"),
     ("NIPA", "T61600D", "19", "bea_corp_profits_computers", "BEA: Computer and Electronics Corporate Profits", "quarterly", "economy", "manufacturing"),
     ("NIPA", "T61600D", "25", "bea_corp_profits_petroleum_coal", "BEA: Petroleum and Coal Corporate Profits", "quarterly", "economy", "energy"),
+    # ── PCE Price Index (NIPA T20804) ──
+    ("NIPA", "T20804", "1", "bea_pce_price_total", "BEA: PCE Price Index", "quarterly", "economy", "inflation"),
+    ("NIPA", "T20804", "2", "bea_pce_price_goods", "BEA: PCE Price Index (Goods)", "quarterly", "economy", "inflation"),
+    ("NIPA", "T20804", "3", "bea_pce_price_durable", "BEA: PCE Price Index (Durable Goods)", "quarterly", "economy", "inflation"),
+    ("NIPA", "T20804", "5", "bea_pce_price_services", "BEA: PCE Price Index (Services)", "quarterly", "economy", "inflation"),
+    ("NIPA", "T20804", "13", "bea_pce_price_core", "BEA: Core PCE Price Index", "quarterly", "economy", "inflation"),
+    # ── Government Receipts (NIPA T30100) ──
+    ("NIPA", "T30100", "1", "bea_govt_receipts", "BEA: Total Govt Receipts", "quarterly", "economy", "fiscal"),
+    ("NIPA", "T30100", "2", "bea_personal_tax_receipts", "BEA: Personal Tax Receipts", "quarterly", "economy", "fiscal"),
+    ("NIPA", "T30100", "4", "bea_corp_tax_receipts", "BEA: Corporate Tax Receipts", "quarterly", "economy", "fiscal"),
+    ("NIPA", "T30100", "6", "bea_social_insurance", "BEA: Social Insurance Contributions", "quarterly", "economy", "fiscal"),
+    # ── GDP by Industry (NIPA T10705) ──
+    ("NIPA", "T10705", "3", "bea_gdp_private_goods", "BEA: Private Goods-Producing GDP", "quarterly", "economy", "economic"),
+    ("NIPA", "T10705", "11", "bea_gdp_private_services", "BEA: Private Services-Producing GDP", "quarterly", "economy", "economic"),
+    ("NIPA", "T10705", "5", "bea_gdp_manufacturing", "BEA: Manufacturing GDP", "quarterly", "economy", "manufacturing"),
+    ("NIPA", "T10705", "12", "bea_gdp_info", "BEA: Information Industry GDP", "quarterly", "economy", "economic"),
+    ("NIPA", "T10705", "14", "bea_gdp_finance", "BEA: Finance/Insurance GDP", "quarterly", "economy", "economic"),
 ]
 
 

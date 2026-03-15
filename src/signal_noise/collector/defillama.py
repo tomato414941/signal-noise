@@ -28,6 +28,11 @@ CHAIN_TVL_SERIES: list[tuple[str, str, str]] = [
     ("Cronos", "defi_tvl_cro", "DeFi TVL: Cronos"),
     ("Scroll", "defi_tvl_scroll", "DeFi TVL: Scroll"),
     ("zkSync Era", "defi_tvl_zksync", "DeFi TVL: zkSync Era"),
+    ("Blast", "defi_tvl_blast", "DeFi TVL: Blast"),
+    ("Linea", "defi_tvl_linea", "DeFi TVL: Linea"),
+    ("Starknet", "defi_tvl_starknet", "DeFi TVL: Starknet"),
+    ("Sei", "defi_tvl_sei", "DeFi TVL: Sei"),
+    ("Manta", "defi_tvl_manta", "DeFi TVL: Manta"),
 ]
 
 
@@ -209,6 +214,11 @@ PROTOCOL_TVL_SERIES: list[tuple[str, str, str]] = [
     ("raydium", "defi_proto_ray", "Protocol TVL: Raydium"),
     ("sparklend", "defi_proto_spark", "Protocol TVL: SparkLend"),
     ("kamino-lend", "defi_proto_kamino", "Protocol TVL: Kamino"),
+    ("hyperliquid", "defi_proto_hyperliquid", "Protocol TVL: Hyperliquid"),
+    ("venus", "defi_proto_venus", "Protocol TVL: Venus"),
+    ("instadapp", "defi_proto_instadapp", "Protocol TVL: Instadapp"),
+    ("benqi-lending", "defi_proto_benqi", "Protocol TVL: BENQI"),
+    ("drift-protocol", "defi_proto_drift", "Protocol TVL: Drift"),
 ]
 
 
