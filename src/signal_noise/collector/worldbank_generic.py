@@ -255,6 +255,17 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SM.POP.FDIP", "DE", "wb_forced_displaced_de", "Forcibly Displaced People: Germany", "society", "displacement"),
     ("SM.POP.IDPC", "WLD", "wb_idp_world", "Internally Displaced People: World", "society", "displacement"),
     ("SM.POP.ASYS.EA", "WLD", "wb_asylum_world", "Asylum Seekers: World", "society", "displacement"),
+    # ── Patents & IP ──
+    ("IP.PAT.RESD", "WLD", "wb_patent_resident_world", "Resident Patent Apps: World", "technology", "patents"),
+    ("IP.PAT.RESD", "US", "wb_patent_resident_us", "Resident Patent Apps: US", "technology", "patents"),
+    ("IP.PAT.RESD", "CN", "wb_patent_resident_cn", "Resident Patent Apps: China", "technology", "patents"),
+    ("IP.PAT.RESD", "JP", "wb_patent_resident_jp", "Resident Patent Apps: Japan", "technology", "patents"),
+    ("IP.PAT.RESD", "KR", "wb_patent_resident_kr", "Resident Patent Apps: S.Korea", "technology", "patents"),
+    ("IP.PAT.RESD", "DE", "wb_patent_resident_de", "Resident Patent Apps: Germany", "technology", "patents"),
+    ("IP.PAT.NRES", "US", "wb_patent_nonres_us", "Non-Resident Patent Apps: US", "technology", "patents"),
+    ("IP.PAT.NRES", "CN", "wb_patent_nonres_cn", "Non-Resident Patent Apps: China", "technology", "patents"),
+    ("IP.PAT.NRES", "JP", "wb_patent_nonres_jp", "Non-Resident Patent Apps: Japan", "technology", "patents"),
+    ("IP.PAT.NRES", "KR", "wb_patent_nonres_kr", "Non-Resident Patent Apps: S.Korea", "technology", "patents"),
     # ── Cause-of-death structure ──
     ("SP.DYN.AMRT.FE", "WLD", "wb_adult_mort_female_world", "Adult Mortality Female: World", "society", "cause_of_death"),
     ("SP.DYN.AMRT.MA", "WLD", "wb_adult_mort_male_world", "Adult Mortality Male: World", "society", "cause_of_death"),

@@ -57,6 +57,14 @@ WHO_GHO_SERIES: list[tuple[str, str, str | None, str, str, str, str]] = [
     ("SDGSUICIDE", "USA", "SEX_BTSX", "who_suicide_us", "Suicide Rate: US", "society", "public_health"),
     ("SDGSUICIDE", "JPN", "SEX_BTSX", "who_suicide_jp", "Suicide Rate: Japan", "society", "public_health"),
     ("SDGSUICIDE", "KOR", "SEX_BTSX", "who_suicide_kr", "Suicide Rate: S.Korea", "society", "public_health"),
+    # Road traffic death rate per 100k
+    ("RS_198", "GLOBAL", None, "who_road_deaths_global", "Road Traffic Death Rate: Global", "society", "safety"),
+    ("RS_198", "USA", None, "who_road_deaths_us", "Road Traffic Death Rate: US", "society", "safety"),
+    ("RS_198", "JPN", None, "who_road_deaths_jp", "Road Traffic Death Rate: Japan", "society", "safety"),
+    ("RS_198", "DEU", None, "who_road_deaths_de", "Road Traffic Death Rate: Germany", "society", "safety"),
+    ("RS_198", "IND", None, "who_road_deaths_in", "Road Traffic Death Rate: India", "society", "safety"),
+    ("RS_198", "BRA", None, "who_road_deaths_br", "Road Traffic Death Rate: Brazil", "society", "safety"),
+    ("RS_198", "CHN", None, "who_road_deaths_cn", "Road Traffic Death Rate: China", "society", "safety"),
 ]
 
 
