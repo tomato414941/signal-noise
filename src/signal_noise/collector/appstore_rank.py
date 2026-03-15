@@ -25,6 +25,12 @@ _APPS: list[tuple[str, str, str]] = [
     ("TikTok", "appstore_tiktok", "App Store Rank: TikTok"),
     ("Instagram", "appstore_instagram", "App Store Rank: Instagram"),
     ("Threads", "appstore_threads", "App Store Rank: Threads"),
+    ("WhatsApp", "appstore_whatsapp", "App Store Rank: WhatsApp"),
+    ("Telegram", "appstore_telegram", "App Store Rank: Telegram"),
+    ("Spotify", "appstore_spotify", "App Store Rank: Spotify"),
+    ("YouTube", "appstore_youtube", "App Store Rank: YouTube"),
+    ("Snapchat", "appstore_snapchat", "App Store Rank: Snapchat"),
+    ("X", "appstore_x", "App Store Rank: X"),
 ]
 
 _cache: dict | None = None

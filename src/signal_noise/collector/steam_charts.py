@@ -25,6 +25,14 @@ STEAM_GAMES: list[tuple[str, str, str]] = [
     ("413150", "steam_stardew", "Steam Players: Stardew Valley"),
     ("230410", "steam_warframe", "Steam Players: Warframe"),
     ("1203220", "steam_naraka", "Steam Players: Naraka Bladepoint"),
+    ("346110", "steam_ark", "Steam Players: ARK"),
+    ("960090", "steam_sotf", "Steam Players: Sons of the Forest"),
+    ("236390", "steam_warthunder", "Steam Players: War Thunder"),
+    ("431960", "steam_wallpaper_engine", "Steam Players: Wallpaper Engine"),
+    ("304930", "steam_unturned", "Steam Players: Unturned"),
+    ("1174180", "steam_rdr2", "Steam Players: Red Dead Redemption 2"),
+    ("814380", "steam_sekiro", "Steam Players: Sekiro"),
+    ("242760", "steam_forest", "Steam Players: The Forest"),
 ]
 
 

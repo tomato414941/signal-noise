@@ -139,3 +139,41 @@ class HNCryptoMentionsCollector(_HNTopicCollector):
         domain="sentiment",
         category="attention",
     )
+
+
+class HNRustMentionsCollector(_HNTopicCollector):
+    _keywords = {"rust", "rustlang", "cargo", "tokio", "wasm"}
+    meta = CollectorMeta(
+        name="hn_rust_mentions",
+        display_name="HN Top 30 Rust Mentions",
+        update_frequency="hourly",
+        api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
+    )
+
+
+class HNSecurityMentionsCollector(_HNTopicCollector):
+    _keywords = {"security", "vulnerability", "cve", "exploit", "ransomware",
+                 "malware", "zero-day", "breach", "infosec", "cybersecurity"}
+    meta = CollectorMeta(
+        name="hn_security_mentions",
+        display_name="HN Top 30 Security Mentions",
+        update_frequency="hourly",
+        api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
+    )
+
+
+class HNCloudMentionsCollector(_HNTopicCollector):
+    _keywords = {"aws", "azure", "gcp", "kubernetes", "k8s", "docker",
+                 "terraform", "cloudflare", "serverless", "lambda"}
+    meta = CollectorMeta(
+        name="hn_cloud_mentions",
+        display_name="HN Top 30 Cloud/Infra Mentions",
+        update_frequency="hourly",
+        api_docs_url="https://github.com/HackerNews/API",
+        domain="sentiment",
+        category="attention",
+    )

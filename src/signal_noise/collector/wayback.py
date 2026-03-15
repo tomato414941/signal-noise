@@ -16,6 +16,12 @@ WAYBACK_SITES: list[tuple[str, str, str]] = [
     ("binance.com", "wb_binance", "Wayback: binance.com"),
     ("sec.gov", "wb_sec_gov", "Wayback: sec.gov"),
     ("federalreserve.gov", "wb_fed_gov", "Wayback: federalreserve.gov"),
+    ("reddit.com", "wb_reddit", "Wayback: reddit.com"),
+    ("twitter.com", "wb_twitter", "Wayback: twitter.com"),
+    ("github.com", "wb_github", "Wayback: github.com"),
+    ("stackoverflow.com", "wb_stackoverflow", "Wayback: stackoverflow.com"),
+    ("wikipedia.org", "wb_wikipedia", "Wayback: wikipedia.org"),
+    ("amazon.com", "wb_amazon", "Wayback: amazon.com"),
 ]
 
 
