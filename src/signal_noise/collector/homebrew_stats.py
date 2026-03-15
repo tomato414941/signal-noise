@@ -37,3 +37,45 @@ class HomebrewInstallsCollector(BaseCollector):
                     total += val
         now = pd.Timestamp.now(tz="UTC").normalize()
         return pd.DataFrame([{"date": now, "value": float(total)}])
+
+
+class HomebrewFormulaeCountCollector(BaseCollector):
+    meta = CollectorMeta(
+        name="brew_formulae_count",
+        display_name="Homebrew Formulae (Total)",
+        update_frequency="daily",
+        api_docs_url="https://formulae.brew.sh/docs/api/",
+        domain="technology",
+        category="developer",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        resp = requests.get(
+            "https://formulae.brew.sh/api/formula.json",
+            timeout=self.config.request_timeout,
+        )
+        resp.raise_for_status()
+        count = len(resp.json())
+        now = pd.Timestamp.now(tz="UTC").normalize()
+        return pd.DataFrame([{"date": now, "value": float(count)}])
+
+
+class HomebrewCasksCountCollector(BaseCollector):
+    meta = CollectorMeta(
+        name="brew_casks_count",
+        display_name="Homebrew Casks (Total)",
+        update_frequency="daily",
+        api_docs_url="https://formulae.brew.sh/docs/api/",
+        domain="technology",
+        category="developer",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        resp = requests.get(
+            "https://formulae.brew.sh/api/cask.json",
+            timeout=self.config.request_timeout,
+        )
+        resp.raise_for_status()
+        count = len(resp.json())
+        now = pd.Timestamp.now(tz="UTC").normalize()
+        return pd.DataFrame([{"date": now, "value": float(count)}])
