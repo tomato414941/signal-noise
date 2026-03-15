@@ -46,6 +46,11 @@ _MODELS: list[tuple[str, str, str]] = [
     ("google/gemma-2-9b-it", "hf_gemma_9b", "HF Downloads: Gemma-2-9B"),
     ("black-forest-labs/FLUX.1-dev", "hf_flux", "HF Downloads: FLUX.1-dev"),
     ("deepseek-ai/DeepSeek-R1", "hf_deepseek_r1", "HF Downloads: DeepSeek-R1"),
+    ("mistralai/Mistral-7B-v0.1", "hf_mistral_7b_base", "HF Downloads: Mistral-7B-v0.1"),
+    ("google/gemma-7b", "hf_gemma_7b", "HF Downloads: Gemma-7B"),
+    ("microsoft/phi-2", "hf_phi2", "HF Downloads: phi-2"),
+    ("TheBloke/Llama-2-13B-chat-GPTQ", "hf_thebloke_llama2_13b", "HF Downloads: TheBloke Llama-2-13B-GPTQ"),
+    ("TheBloke/Mistral-7B-Instruct-v0.2-GPTQ", "hf_thebloke_mistral_7b", "HF Downloads: TheBloke Mistral-7B-GPTQ"),
 ]
 
 

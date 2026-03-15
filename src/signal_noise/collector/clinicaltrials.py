@@ -53,6 +53,8 @@ _SIGNALS: list[tuple[str, str, str | None]] = [
     ("ct_covid", "ClinicalTrials COVID Studies", "covid"),
     ("ct_gene_therapy", "ClinicalTrials Gene Therapy Studies", "gene therapy"),
     ("ct_ai_ml", "ClinicalTrials AI/ML Studies", "artificial intelligence OR machine learning"),
+    ("ct_depression", "ClinicalTrials Depression Studies", "depression"),
+    ("ct_anxiety", "ClinicalTrials Anxiety Studies", "anxiety"),
 ]
 
 

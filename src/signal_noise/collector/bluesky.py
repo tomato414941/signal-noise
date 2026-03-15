@@ -72,6 +72,10 @@ _SIGNALS: list[tuple[str, str, str]] = [
     ("bsky_daily_likes", "Bluesky Daily Likes", "num_likes"),
     ("bsky_daily_follows", "Bluesky Daily Follows", "num_follows"),
     ("bsky_total_users", "Bluesky Total Users", "total_users"),
+    ("bsky_daily_likers", "Bluesky Daily Likers", "num_likers"),
+    ("bsky_daily_followers", "Bluesky Daily Followers", "num_followers"),
+    ("bsky_daily_blocks", "Bluesky Daily Blocks", "num_blocks"),
+    ("bsky_daily_blockers", "Bluesky Daily Blockers", "num_blockers"),
 ]
 
 

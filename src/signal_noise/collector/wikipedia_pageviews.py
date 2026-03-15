@@ -30,6 +30,11 @@ _PAGEVIEW_SERIES: list[tuple[str, str, str]] = [
     ("Pandemic", "wikipedia_pv_pandemic", "Wikipedia PV: Pandemic"),
     ("Nuclear_weapon", "wikipedia_pv_nuclear", "Wikipedia PV: Nuclear Weapon"),
     ("Climate_change", "wikipedia_pv_climate", "Wikipedia PV: Climate Change"),
+    ("United_States", "wikipedia_pv_us", "Wikipedia PV: United States"),
+    ("World_War_II", "wikipedia_pv_ww2", "Wikipedia PV: World War II"),
+    ("COVID-19_pandemic", "wikipedia_pv_covid", "Wikipedia PV: COVID-19 Pandemic"),
+    ("Taylor_Swift", "wikipedia_pv_taylor_swift", "Wikipedia PV: Taylor Swift"),
+    ("Elon_Musk", "wikipedia_pv_elon_musk", "Wikipedia PV: Elon Musk"),
 ]
 
 

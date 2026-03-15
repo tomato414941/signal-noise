@@ -51,6 +51,12 @@ _REPOS: list[tuple[str, str, str]] = [
     ("vercel/next.js", "gh_stars_nextjs", "GitHub Stars: next.js"),
     ("denoland/deno", "gh_stars_deno", "GitHub Stars: deno"),
     ("docker/compose", "gh_stars_compose", "GitHub Stars: docker-compose"),
+    ("oven-sh/bun", "gh_stars_bun", "GitHub Stars: bun"),
+    ("astral-sh/ruff", "gh_stars_ruff", "GitHub Stars: ruff"),
+    ("astral-sh/uv", "gh_stars_uv", "GitHub Stars: uv"),
+    ("pnpm/pnpm", "gh_stars_pnpm", "GitHub Stars: pnpm"),
+    ("biomejs/biome", "gh_stars_biome", "GitHub Stars: biome"),
+    ("tauri-apps/tauri", "gh_stars_tauri", "GitHub Stars: tauri"),
 ]
 
 
