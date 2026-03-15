@@ -144,6 +144,13 @@ detail = "NOAA endpoint returns 404."
 review_after = "2026-06-01"
 
 [[rules]]
+selectors = ["fda_drug_adverse_events"]
+scopes = ["alpha-os"]
+reason_code = "upstream_blocked"
+detail = "OpenFDA API returns 403 Forbidden from alpha-os."
+review_after = "2026-04-15"
+
+[[rules]]
 selectors = ["fema_disaster_count", "fema_major_disaster_count"]
 scopes = ["alpha-os"]
 reason_code = "upstream_blocked"
