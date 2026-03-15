@@ -42,6 +42,11 @@ CRATES: list[tuple[str, str, str]] = [
     ("tauri", "crates_tauri_downloads", "crates.io: tauri"),
     ("bevy", "crates_bevy_downloads", "crates.io: bevy"),
     ("solana-sdk", "crates_solana_sdk_downloads", "crates.io: solana-sdk"),
+    ("actix-web", "crates_actix_web_downloads", "crates.io: actix-web"),
+    ("diesel", "crates_diesel_downloads", "crates.io: diesel"),
+    ("warp", "crates_warp_downloads", "crates.io: warp"),
+    ("poem", "crates_poem_downloads", "crates.io: poem"),
+    ("thiserror", "crates_thiserror_downloads", "crates.io: thiserror"),
 ]
 
 

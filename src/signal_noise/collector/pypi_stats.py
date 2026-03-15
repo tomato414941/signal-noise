@@ -32,6 +32,13 @@ PYPI_PACKAGES: list[tuple[str, str, str]] = [
     ("ccxt", "pypi_ccxt_downloads", "PyPI: ccxt"),
     ("web3", "pypi_web3_downloads", "PyPI: web3"),
     ("uvicorn", "pypi_uvicorn_downloads", "PyPI: uvicorn"),
+    ("pillow", "pypi_pillow_downloads", "PyPI: pillow"),
+    ("sqlalchemy", "pypi_sqlalchemy_downloads", "PyPI: sqlalchemy"),
+    ("celery", "pypi_celery_downloads", "PyPI: celery"),
+    ("pydantic", "pypi_pydantic_downloads", "PyPI: pydantic"),
+    ("httpx", "pypi_httpx_downloads", "PyPI: httpx"),
+    ("black", "pypi_black_downloads", "PyPI: black"),
+    ("ruff", "pypi_ruff_downloads", "PyPI: ruff"),
 ]
 
 _PYPI_REQUEST_LOCK = threading.Lock()

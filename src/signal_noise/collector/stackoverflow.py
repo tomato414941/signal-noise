@@ -27,6 +27,14 @@ SO_TAGS: list[tuple[str, str, str]] = [
     ("kubernetes", "so_kubernetes", "StackOverflow: kubernetes"),
     ("docker", "so_docker", "StackOverflow: docker"),
     ("webassembly", "so_wasm", "StackOverflow: webassembly"),
+    ("swift", "so_swift", "StackOverflow: swift"),
+    ("go", "so_go", "StackOverflow: go"),
+    ("flutter", "so_flutter", "StackOverflow: flutter"),
+    ("graphql", "so_graphql", "StackOverflow: graphql"),
+    ("mongodb", "so_mongodb", "StackOverflow: mongodb"),
+    ("postgresql", "so_postgresql", "StackOverflow: postgresql"),
+    ("redis", "so_redis", "StackOverflow: redis"),
+    ("elasticsearch", "so_elasticsearch", "StackOverflow: elasticsearch"),
 ]
 
 

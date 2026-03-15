@@ -29,6 +29,12 @@ _IMAGES: list[tuple[str, str, str]] = [
     ("library/rust", "docker_rust", "Docker: rust"),
     ("grafana/grafana", "docker_grafana", "Docker: grafana"),
     ("prom/prometheus", "docker_prometheus", "Docker: prometheus"),
+    ("library/traefik", "docker_traefik", "Docker: traefik"),
+    ("library/caddy", "docker_caddy", "Docker: caddy"),
+    ("library/mariadb", "docker_mariadb", "Docker: mariadb"),
+    ("library/rabbitmq", "docker_rabbitmq", "Docker: rabbitmq"),
+    ("library/memcached", "docker_memcached", "Docker: memcached"),
+    ("library/vault", "docker_vault", "Docker: vault"),
 ]
 
 

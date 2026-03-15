@@ -25,6 +25,13 @@ NPM_PACKAGES: list[tuple[str, str, str]] = [
     ("next", "npm_next", "NPM: next"),
     ("svelte", "npm_svelte", "NPM: svelte"),
     ("esbuild", "npm_esbuild", "NPM: esbuild"),
+    ("vite", "npm_vite", "NPM: vite"),
+    ("prettier", "npm_prettier", "NPM: prettier"),
+    ("eslint", "npm_eslint", "NPM: eslint"),
+    ("zod", "npm_zod", "NPM: zod"),
+    ("@trpc/server", "npm_trpc", "NPM: @trpc/server"),
+    ("prisma", "npm_prisma", "NPM: prisma"),
+    ("drizzle-orm", "npm_drizzle_orm", "NPM: drizzle-orm"),
 ]
 
 
