@@ -55,6 +55,14 @@ _SIGNALS: list[tuple[str, str, str | None]] = [
     ("ct_ai_ml", "ClinicalTrials AI/ML Studies", "artificial intelligence OR machine learning"),
     ("ct_depression", "ClinicalTrials Depression Studies", "depression"),
     ("ct_anxiety", "ClinicalTrials Anxiety Studies", "anxiety"),
+    ("ct_heart_failure", "ClinicalTrials Heart Failure Studies", "heart failure"),
+    ("ct_stroke", "ClinicalTrials Stroke Studies", "stroke"),
+    ("ct_parkinson", "ClinicalTrials Parkinson Studies", "parkinson"),
+    ("ct_rare_disease", "ClinicalTrials Rare Disease Studies", "rare disease"),
+    ("ct_immunotherapy", "ClinicalTrials Immunotherapy Studies", "immunotherapy"),
+    ("ct_glp1", "ClinicalTrials GLP-1 Studies", "GLP-1"),
+    ("ct_cell_therapy", "ClinicalTrials Cell Therapy Studies", "cell therapy OR CAR-T"),
+    ("ct_mrna", "ClinicalTrials mRNA Studies", "mRNA"),
 ]
 
 

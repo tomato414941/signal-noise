@@ -51,6 +51,13 @@ _EV_STATES = [
     ("NY", "nrel_ev_stations_ny", "EV Charging Stations: New York"),
     ("FL", "nrel_ev_stations_fl", "EV Charging Stations: Florida"),
     ("WA", "nrel_ev_stations_wa", "EV Charging Stations: Washington"),
+    ("IL", "nrel_ev_stations_il", "EV Charging Stations: Illinois"),
+    ("MA", "nrel_ev_stations_ma", "EV Charging Stations: Massachusetts"),
+    ("CO", "nrel_ev_stations_co", "EV Charging Stations: Colorado"),
+    ("PA", "nrel_ev_stations_pa", "EV Charging Stations: Pennsylvania"),
+    ("NJ", "nrel_ev_stations_nj", "EV Charging Stations: New Jersey"),
+    ("GA", "nrel_ev_stations_ga", "EV Charging Stations: Georgia"),
+    ("AZ", "nrel_ev_stations_az", "EV Charging Stations: Arizona"),
 ]
 
 

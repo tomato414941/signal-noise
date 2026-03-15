@@ -87,7 +87,8 @@ class TestNSIDC:
 class TestUSGSGroundwater:
     def test_factory_count(self):
         from signal_noise.collector.usgs_groundwater import get_groundwater_collectors
-        assert len(get_groundwater_collectors()) == 5
+        from signal_noise.collector.usgs_groundwater import _GW_SITES
+        assert len(get_groundwater_collectors()) == len(_GW_SITES)
 
     def test_meta(self):
         from signal_noise.collector.usgs_groundwater import get_groundwater_collectors

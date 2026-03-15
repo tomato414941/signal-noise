@@ -51,6 +51,21 @@ _MODELS: list[tuple[str, str, str]] = [
     ("microsoft/phi-2", "hf_phi2", "HF Downloads: phi-2"),
     ("TheBloke/Llama-2-13B-chat-GPTQ", "hf_thebloke_llama2_13b", "HF Downloads: TheBloke Llama-2-13B-GPTQ"),
     ("TheBloke/Mistral-7B-Instruct-v0.2-GPTQ", "hf_thebloke_mistral_7b", "HF Downloads: TheBloke Mistral-7B-GPTQ"),
+    # Vision / multimodal
+    ("openai/clip-vit-base-patch32", "hf_clip_base", "HF Downloads: CLIP-ViT-Base"),
+    ("Salesforce/blip2-opt-2.7b", "hf_blip2", "HF Downloads: BLIP-2"),
+    # Code models
+    ("bigcode/starcoder2-15b", "hf_starcoder2", "HF Downloads: StarCoder2-15B"),
+    ("Qwen/Qwen2.5-Coder-32B-Instruct", "hf_qwen_coder", "HF Downloads: Qwen2.5-Coder-32B"),
+    # Embedding models
+    ("BAAI/bge-large-en-v1.5", "hf_bge_large", "HF Downloads: BGE-large-en"),
+    ("intfloat/e5-large-v2", "hf_e5_large", "HF Downloads: E5-large-v2"),
+    # Speech / audio
+    ("openai/whisper-tiny", "hf_whisper_tiny", "HF Downloads: Whisper-tiny"),
+    ("facebook/wav2vec2-base-960h", "hf_wav2vec2", "HF Downloads: wav2vec2-base"),
+    # Small LLMs
+    ("microsoft/phi-3-mini-4k-instruct", "hf_phi3_mini", "HF Downloads: Phi-3-mini"),
+    ("google/gemma-2-2b-it", "hf_gemma_2b", "HF Downloads: Gemma-2-2B"),
 ]
 
 

@@ -20,6 +20,12 @@ USGS_WATER_SITES: list[tuple[str, str, str, str]] = [
     ("01646500", "usgs_potomac_dc", "USGS: Potomac River at Washington DC", "flood"),
     ("08279500", "usgs_rio_grande_nm", "USGS: Rio Grande at Embudo NM", "drought"),
     ("11303500", "usgs_san_joaquin_ca", "USGS: San Joaquin River CA", "drought"),
+    ("14105700", "usgs_columbia_or", "USGS: Columbia River at The Dalles OR", "hydro"),
+    ("09429490", "usgs_colorado_parker", "USGS: Colorado River at Parker AZ", "drought"),
+    ("11447650", "usgs_sacramento_ca", "USGS: Sacramento River at Freeport CA", "drought"),
+    ("02358000", "usgs_apalachicola_fl", "USGS: Apalachicola River FL", "flood"),
+    ("03611500", "usgs_ohio_metropolis", "USGS: Ohio River at Metropolis IL", "flood"),
+    ("06934500", "usgs_missouri_hermann", "USGS: Missouri River at Hermann MO", "flood"),
 ]
 
 _BASE_URL = (

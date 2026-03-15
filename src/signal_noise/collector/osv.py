@@ -49,6 +49,13 @@ _SIGNALS: list[tuple[str, str, str, str]] = [
     ("osv_express", "OSV Vulns: express (npm)", "express", "npm"),
     ("osv_linux_kernel", "OSV Vulns: Linux Kernel", "Kernel", "Linux"),
     ("osv_tensorflow", "OSV Vulns: tensorflow (PyPI)", "tensorflow", "PyPI"),
+    ("osv_flask", "OSV Vulns: Flask (PyPI)", "Flask", "PyPI"),
+    ("osv_numpy", "OSV Vulns: numpy (PyPI)", "numpy", "PyPI"),
+    ("osv_react", "OSV Vulns: react (npm)", "react", "npm"),
+    ("osv_axios", "OSV Vulns: axios (npm)", "axios", "npm"),
+    ("osv_spring_framework", "OSV Vulns: Spring Framework (Maven)", "org.springframework:spring-framework-bom", "Maven"),
+    ("osv_rails", "OSV Vulns: Rails (RubyGems)", "rails", "RubyGems"),
+    ("osv_openssl", "OSV Vulns: OpenSSL", "openssl", "OSS-Fuzz"),
 ]
 
 

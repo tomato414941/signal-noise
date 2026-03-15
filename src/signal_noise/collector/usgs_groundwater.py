@@ -21,6 +21,10 @@ _GW_SITES = [
     ("370812122235501", "usgs_gw_ca_sv", "USGS Groundwater: CA Santa Clara Valley"),
     ("290000095070001", "usgs_gw_tx_gulf", "USGS Groundwater: TX Gulf Coast"),
     ("433027088261601", "usgs_gw_wi", "USGS Groundwater: WI Cambrian-Ordovician"),
+    ("330237111410401", "usgs_gw_az_phoenix", "USGS Groundwater: AZ Phoenix Basin"),
+    ("364553116280201", "usgs_gw_nv_dv", "USGS Groundwater: NV Death Valley"),
+    ("340457117082301", "usgs_gw_ca_riverside", "USGS Groundwater: CA Riverside Basin"),
+    ("395302104451601", "usgs_gw_co_denver", "USGS Groundwater: CO Denver Basin"),
 ]
 
 
