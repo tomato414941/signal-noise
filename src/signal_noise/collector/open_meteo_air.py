@@ -23,6 +23,9 @@ AIR_QUALITY_CITIES: list[tuple[float, float, str, str, str]] = [
     (-23.5505, -46.6333, "São Paulo", "air_sao_paulo", "Air Quality: São Paulo"),
     (30.0444, 31.2357, "Cairo", "air_cairo", "Air Quality: Cairo"),
     (14.5995, 120.9842, "Manila", "air_manila", "Air Quality: Manila"),
+    (-6.2088, 106.8456, "Jakarta", "air_jakarta", "Air Quality: Jakarta"),
+    (6.5244, 3.3792, "Lagos", "air_lagos", "Air Quality: Lagos"),
+    (23.8103, 90.4125, "Dhaka", "air_dhaka", "Air Quality: Dhaka"),
 ]
 
 _AQ_URL = (

@@ -193,3 +193,72 @@ class USGSQuakeSignificantCollector(_USGSHourlyBase):
         features = self._get_features()
         ts = pd.Timestamp.now(tz="UTC").floor("h")
         return pd.DataFrame({"timestamp": [ts], "value": [float(len(features))]})
+
+
+class USGSQuakeM25Count24hCollector(_USGSHourlyBase):
+    """Count of M2.5+ earthquakes worldwide in the last 24h.
+
+    Lower threshold captures moderate seismic activity patterns.
+    """
+
+    _feed_url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson"
+
+    meta = CollectorMeta(
+        name="usgs_quake_m25_count_24h",
+        display_name="USGS M2.5+ Quakes (24h)",
+        update_frequency="hourly",
+        api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
+        domain="environment",
+        category="seismic",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        features = self._get_features()
+        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        return pd.DataFrame({"timestamp": [ts], "value": [float(len(features))]})
+
+
+class USGSQuakeM10Count24hCollector(_USGSHourlyBase):
+    """Count of M1.0+ earthquakes worldwide in the last 24h.
+
+    Captures micro-seismic activity; useful for detecting swarm patterns.
+    """
+
+    _feed_url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_day.geojson"
+
+    meta = CollectorMeta(
+        name="usgs_quake_m10_count_24h",
+        display_name="USGS M1.0+ Quakes (24h)",
+        update_frequency="hourly",
+        api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
+        domain="environment",
+        category="seismic",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        features = self._get_features()
+        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        return pd.DataFrame({"timestamp": [ts], "value": [float(len(features))]})
+
+
+class USGSQuakeSignificant7dCollector(_USGSHourlyBase):
+    """Count of significant earthquakes worldwide in the last 7 days.
+
+    Wider window captures major seismic events that may be missed in 24h snapshots.
+    """
+
+    _feed_url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson"
+
+    meta = CollectorMeta(
+        name="usgs_quake_significant_7d",
+        display_name="USGS Significant Quakes (7d)",
+        update_frequency="hourly",
+        api_docs_url="https://earthquake.usgs.gov/earthquakes/feed/",
+        domain="environment",
+        category="seismic",
+    )
+
+    def fetch(self) -> pd.DataFrame:
+        features = self._get_features()
+        ts = pd.Timestamp.now(tz="UTC").floor("h")
+        return pd.DataFrame({"timestamp": [ts], "value": [float(len(features))]})

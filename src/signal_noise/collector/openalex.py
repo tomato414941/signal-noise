@@ -20,6 +20,12 @@ FIELDS: list[tuple[str, str, str]] = [
     ("C15744967", "openalex_psychology_papers", "OpenAlex: Psychology"),
     ("C17744445", "openalex_polisci_papers", "OpenAlex: Political Science"),
     ("C205649164", "openalex_climate_papers", "OpenAlex: Climate Change"),
+    ("C49204034", "openalex_quantum_computing_papers", "OpenAlex: Quantum Computing"),
+    ("C80444323", "openalex_robotics_papers", "OpenAlex: Robotics"),
+    ("C135473242", "openalex_renewable_energy_papers", "OpenAlex: Renewable Energy"),
+    ("C55493867", "openalex_gene_therapy_papers", "OpenAlex: Gene Therapy"),
+    ("C178790620", "openalex_crispr_papers", "OpenAlex: CRISPR"),
+    ("C50644808", "openalex_neural_networks_papers", "OpenAlex: Neural Networks"),
 ]
 
 

@@ -35,6 +35,11 @@ WEATHER_CITIES: list[tuple[float, float, str, str, str]] = [
     (19.4326, -99.1332, "Mexico City", "meteo_mexico", "Weather: Mexico City"),
     (28.6139, 77.2090, "New Delhi", "meteo_delhi", "Weather: New Delhi"),
     (37.5665, 126.9780, "Seoul", "meteo_seoul", "Weather: Seoul"),
+    # ── Additional global cities ──
+    (19.0760, 72.8777, "Mumbai", "meteo_mumbai", "Weather: Mumbai"),
+    (6.5244, 3.3792, "Lagos", "meteo_lagos", "Weather: Lagos"),
+    (13.7563, 100.5018, "Bangkok", "meteo_bangkok", "Weather: Bangkok"),
+    (41.0082, 28.9784, "Istanbul", "meteo_istanbul", "Weather: Istanbul"),
 ]
 
 _ARCHIVE_URL = (

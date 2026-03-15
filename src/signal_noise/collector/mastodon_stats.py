@@ -47,6 +47,14 @@ _SIGNALS: list[tuple[str, str, str, str]] = [
     ("mastodon_social_statuses", "Mastodon.social Total Statuses", "mastodon.social", "status_count"),
     ("mastodon_social_domains", "Mastodon.social Connected Domains", "mastodon.social", "domain_count"),
     ("fosstodon_users", "Fosstodon Users", "fosstodon.org", "user_count"),
+    ("fosstodon_statuses", "Fosstodon Total Statuses", "fosstodon.org", "status_count"),
+    ("fosstodon_domains", "Fosstodon Connected Domains", "fosstodon.org", "domain_count"),
+    ("hachyderm_users", "Hachyderm Users", "hachyderm.io", "user_count"),
+    ("hachyderm_statuses", "Hachyderm Total Statuses", "hachyderm.io", "status_count"),
+    ("hachyderm_domains", "Hachyderm Connected Domains", "hachyderm.io", "domain_count"),
+    ("infosec_exchange_users", "Infosec.exchange Users", "infosec.exchange", "user_count"),
+    ("infosec_exchange_statuses", "Infosec.exchange Total Statuses", "infosec.exchange", "status_count"),
+    ("infosec_exchange_domains", "Infosec.exchange Connected Domains", "infosec.exchange", "domain_count"),
 ]
 
 
