@@ -183,7 +183,7 @@ Modules added to complete the service architecture:
 
 ### What signal-noise delivers
 
-- **Raw time series**: 1,629 collector outputs across 6 domains and 61 categories
+- **Raw time series**: 2,329 collector outputs across 6 domains and 64 categories
 - **Format**: `DataFrame[timestamp, value]` for scalar signals,
   `DataFrame[timestamp, value, open, high, low, volume]` for OHLCV signals
 - **No derived signals**: transforms (z-score, SMA, RSI, etc.) are not applied

@@ -19,18 +19,18 @@ Collect worldwide time series and deliver via REST API + WebSocket.
 
 | Domain | Description | Categories |
 |--------|-----------|------------|
-| markets | Equities, FX, bonds, commodities, crypto, derivatives | equity, crypto, crypto_derivatives, forex, rates, commodity, microstructure, regulatory |
+| markets | Equities, FX, bonds, commodities, crypto, derivatives | equity, crypto, crypto_derivatives, defi, forex, rates, commodity, microstructure, regulatory |
 | economy | GDP, employment, inflation, housing, agriculture, energy, inequality | economic, labor, inflation, trade, fiscal, real_estate, food_price, agriculture, energy, inequality, tourism, manufacturing, retail |
 | environment | Weather, climate, ocean, geology, space weather, biodiversity, noise | weather, climate, marine, air_quality, hydrology, satellite, space_weather, seismic, celestial, wildlife, biodiversity, noise, cryosphere |
-| technology | Software ecosystems, internet, logistics, aviation, R&D | developer, academic, patents, logistics, aviation, internet, space, transportation, safety |
+| technology | Software ecosystems, internet, logistics, aviation, R&D, AI | developer, academic, ai, patents, logistics, aviation, internet, infra, space, transportation, safety |
 | sentiment | Opinions, attention, expectations, prediction markets, gaming | sentiment, attention, prediction_market, temporal, gaming |
 | society | Health, mortality, conflict, demographics, governance, legislation | epidemiology, public_health, excess_deaths, cause_of_death, armed_conflict, displacement, city_stats, crime, governance, demographics, education, legislation, food_security |
 
 ### Scale
 
 - **Domains**: 6
-- **Categories**: 61
-- **Collectors**: ~1.7k time series
+- **Categories**: 64
+- **Collectors**: ~2.3k time series
 
 ## Architecture
 
@@ -117,7 +117,7 @@ L2 collectors require API keys stored in `~/.secrets/`:
 | Finnhub | `FINNHUB_API_KEY` | `~/.secrets/finnhub` | 42 |
 | ENTSO-E | `ENTSOE_API_KEY` | `~/.secrets/entsoe` | 4 |
 | FBI Crime | `FBI_API_KEY` | `~/.secrets/fbi` | 6 |
-| Congress.gov | `CONGRESS_API_KEY` | `~/.secrets/congress` | 5 |
+| Congress.gov | `CONGRESS_API_KEY` | `~/.secrets/congress` | 9 |
 | Twitch | `TWITCH_CLIENT_ID/SECRET` | `~/.secrets/twitch` | 7 |
 | Reddit | `REDDIT_CLIENT_ID/SECRET` | `~/.secrets/reddit` | 3 |
 | Sonitus | `SONITUS_USER/PASSWORD` | `~/.secrets/sonitus` | 4 |
@@ -146,7 +146,7 @@ Pattern: env var → `~/.secrets/{provider}` file → raise RuntimeError with si
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v                      # 764 tests
+pytest tests/ -v                      # 931 tests
 ruff check src/ tests/
 python -m signal_noise count          # Show collector count
 ```

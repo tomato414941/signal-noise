@@ -4,7 +4,7 @@
 
 Collect worldwide time series and deliver via REST API + WebSocket.
 
-**2,014 collectors** across **6 domains** and **61 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
+**2,329 collectors** across **6 domains** and **64 categories** — from stock prices and GDP to earthquake magnitudes, solar wind speed, and real-time orderbook microstructure.
 
 ## Features
 
@@ -107,18 +107,18 @@ The built-in `/ops` page is intentionally narrow in scope: it is a read-only ope
 
 | Domain | Description | Example categories |
 |--------|-------------|-------------------|
-| markets | Equities, FX, bonds, crypto, derivatives | equity, crypto, forex, rates, commodity, microstructure |
-| economy | GDP, employment, inflation, housing, energy, inequality | economic, labor, inflation, energy, manufacturing, inequality |
-| environment | Weather, climate, ocean, geology, biodiversity, noise | weather, climate, hydrology, cryosphere, noise, satellite |
-| technology | Software ecosystems, internet, logistics, aviation, R&D | developer, internet, aviation, logistics, academic |
-| sentiment | Opinions, attention, prediction markets, gaming | sentiment, attention, prediction_market, gaming |
-| society | Health, mortality, conflict, demographics, governance | public_health, crime, governance, legislation, food_security |
+| markets | Equities, FX, bonds, crypto, derivatives | equity, crypto, crypto_derivatives, defi, forex, rates, commodity, microstructure, regulatory |
+| economy | GDP, employment, inflation, housing, energy, inequality | economic, labor, inflation, trade, fiscal, real_estate, food_price, agriculture, energy, inequality, tourism, manufacturing, retail |
+| environment | Weather, climate, ocean, geology, biodiversity, noise | weather, climate, marine, air_quality, hydrology, satellite, space_weather, seismic, celestial, wildlife, biodiversity, noise, cryosphere |
+| technology | Software ecosystems, internet, logistics, aviation, R&D, AI | developer, academic, ai, patents, logistics, aviation, internet, infra, space, transportation, safety |
+| sentiment | Opinions, attention, prediction markets, gaming | sentiment, attention, prediction_market, temporal, gaming |
+| society | Health, mortality, conflict, demographics, governance | epidemiology, public_health, excess_deaths, cause_of_death, armed_conflict, displacement, city_stats, crime, governance, demographics, education, legislation, food_security |
 
 ## Development
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -q   # 931 passed as of 2026-03-08
+pytest tests/ -q   # 931 tests as of 2026-03-14
 ruff check src/ tests/
 ```
 
