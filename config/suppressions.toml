@@ -18,13 +18,6 @@ detail = "ENTSOE_API_KEY is not configured on alpha-os."
 review_after = "2026-04-15"
 
 [[rules]]
-selectors = ["ecb_ester"]
-scopes = ["alpha-os"]
-reason_code = "upstream_outage"
-detail = "ECB API is temporarily failing for this series."
-review_after = "2026-03-31"
-
-[[rules]]
 selectors = ["marine_suez"]
 scopes = ["alpha-os"]
 reason_code = "source_removed"
@@ -174,9 +167,9 @@ review_after = "2026-04-15"
 [[rules]]
 selectors = ["fred_leading_index"]
 scopes = ["alpha-os"]
-reason_code = "no_data"
-detail = "FRED series USSLIND currently returns no data."
-review_after = "2026-05-01"
+reason_code = "missing_api_key"
+detail = "FRED_API_KEY required but this series uses a separate key path."
+review_after = "2026-04-15"
 
 [[rules]]
 selectors = ["iucn_threatened_species"]
@@ -227,28 +220,20 @@ detail = "The upstream OECD record is absent."
 review_after = "2026-05-01"
 
 [[rules]]
-selectors = ["eonet_*"]
-match = "glob"
-scopes = ["alpha-os"]
-reason_code = "review_pending"
-detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate EONET availability."
-review_after = "2026-04-15"
-
-[[rules]]
 selectors = ["nrc_reactor_*"]
 match = "glob"
 scopes = ["alpha-os"]
-reason_code = "review_pending"
-detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate NRC source behavior."
-review_after = "2026-04-15"
+reason_code = "no_data"
+detail = "NRC reactor endpoint returns no data."
+review_after = "2026-05-01"
 
 [[rules]]
 selectors = ["caiso_lmp_*"]
 match = "glob"
 scopes = ["alpha-os"]
-reason_code = "review_pending"
-detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate CAISO OASIS behavior."
-review_after = "2026-04-15"
+reason_code = "upstream_blocked"
+detail = "oasis.caiso.com DNS resolution fails consistently."
+review_after = "2026-05-01"
 
 [[rules]]
 selectors = ["bgp_ipv4_prefix_count", "bgp_ipv6_prefix_count"]
@@ -288,15 +273,8 @@ detail = "USGS groundwater parameter 72019 is no longer served for these sites."
 review_after = "2026-04-15"
 
 [[rules]]
-selectors = ["btc_node_count"]
-scopes = ["alpha-os"]
-reason_code = "review_pending"
-detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate Bitnodes availability."
-review_after = "2026-04-15"
-
-[[rules]]
 selectors = ["uspto_trademark_apps"]
 scopes = ["alpha-os"]
-reason_code = "review_pending"
-detail = "Legacy alpha-os suppression migrated from systemd; re-evaluate USPTO API behavior."
-review_after = "2026-04-15"
+reason_code = "no_data"
+detail = "USPTO trademark endpoint returns no data."
+review_after = "2026-05-01"
