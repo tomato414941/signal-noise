@@ -119,6 +119,34 @@ FRED_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SP500", "fred_sp500", "S&P 500 (FRED)", "daily", "markets", "equity"),
     ("NASDAQCOM", "fred_nasdaq", "NASDAQ Composite (FRED)", "daily", "markets", "equity"),
     # WILL5000INDFC discontinued by FRED
+    # ── Auto / vehicle sales ──
+    ("TOTALSA", "fred_total_vehicle_sales", "Total Vehicle Sales (SAAR)", "monthly", "economy", "economic"),
+    ("LAUTOSA", "fred_auto_sales", "Light Vehicle Sales: Autos", "monthly", "economy", "economic"),
+    ("LTRUCKSA", "fred_truck_sales", "Light Vehicle Sales: Trucks", "monthly", "economy", "economic"),
+    # ── Credit / consumer debt ──
+    ("REVOLSL", "fred_revolving_credit", "Revolving Consumer Credit", "monthly", "economy", "economic"),
+    ("NONREVSL", "fred_nonrev_credit", "Non-Revolving Consumer Credit", "monthly", "economy", "economic"),
+    ("DRALACBS", "fred_auto_delinquency", "Auto Loan Delinquency Rate", "quarterly", "economy", "economic"),
+    ("DRSFRMACBS", "fred_mortgage_delinquency", "Mortgage Delinquency Rate (SF)", "quarterly", "economy", "real_estate"),
+    ("DRCCLACBS", "fred_cc_delinquency", "Credit Card Delinquency Rate", "quarterly", "economy", "economic"),
+    # ── Small business / entrepreneurship ──
+    ("EVANQ", "fred_establishment_births", "Business Establishment Births", "quarterly", "economy", "economic"),
+    ("BDATN", "fred_establishment_deaths", "Business Establishment Deaths", "quarterly", "economy", "economic"),
+    # ── Producer prices / supply chain ──
+    ("PPIACO", "fred_ppi_all", "PPI: All Commodities", "monthly", "economy", "inflation"),
+    ("WPU101", "fred_ppi_lumber", "PPI: Lumber", "monthly", "economy", "inflation"),
+    ("PCUOMFGOMFG", "fred_ppi_manufacturing", "PPI: Total Manufacturing", "monthly", "economy", "inflation"),
+    # ── Regional / state ──
+    ("LAUST060000000000003A", "fred_unemp_california", "Unemployment Rate: California", "annual", "economy", "labor"),
+    ("LAUST480000000000003A", "fred_unemp_texas", "Unemployment Rate: Texas", "annual", "economy", "labor"),
+    ("LAUST360000000000003A", "fred_unemp_newyork", "Unemployment Rate: New York", "annual", "economy", "labor"),
+    # ── REIT / commercial ──
+    ("WILLREITIND", "fred_reit_index", "Wilshire US REIT Index", "daily", "markets", "equity"),
+    # ── Commodity extras ──
+    ("PCOPPUSDM", "fred_copper_price", "Copper Price (USD/lb)", "monthly", "markets", "commodity"),
+    ("PMAIZMTUSDM", "fred_corn_price", "Corn Price (USD/mt)", "monthly", "markets", "commodity"),
+    ("PWHEAMTUSDM", "fred_wheat_price", "Wheat Price (USD/mt)", "monthly", "markets", "commodity"),
+    ("PSOYBUSDQ", "fred_soybean_price", "Soybean Price (USD/mt)", "quarterly", "markets", "commodity"),
 ]
 
 

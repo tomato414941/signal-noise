@@ -35,6 +35,18 @@ _PAGEVIEW_SERIES: list[tuple[str, str, str]] = [
     ("COVID-19_pandemic", "wikipedia_pv_covid", "Wikipedia PV: COVID-19 Pandemic"),
     ("Taylor_Swift", "wikipedia_pv_taylor_swift", "Wikipedia PV: Taylor Swift"),
     ("Elon_Musk", "wikipedia_pv_elon_musk", "Wikipedia PV: Elon Musk"),
+    ("Unemployment", "wikipedia_pv_unemployment", "Wikipedia PV: Unemployment"),
+    ("Interest_rate", "wikipedia_pv_interest_rate", "Wikipedia PV: Interest Rate"),
+    ("Hyperinflation", "wikipedia_pv_hyperinflation", "Wikipedia PV: Hyperinflation"),
+    ("Bankruptcy", "wikipedia_pv_bankruptcy", "Wikipedia PV: Bankruptcy"),
+    ("Data_breach", "wikipedia_pv_data_breach", "Wikipedia PV: Data Breach"),
+    ("Supply_chain", "wikipedia_pv_supply_chain", "Wikipedia PV: Supply Chain"),
+    ("Tariff", "wikipedia_pv_tariff", "Wikipedia PV: Tariff"),
+    ("Stagflation", "wikipedia_pv_stagflation", "Wikipedia PV: Stagflation"),
+    ("Housing_bubble", "wikipedia_pv_housing_bubble", "Wikipedia PV: Housing Bubble"),
+    ("Sovereign_debt", "wikipedia_pv_sovereign_debt", "Wikipedia PV: Sovereign Debt"),
+    ("Great_Depression", "wikipedia_pv_great_depression", "Wikipedia PV: Great Depression"),
+    ("Famine", "wikipedia_pv_famine", "Wikipedia PV: Famine"),
 ]
 
 

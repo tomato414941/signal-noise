@@ -65,6 +65,36 @@ WHO_GHO_SERIES: list[tuple[str, str, str | None, str, str, str, str]] = [
     ("RS_198", "IND", None, "who_road_deaths_in", "Road Traffic Death Rate: India", "society", "safety"),
     ("RS_198", "BRA", None, "who_road_deaths_br", "Road Traffic Death Rate: Brazil", "society", "safety"),
     ("RS_198", "CHN", None, "who_road_deaths_cn", "Road Traffic Death Rate: China", "society", "safety"),
+    # Maternal mortality ratio (per 100k live births)
+    ("MDG_0000000026", "GLOBAL", None, "who_maternal_mort_global", "WHO Maternal Mortality (Global)", "society", "public_health"),
+    ("MDG_0000000026", "IND", None, "who_maternal_mort_in", "WHO Maternal Mortality: India", "society", "public_health"),
+    ("MDG_0000000026", "NGA", None, "who_maternal_mort_ng", "WHO Maternal Mortality: Nigeria", "society", "public_health"),
+    # Neonatal mortality rate
+    ("MDG_0000000003", "GLOBAL", "SEX_BTSX", "who_neonatal_mort", "WHO Neonatal Mortality (Global)", "society", "public_health"),
+    # Nurses and midwives per 10k
+    ("HWF_0006", "USA", None, "who_nurses_us", "Nurses per 10k: US", "society", "public_health"),
+    ("HWF_0006", "JPN", None, "who_nurses_jp", "Nurses per 10k: Japan", "society", "public_health"),
+    ("HWF_0006", "DEU", None, "who_nurses_de", "Nurses per 10k: Germany", "society", "public_health"),
+    ("HWF_0006", "GBR", None, "who_nurses_gb", "Nurses per 10k: UK", "society", "public_health"),
+    # UHC service coverage index
+    ("UHC_INDEX_REPORTED", "GLOBAL", None, "who_uhc_index_global", "WHO UHC Coverage Index (Global)", "society", "public_health"),
+    ("UHC_INDEX_REPORTED", "USA", None, "who_uhc_index_us", "WHO UHC Coverage Index: US", "society", "public_health"),
+    ("UHC_INDEX_REPORTED", "JPN", None, "who_uhc_index_jp", "WHO UHC Coverage Index: Japan", "society", "public_health"),
+    ("UHC_INDEX_REPORTED", "IND", None, "who_uhc_index_in", "WHO UHC Coverage Index: India", "society", "public_health"),
+    # Measles immunization coverage (% 1yr olds)
+    ("WHS8_110", "GLOBAL", None, "who_measles_coverage", "WHO Measles Immunization (Global)", "society", "epidemiology"),
+    # Malaria incidence per 1000
+    ("MALARIA_EST_INCIDENCE", "GLOBAL", None, "who_malaria_incidence", "WHO Malaria Incidence (Global)", "society", "epidemiology"),
+    # HIV prevalence (% 15-49)
+    ("MDG_0000000029", "GLOBAL", "SEX_BTSX", "who_hiv_prevalence", "WHO HIV Prevalence (Global)", "society", "epidemiology"),
+    # Tobacco smoking prevalence (%)
+    ("M_Est_smk_curr_std", "USA", "SEX_BTSX", "who_tobacco_us", "Tobacco Smoking Prevalence: US", "society", "public_health"),
+    ("M_Est_smk_curr_std", "CHN", "SEX_BTSX", "who_tobacco_cn", "Tobacco Smoking Prevalence: China", "society", "public_health"),
+    ("M_Est_smk_curr_std", "JPN", "SEX_BTSX", "who_tobacco_jp", "Tobacco Smoking Prevalence: Japan", "society", "public_health"),
+    # Out-of-pocket health expenditure (% of current health expenditure)
+    ("GHED_OOPSCHE_SHA2011", "USA", None, "who_oop_health_us", "Out-of-Pocket Health Exp %: US", "society", "public_health"),
+    ("GHED_OOPSCHE_SHA2011", "IND", None, "who_oop_health_in", "Out-of-Pocket Health Exp %: India", "society", "public_health"),
+    ("GHED_OOPSCHE_SHA2011", "CHN", None, "who_oop_health_cn", "Out-of-Pocket Health Exp %: China", "society", "public_health"),
 ]
 
 

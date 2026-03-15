@@ -57,6 +57,22 @@ _REPOS: list[tuple[str, str, str]] = [
     ("pnpm/pnpm", "gh_stars_pnpm", "GitHub Stars: pnpm"),
     ("biomejs/biome", "gh_stars_biome", "GitHub Stars: biome"),
     ("tauri-apps/tauri", "gh_stars_tauri", "GitHub Stars: tauri"),
+    # Frameworks
+    ("facebook/react", "gh_stars_react", "GitHub Stars: react"),
+    ("vuejs/core", "gh_stars_vue", "GitHub Stars: vue"),
+    ("sveltejs/svelte", "gh_stars_svelte", "GitHub Stars: svelte"),
+    # ML / AI
+    ("pytorch/pytorch", "gh_stars_pytorch", "GitHub Stars: pytorch"),
+    ("tensorflow/tensorflow", "gh_stars_tensorflow", "GitHub Stars: tensorflow"),
+    ("keras-team/keras", "gh_stars_keras", "GitHub Stars: keras"),
+    # Data / Big Data
+    ("apache/spark", "gh_stars_spark", "GitHub Stars: spark"),
+    ("apache/kafka", "gh_stars_kafka", "GitHub Stars: kafka"),
+    # DevOps / Cloud
+    ("kubernetes/kubernetes", "gh_stars_kubernetes", "GitHub Stars: kubernetes"),
+    ("hashicorp/terraform", "gh_stars_terraform", "GitHub Stars: terraform"),
+    ("grafana/grafana", "gh_stars_grafana", "GitHub Stars: grafana"),
+    ("prometheus/prometheus", "gh_stars_prometheus", "GitHub Stars: prometheus"),
 ]
 
 

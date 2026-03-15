@@ -16,6 +16,7 @@ _STOCKS = [
     "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA", "META",
     "AMD", "AVGO", "GS", "XOM", "CVX", "CAT", "DE", "UNP",
     "FDX", "DHI", "LEN",
+    "NFLX", "ASML", "INTC", "BKNG", "LLY", "UNH", "JPM",
 ]
 _STOCK_NAMES = {
     "AAPL": "Apple", "MSFT": "Microsoft", "GOOGL": "Alphabet",
@@ -24,6 +25,9 @@ _STOCK_NAMES = {
     "XOM": "Exxon Mobil", "CVX": "Chevron", "CAT": "Caterpillar",
     "DE": "Deere", "UNP": "Union Pacific", "FDX": "FedEx",
     "DHI": "D.R. Horton", "LEN": "Lennar",
+    "NFLX": "Netflix", "ASML": "ASML", "INTC": "Intel",
+    "BKNG": "Booking Holdings", "LLY": "Eli Lilly", "UNH": "UnitedHealth",
+    "JPM": "JPMorgan Chase",
 }
 
 

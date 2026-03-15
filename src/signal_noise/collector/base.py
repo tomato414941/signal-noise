@@ -45,7 +45,7 @@ CATEGORIES = {
     # technology
     "developer", "academic", "patents", "infra", "ai",
     "logistics", "aviation", "internet", "space",
-    "transportation", "safety",
+    "transportation", "safety", "ev",
     # sentiment
     "sentiment", "attention", "prediction_market", "temporal",
     "gaming",
@@ -53,7 +53,7 @@ CATEGORIES = {
     "epidemiology", "public_health", "excess_deaths", "cause_of_death",
     "armed_conflict", "displacement", "city_stats",
     "crime", "governance", "demographics", "education", "legislation",
-    "food_security",
+    "food_security", "culture",
 }
 
 # update_frequency: allowed values

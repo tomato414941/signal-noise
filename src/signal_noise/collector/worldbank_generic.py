@@ -286,6 +286,57 @@ WORLDBANK_SERIES: list[tuple[str, str, str, str, str, str]] = [
     ("SH.DTH.NCOM.ZS", "US", "wb_death_ncd_share_us", "Deaths by NCD (%): US", "society", "cause_of_death"),
     ("SH.DTH.COMM.ZS", "US", "wb_death_comm_share_us", "Deaths by Communicable Diseases (%): US", "society", "cause_of_death"),
     ("SH.DTH.INJR.ZS", "US", "wb_death_injury_share_us", "Deaths by Injury (%): US", "society", "cause_of_death"),
+    # ── Remittances ──
+    ("BX.TRF.PWKR.CD.DT", "WLD", "wb_remittances_world", "Personal Remittances Received: World", "economy", "trade"),
+    ("BX.TRF.PWKR.CD.DT", "IN", "wb_remittances_in", "Personal Remittances Received: India", "economy", "trade"),
+    ("BX.TRF.PWKR.CD.DT", "MX", "wb_remittances_mx", "Personal Remittances Received: Mexico", "economy", "trade"),
+    ("BX.TRF.PWKR.CD.DT", "PH", "wb_remittances_ph", "Personal Remittances Received: Philippines", "economy", "trade"),
+    # ── CO2 emissions per capita ──
+    ("EN.ATM.CO2E.PC", "WLD", "wb_co2_pc_world", "CO2 Emissions per Capita: World", "environment", "climate"),
+    ("EN.ATM.CO2E.PC", "US", "wb_co2_pc_us", "CO2 Emissions per Capita: US", "environment", "climate"),
+    ("EN.ATM.CO2E.PC", "CN", "wb_co2_pc_cn", "CO2 Emissions per Capita: China", "environment", "climate"),
+    ("EN.ATM.CO2E.PC", "IN", "wb_co2_pc_in", "CO2 Emissions per Capita: India", "environment", "climate"),
+    ("EN.ATM.CO2E.PC", "DE", "wb_co2_pc_de", "CO2 Emissions per Capita: Germany", "environment", "climate"),
+    # ── Female labor participation ──
+    ("SL.TLF.CACT.FE.ZS", "WLD", "wb_female_labor_world", "Female Labor Participation: World", "economy", "labor"),
+    ("SL.TLF.CACT.FE.ZS", "US", "wb_female_labor_us", "Female Labor Participation: US", "economy", "labor"),
+    ("SL.TLF.CACT.FE.ZS", "JP", "wb_female_labor_jp", "Female Labor Participation: Japan", "economy", "labor"),
+    ("SL.TLF.CACT.FE.ZS", "IN", "wb_female_labor_in", "Female Labor Participation: India", "economy", "labor"),
+    ("SL.TLF.CACT.FE.ZS", "SA", "wb_female_labor_sa", "Female Labor Participation: Saudi Arabia", "economy", "labor"),
+    # ── Infant mortality rate ──
+    ("SP.DYN.IMRT.IN", "WLD", "wb_infant_mort_world", "Infant Mortality: World", "society", "public_health"),
+    ("SP.DYN.IMRT.IN", "US", "wb_infant_mort_us", "Infant Mortality: US", "society", "public_health"),
+    ("SP.DYN.IMRT.IN", "IN", "wb_infant_mort_in", "Infant Mortality: India", "society", "public_health"),
+    ("SP.DYN.IMRT.IN", "NG", "wb_infant_mort_ng", "Infant Mortality: Nigeria", "society", "public_health"),
+    # ── Maternal mortality ratio ──
+    ("SH.STA.MMRT", "WLD", "wb_maternal_mort_world", "Maternal Mortality Ratio: World", "society", "public_health"),
+    ("SH.STA.MMRT", "US", "wb_maternal_mort_us", "Maternal Mortality Ratio: US", "society", "public_health"),
+    ("SH.STA.MMRT", "IN", "wb_maternal_mort_in", "Maternal Mortality Ratio: India", "society", "public_health"),
+    ("SH.STA.MMRT", "NG", "wb_maternal_mort_ng", "Maternal Mortality Ratio: Nigeria", "society", "public_health"),
+    # ── Child stunting ──
+    ("SH.STA.STNT.ZS", "WLD", "wb_stunting_world", "Child Stunting (% under 5): World", "society", "food_security"),
+    ("SH.STA.STNT.ZS", "IN", "wb_stunting_in", "Child Stunting (% under 5): India", "society", "food_security"),
+    ("SH.STA.STNT.ZS", "NG", "wb_stunting_ng", "Child Stunting (% under 5): Nigeria", "society", "food_security"),
+    # ── Mobile cellular subscriptions (per 100 people) ──
+    ("IT.CEL.SETS.P2", "WLD", "wb_mobile_world", "Mobile Subscriptions per 100: World", "technology", "internet"),
+    ("IT.CEL.SETS.P2", "IN", "wb_mobile_in", "Mobile Subscriptions per 100: India", "technology", "internet"),
+    ("IT.CEL.SETS.P2", "NG", "wb_mobile_ng", "Mobile Subscriptions per 100: Nigeria", "technology", "internet"),
+    # ── R&D expenditure (% of GDP) ──
+    ("GB.XPD.RSDV.GD.ZS", "US", "wb_rnd_us", "R&D Expenditure % GDP: US", "technology", "patents"),
+    ("GB.XPD.RSDV.GD.ZS", "CN", "wb_rnd_cn", "R&D Expenditure % GDP: China", "technology", "patents"),
+    ("GB.XPD.RSDV.GD.ZS", "KR", "wb_rnd_kr", "R&D Expenditure % GDP: S.Korea", "technology", "patents"),
+    ("GB.XPD.RSDV.GD.ZS", "IL", "wb_rnd_il", "R&D Expenditure % GDP: Israel", "technology", "patents"),
+    ("GB.XPD.RSDV.GD.ZS", "JP", "wb_rnd_jp", "R&D Expenditure % GDP: Japan", "technology", "patents"),
+    # ── External debt stocks (% of GNI) ──
+    ("DT.DOD.DECT.GN.ZS", "BR", "wb_ext_debt_br", "External Debt % GNI: Brazil", "economy", "fiscal"),
+    ("DT.DOD.DECT.GN.ZS", "IN", "wb_ext_debt_in", "External Debt % GNI: India", "economy", "fiscal"),
+    ("DT.DOD.DECT.GN.ZS", "TR", "wb_ext_debt_tr", "External Debt % GNI: Turkey", "economy", "fiscal"),
+    ("DT.DOD.DECT.GN.ZS", "ZA", "wb_ext_debt_za", "External Debt % GNI: South Africa", "economy", "fiscal"),
+    # ── Urban population (% of total) ──
+    ("SP.URB.TOTL.IN.ZS", "WLD", "wb_urban_world", "Urban Population %: World", "society", "demographics"),
+    ("SP.URB.TOTL.IN.ZS", "CN", "wb_urban_cn", "Urban Population %: China", "society", "demographics"),
+    ("SP.URB.TOTL.IN.ZS", "IN", "wb_urban_in", "Urban Population %: India", "society", "demographics"),
+    ("SP.URB.TOTL.IN.ZS", "NG", "wb_urban_ng", "Urban Population %: Nigeria", "society", "demographics"),
 ]
 
 
